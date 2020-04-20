@@ -3,26 +3,23 @@ import { actionTypes } from "../actions";
 import {
     GRID_CELL_MINE_PRESENT,
     GRID_CELL_UNCOVERED,
-    NUM_MINES,
-    GRID_WIDTH_TILES,
-    GRID_HEIGHT_TILES,
 } from "../constants";
 
-const MakeGrid = () => {
+const MakeGrid = (width, height, numMines) => {
     // Set up empty game grid.
     let grid = [];
-    for (let y = 0; y < GRID_HEIGHT_TILES; ++y) {
+    for (let y = 0; y < height; ++y) {
         grid[y] = [];
-        for (let x = 0; x < GRID_WIDTH_TILES; ++x) {
+        for (let x = 0; x < width; ++x) {
             grid[y][x] = 0;
         }
     }
 
     // Place mines.
-    let minesLeft = NUM_MINES;
+    let minesLeft = numMines;
     while (minesLeft > 0) {
-        let x = Math.floor(Math.random() * GRID_WIDTH_TILES);
-        let y = Math.floor(Math.random() * GRID_HEIGHT_TILES);
+        let x = Math.floor(Math.random() * width);
+        let y = Math.floor(Math.random() * height);
         if (grid[y][x] === 0) {
             grid[y][x] = GRID_CELL_MINE_PRESENT;
             --minesLeft;
@@ -35,10 +32,12 @@ const MakeGrid = () => {
 
 const initialState = {
     active: true,
-    lost: false,
-    grid: null,
     cellsCleared: 0,
     cellsToClear: 0,
+    grid: null,
+    lost: false,
+    numMines: 0,
+    score: 0,
 };
 
 export default function (state = initialState, action) {
@@ -49,15 +48,21 @@ export default function (state = initialState, action) {
                 active: false,
                 lost: true,
             };
-        case actionTypes.Play:
+        case actionTypes.Play: {
+            const numMines = action.numMines || state.numMines;
+            const width = action.width || state.grid[0].length;
+            const height = action.height || state.grid.length;
             return {
                 ...state,
                 active: true,
-                lost: false,
-                grid: MakeGrid(),
                 cellsCleared: 0,
-                cellsToClear: GRID_WIDTH_TILES * GRID_HEIGHT_TILES - NUM_MINES,
+                cellsToClear: width * height - numMines,
+                grid: MakeGrid(width, height, numMines),
+                lost: false,
+                numMines,
+                score: 0,
             };
+        }
         case actionTypes.ReflectGridUpdated:
             const originalCell = state.grid[action.y][action.x];
             const grid = [...state.grid];
@@ -83,6 +88,11 @@ export default function (state = initialState, action) {
                 cellsCleared,
                 cellsToClear,
                 grid,
+            };
+        case actionTypes.ReflectScore:
+            return {
+                ...state,
+                score: action.score,
             };
         default:
             return state;

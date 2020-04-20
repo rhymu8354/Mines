@@ -15,6 +15,7 @@ const Play = ({
     onReflectStageSize,
     onRetry,
     onShowStage,
+    score,
 }) => {
     const stageRef = useRef(null);
     useOnceEffect(
@@ -49,17 +50,20 @@ const Play = ({
             />
         </div>
         <div className="Play-controls">
-            <p>
-                {(
-                    gameActive
-                    ? <>(Score and other stuff will go here!)</>
-                    : (
+            <p className="Player-controls-score">
+                Score: <span className="score-text">{score}</span>
+            </p>
+            {(
+                gameActive
+                ? null
+                : <p className="Player-controls-game-status">
+                    {(
                         gameLost
                         ? <span className="game-over-text">GAME OVER</span>
                         : <span className="game-won-text">* YOU WIN *</span>
-                    )
-                )}
-            </p>
+                    )}
+                </p>
+            )}
             <div className="Play-controls-buttons">
                 <button
                     type="button"
@@ -85,13 +89,14 @@ const Play = ({
 const mapStateToProps = (state, ownProps) => ({
     gameActive: state.game.active,
     gameLost: state.game.lost,
+    score: state.game.score,
 });
 
 const mapDispatchToProps = (dispatch, ownProps) => ({
     onHideStage: () => dispatch(actions.HideStage()),
     onReflectStageSize: (width, height) => dispatch(actions.ReflectStageSize({width, height})),
     onQuit: () => dispatch(actions.Quit()),
-    onRetry: () => dispatch(actions.Play()),
+    onRetry: () => dispatch(actions.Play({})),
     onShowStage: () => dispatch(actions.ShowStage()),
 });
 

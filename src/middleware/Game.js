@@ -15,15 +15,13 @@ import {
     GRID_CELL_MINE_PRESENT,
     GRID_CELL_TAGGED,
     GRID_CELL_UNCOVERED,
-    GRID_HEIGHT_TILES,
-    GRID_WIDTH_TILES,
 } from "../constants";
 
 const StepOnNeighbors = ({
     dispatch,
     grid, x, y
 }) => {
-    WithNeighborGridCells({x, y, fn: (x, y) => {
+    WithNeighborGridCells({grid, x, y, fn: (x, y) => {
         if (!IsUncovered({grid, x, y})) {
             dispatch(actions.StepIfNotTagged({x, y}));
         }
@@ -35,10 +33,12 @@ const PlaceMineSomewhereExcept = ({
     grid,
     except: {x: exceptX, y: exceptY},
 }) => {
+    const height = grid.length;
+    const width = grid[0].length;
     let needMine = true;
     while (needMine) {
-        let x = Math.floor(Math.random() * GRID_WIDTH_TILES);
-        let y = Math.floor(Math.random() * GRID_HEIGHT_TILES);
+        let x = Math.floor(Math.random() * width);
+        let y = Math.floor(Math.random() * height);
         if (
             (x === exceptX)
             && (y === exceptY)
@@ -59,7 +59,7 @@ const OnGameLost = ({
     getState,
 }) => {
     const grid = getState().game.grid;
-    WithAllGridCells((x, y) => {
+    WithAllGridCells(grid, (x, y) => {
         let cell = grid[y][x];
         if (IsMinePresent({grid, x, y})) {
             if (!IsUncovered({grid, x, y})) {
@@ -82,7 +82,7 @@ const OnGameWon = ({
     getState,
 }) => {
     const grid = getState().game.grid;
-    WithAllGridCells((x, y) => {
+    WithAllGridCells(grid, (x, y) => {
         let cell = grid[y][x];
         if (IsMinePresent({grid, x, y})) {
             if (!IsTagged({grid, x, y})) {

@@ -17,6 +17,7 @@ const DefineAction = (type) => {
     "PushModal",
     "Quit",
     "ReflectGridUpdated",
+    "ReflectScore",
     "ReflectStageSize",
     "SetActivity",
     "ShowReleaseNotes",

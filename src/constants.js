@@ -1,7 +1,3 @@
-export const GRID_WIDTH_TILES = 10;
-export const GRID_HEIGHT_TILES = 10;
-export const NUM_MINES = 15;
-
 export const TILE_SIZE = 16;
 
 export const ACTIVITY_PLAY = "ACTIVITY_PLAY";

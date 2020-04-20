@@ -9,6 +9,13 @@ import "./ReleaseNotes.css";
 
 const content = [
     {
+        version: "0.8.0 - 2020-04-20",
+        notes: <ul>
+            <li>Enabled different levels of difficulty.</li>
+            <li>Added time/score.</li>
+        </ul>,
+    },
+    {
         version: "0.7.0 - 2020-04-20",
         notes: <ul>
             <li>Prevent loss on first move.</li>

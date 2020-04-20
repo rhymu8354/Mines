@@ -29,3 +29,11 @@
 .Play-controls-buttons > *:not(:first-child) {
     margin-left: 10px;
 }
+
+.Player-controls-score {
+    font-size: 150%;
+}
+
+.Player-controls-game-status {
+    font-size: 200%;
+}

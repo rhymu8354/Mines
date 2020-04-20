@@ -5,14 +5,14 @@ Rhymines:
         [09:44] alexwritescode: It scales to whatever container the canvas is in.
         [09:44] alexwritescode: (Phaser 3)
         [09:53] DevelopIt: https://www.npmjs.com/package/react-resize-detector this one might help you
-    ☐ Add timer @created(2020-04-20 09:47)
+    ✔ Add timer @created(2020-04-20 09:47) @done(2020-04-20 15:38)
     ✔ Add mines @created(2020-04-20 09:47) @done(2020-04-20 12:01)
     ✔ Show adjacent mine count for unmined revealed cells @created(2020-04-20 12:01) @done(2020-04-20 12:15)
     ✔ Auto-reveal all cells around a newly-exposed cell with no neighbor mines @created(2020-04-20 12:15) @done(2020-04-20 12:35)
     ✔ Detect game lost condition (exploded mine) @created(2020-04-20 09:47) @done(2020-04-20 13:10)
     ☐ Further refinements to "GAME OVER" @created(2020-04-20 13:32)
         [12:55] opieopie: the mine explosion, dim play area, game over overlay with a retry option
-    ☐ Add ability to mark where players think mines are @created(2020-04-20 13:11)
+    ✔ Add ability to mark where players think mines are @created(2020-04-20 13:11) @done(2020-04-20 15:15)
         ✔ Only allow marking spots not stepped on. @created(2020-04-20 14:01) @done(2020-04-20 14:01)
         ✔ Right-click the first time should mark a spot. @created(2020-04-20 13:31) @done(2020-04-20 14:01)
         ✔ Right-clicking a second time removes the mark. @created(2020-04-20 13:31) @done(2020-04-20 14:01)
@@ -20,10 +20,11 @@ Rhymines:
         ✔ At the end of the game, show wrong marks. @created(2020-04-20 13:31) @done(2020-04-20 14:21)
     ✔ Detect win condition (all mines flagged and all clear cells revealed) @created(2020-04-20 12:36) @done(2020-04-20 14:21)
     ✔ Shift-click or middle-click number should step on all untagged neighbors as long as there are enough tagged neighbors. @created(2020-04-20 14:25) @done(2020-04-20 14:36)
-    ☐ Make the first click a guarantee (no mine) @created(2020-04-20 13:36)
+    ✔ Make the first click a guarantee (no mine) @created(2020-04-20 13:36) @done(2020-04-20 14:58)
         [13:34] tollus: are you also planning to make the first click a guarantee?
     ☐ Review pull request @created(2020-04-20 12:38)
         [12:37] Aiden_Garth: Pull created. Link: https://github.com/rhymu8354/Mines/pull/1
+        The test build failed; looks like `typescript` needs to be added to the project in order for the build to work.
     ☐ Add game levels @created(2020-04-20 09:47)
     ☐ Add explosion effects @created(2020-04-20 09:47)
     ☐ Get Gud at CSS @created(2020-04-20 10:54)
@@ -31,3 +32,8 @@ Rhymines:
         [10:51] domsson: "box-sizing: border-box" is really nice though, it makes everything work more consistently, or, at least, intuitively.
     ☐ Fix version number not showing up in production @created(2020-04-20 11:23)
     ☐ [11:23] Neui: If you zoom out something weird happens (on Firefox): https://i.imgur.com/HID069U.png @created(2020-04-20 11:25)
+    ☐ Power points and their collection @created(2020-04-20 15:15)
+    ☐ Power probe @created(2020-04-20 15:16)
+    ☐ Detonator @created(2020-04-20 15:16)
+    ☐ Bonus games @created(2020-04-20 15:16)
+    ☐ Add localStorage-based scoreboard @created(2020-04-20 15:57)

@@ -1,3 +1,15 @@
 .SelectLevel {
     flex: 1 0 auto;
 }
+
+.SelectLevel-header {
+    color: goldenrod;
+}
+
+.SelectLevel-grid {
+    margin-left: 50px;
+    display: grid;
+    grid-template-columns: max-content auto;
+    column-gap: 10px;
+    row-gap: 5px;
+}

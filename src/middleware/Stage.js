@@ -12,8 +12,6 @@ import {
 
 import {
     GRID_CELL_MINE_EXPLODED,
-    GRID_WIDTH_TILES,
-    GRID_HEIGHT_TILES,
     TILE_COVERED,
     TILE_EXPLODED_MINE,
     TILE_SIZE,
@@ -90,12 +88,15 @@ const ComputeCellTexture = ({gameActive, grid, x, y}) => {
 };
 
 const OnPlay = ({
+    getState,
     stage,
 }) => {
-    WithAllGridCells((x, y) => {
+    const grid = getState().game.grid;
+    WithAllGridCells(grid, (x, y) => {
         const sprite = stage.tiles[y][x];
         sprite.setTexture("atlas", TILE_COVERED);
     });
+    stage.baseTime = null;
 };
 
 const OnReflectGridUpdated = ({
@@ -112,17 +113,20 @@ const OnReflectStageSize = ({
     getState,
     stage,
 }) => {
-    const width = getState().app.width;
-    const height = getState().app.height;
-    stage.game.scale.setGameSize(width, height);
+    const widthInPixels = getState().app.width;
+    const heightInPixels = getState().app.height;
+    const grid = getState().game.grid;
+    const heightInTiles = grid.length;
+    const widthInTiles = grid[0].length;
+    stage.game.scale.setGameSize(widthInPixels, heightInPixels);
     const newTileScaling = Math.min(
-        Math.floor(width / (TILE_SIZE * GRID_WIDTH_TILES)),
-        Math.floor(height / (TILE_SIZE * GRID_HEIGHT_TILES)),
+        Math.floor(widthInPixels / (TILE_SIZE * widthInTiles)),
+        Math.floor(heightInPixels / (TILE_SIZE * heightInTiles)),
     );
     if (newTileScaling !== stage.tileScaling) {
         stage.tileScaling = newTileScaling;
         const tileScaledSize = TILE_SIZE * stage.tileScaling;
-        WithAllGridCells((x, y) => {
+        WithAllGridCells(grid, (x, y) => {
             const sprite = stage.tiles[y][x];
             sprite.setX(x * tileScaledSize);
             sprite.setY(y * tileScaledSize);
@@ -181,10 +185,15 @@ const OnShowStage = ({
         );
     };
     const phaserCreate = function() {
+        const grid = getState().game.grid;
+        const height = grid.length;
+        const width = grid[0].length;
+        stage.baseTime = null;
+        stage.time = null;
         const tileScaledSize = TILE_SIZE * stage.tileScaling;
-        for (let y = 0; y < GRID_HEIGHT_TILES; ++y) {
+        for (let y = 0; y < height; ++y) {
             stage.tiles[y] = [];
-            for (let x = 0; x < GRID_WIDTH_TILES; ++x) {
+            for (let x = 0; x < width; ++x) {
                 const sprite = stage.scene.add.sprite(
                     x * tileScaledSize,
                     y * tileScaledSize
@@ -201,6 +210,19 @@ const OnShowStage = ({
         stage.scene.input.on("gameout", onGameOut);
         stage.scene.input.topOnly = false;
     };
+    const phaserUpdate = function(time) {
+        if (getState().game.active) {
+            if (stage.baseTime == null) {
+                stage.baseTime = time;
+                stage.time = 0;
+            }
+            stage.lastTime = stage.time;
+            stage.time = Math.floor((time - stage.baseTime) / 1000);
+            if (stage.lastTime !== stage.time) {
+                dispatch(actions.ReflectScore({score: stage.time}));
+            }
+        }
+    };
     const config = {
         type: Phaser.AUTO,
         input: {
@@ -210,12 +232,13 @@ const OnShowStage = ({
         },
         parent: "stage",
         pixelArt: true,
-        width: GRID_WIDTH_TILES * TILE_SIZE,
-        height: GRID_HEIGHT_TILES * TILE_SIZE,
+        width: 1,
+        height: 1,
         scene: {
             init: phaserInit,
             preload: phaserPreload,
             create: phaserCreate,
+            update: phaserUpdate,
         },
     };
     stage.game = new Phaser.Game(config);
@@ -231,6 +254,7 @@ const handlers = {
 
 export default function({ getState, dispatch }) {
     const stage = {
+        baseTime: null,
         debug: null,
         game: null,
         pointerOver: false,
@@ -238,7 +262,7 @@ export default function({ getState, dispatch }) {
         scene: null,
         tiles: [],
         tileScaling: 1,
-        time: 0,
+        time: null,
     };
     let deferredActions = [];
     let handlingDeferredActions = false;
