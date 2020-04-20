@@ -24,7 +24,9 @@ const App = ({
     onShowReleaseNotes,
 }) => {
     const Activity = activities[activity];
-    return <div className="App">
+    return <div
+        className="App"
+    >
         <div className="App-viewport">
             <header
                 className="App-header"

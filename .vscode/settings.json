@@ -1,0 +1,30 @@
+{
+    "todo.embedded.exclude": [
+        "**/.*/**",
+        "stage/**",
+        "**/build*/**",
+        "**/node_modules/**",
+        "googletest/**",
+        "LibreSSL/**",
+        "lua/**",
+        "zlib/**",
+        "zxcvbn-c/**"
+    ],
+    "todo.embedded.regex": "(?:<!-- *)?(?:#|// @|//|/\\*+|<!--|\\* @|\\{!|\\{\\{!--|\\{\\{!) *(TODO|FIXME|FIX|BUG|UGLY|HACK|NOTE|IDEA|REVIEW|DEBUG|OPTIMIZE)(?:\\s*\\([^)]+\\))?:?(?!\\w)(?: *-->| *\\*/| *!}| *--}}| *}}|(?= *(?:[^:]//|/\\*+|<!--|@|--|\\{!|\\{\\{!--|\\{\\{!))|((?: +[^\\n@]*?)(?= *(?:[^:]//|/\\*+|<!--|@|--(?!>)|\\{!|\\{\\{!--|\\{\\{!))|(?: +[^@\\n]+)?))",
+    "todo.file.exclude": [
+        "**/.*/**",
+        "stage/**",
+        "**/build*/**",
+        "**/node_modules/**",
+        "googletest/**",
+        "LibreSSL/**",
+        "lua/**",
+        "zlib/**",
+        "zxcvbn-c/**",
+    ],
+    "todo.archive.remove.emptyProjects": false,
+    "todo.timekeeping.finished.format": "YYYY-MM-DD HH:mm",
+    "todo.timekeeping.started.format": "YYYY-MM-DD HH:mm",
+    "todo.timekeeping.created.format": "YYYY-MM-DD HH:mm",
+    "todo.timekeeping.created.enabled": true
+}

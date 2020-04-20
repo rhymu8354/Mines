@@ -1,0 +1,15 @@
+Rhymines:
+    ☐ Auto-scale grid/tiles based on window size @created(2020-04-20 09:45)
+        [09:43] alexwritescode: scale: { mode: Phaser.Scale.FIT, autoCenter: Phaser.Scale.CENTER_BOTH },
+        [09:43] alexwritescode: from my game
+        [09:44] alexwritescode: It scales to whatever container the canvas is in.
+        [09:44] alexwritescode: (Phaser 3)
+        [09:53] DevelopIt: https://www.npmjs.com/package/react-resize-detector this one might help you
+    ☐ Add timer @created(2020-04-20 09:47)
+    ☐ Add mines @created(2020-04-20 09:47)
+    ☐ Detect win/lose @created(2020-04-20 09:47)
+    ☐ Add game levels @created(2020-04-20 09:47)
+    ☐ Add explosion effects @created(2020-04-20 09:47)
+    ☐ Get Gud at CSS @created(2020-04-20 10:54)
+        [10:50] movAX13h: box-sizing: border-box; for all elements helps with the margin problem
+        [10:51] domsson: "box-sizing: border-box" is really nice though, it makes everything work more consistently, or, at least, intuitively.

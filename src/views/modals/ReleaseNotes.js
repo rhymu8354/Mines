@@ -9,6 +9,12 @@ import "./ReleaseNotes.css";
 
 const content = [
     {
+        version: "0.3.0 - 2020-04-20",
+        notes: <ul>
+            <li>Made the stage scale up with window size</li>
+        </ul>,
+    },
+    {
         version: "0.2.0 - 2020-04-20",
         notes: <ul>
             <li>Added basic application structure</li>

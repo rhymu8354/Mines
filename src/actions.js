@@ -14,6 +14,7 @@ const DefineAction = (type) => {
     "PopModal",
     "PushModal",
     "Quit",
+    "ReflectStageSize",
     "SetActivity",
     "ShowReleaseNotes",
     "ShowStage",

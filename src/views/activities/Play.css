@@ -1,14 +1,27 @@
 .Play {
+    flex: 1 0 1px;
     display: flex;
     flex-direction: row;
 }
 
-.Play-stage {
-    flex: 0 0 auto;
+.Play-stage-outer {
+    flex: 1 0 1px;
+    display: flex;
+    flex-direction: column;
     border: solid 2px red;
+    font-size: 0;
+    overflow: hidden;
+    width: 1px;
+}
+
+.Play-stage-inner {
+    flex: 1 0 1px;
+    font-size: 0;
+    overflow: hidden;
+    height: 1px;
 }
 
 .Play-controls {
-    flex: 1 0 auto;
+    flex: 0 0 auto;
     margin-left: 10px;
 }

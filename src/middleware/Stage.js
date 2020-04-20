@@ -4,30 +4,15 @@ import { actionTypes } from "../actions";
 
 import {
     STAGE_WIDTH_TILES,
-    STAGE_WIDTH_PIXELS,
     STAGE_HEIGHT_TILES,
-    STAGE_HEIGHT_PIXELS,
     TILE_SIZE,
 } from "../constants";
-
-const defaultFont = {
-    fontFamily: "-apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen', 'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue', sans-serif",
-    fontSize: 20,
-    fontWeight: "normal",
-    color: "#fff",
-};
-
-const DEPTH_DEBUG = 0;
 
 const OnHideStage = ({
     onPhaserNotReady,
     stage,
 }) => {
     onPhaserNotReady();
-    if (stage.debug) {
-        stage.debug.destroy();
-        stage.debug = null;
-    }
     if (stage.tiles) {
         stage.tiles.forEach(row => row.forEach(sprite => {
             sprite.destroy();
@@ -39,9 +24,33 @@ const OnHideStage = ({
     stage.game = null;
 };
 
-const OnShowStage = ({
-    dispatch,
+const OnReflectStageSize = ({
     getState,
+    stage,
+}) => {
+    const width = getState().app.width;
+    const height = getState().app.height;
+    stage.game.scale.setGameSize(width, height);
+    const newTileScaling = Math.min(
+        Math.floor(width / (TILE_SIZE * STAGE_WIDTH_TILES)),
+        Math.floor(height / (TILE_SIZE * STAGE_HEIGHT_TILES)),
+    );
+    if (newTileScaling !== stage.tileScaling) {
+        stage.tileScaling = newTileScaling;
+        const tileScaledSize = TILE_SIZE * stage.tileScaling;
+        for (let y = 0; y < STAGE_HEIGHT_TILES; ++y) {
+            for (let x = 0; x < STAGE_WIDTH_TILES; ++x) {
+                const sprite = stage.tiles[y][x];
+                sprite.setX(x * tileScaledSize);
+                sprite.setY(y * tileScaledSize);
+                sprite.setScale(stage.tileScaling);
+            }
+        }
+    }
+    console.log(`scaling factor: ${stage.tileScaling}`);
+};
+
+const OnShowStage = ({
     onPhaserReady,
     stage,
 }) => {
@@ -49,20 +58,15 @@ const OnShowStage = ({
     };
     const onPointerMove = (pointer) => {
         stage.pointerOver = true;
-        if (stage.debug) {
-            stage.debug.setText(`X: ${pointer.x} (${Math.floor(pointer.x / TILE_SIZE)})  Y:${pointer.y} (${Math.floor(pointer.y / TILE_SIZE)})`);
-        }
     };
     const onPointerDown = (pointer) => {
-        const x = Math.floor(pointer.x / TILE_SIZE);
-        const y = Math.floor(pointer.y / TILE_SIZE);
+        const tileScaledSize = TILE_SIZE * stage.tileScaling;
+        const x = Math.floor(pointer.x / tileScaledSize);
+        const y = Math.floor(pointer.y / tileScaledSize);
         stage.tiles[y][x].setTexture("atlas", 1);
     };
     const onGameOut = () => {
         stage.pointerOver = false;
-        if (stage.debug) {
-            stage.debug.setText("");
-        }
     };
     const phaserInit = function() {
         stage.scene = this;
@@ -78,26 +82,18 @@ const OnShowStage = ({
         );
     };
     const phaserCreate = function() {
+        const tileScaledSize = TILE_SIZE * stage.tileScaling;
         onPhaserReady();
-        stage.debug = stage.scene.add.text(
-            8,
-            STAGE_HEIGHT_PIXELS,
-            "",
-            defaultFont
-        );
-        stage.debug
-            .setOrigin(0, 1)
-            .setStroke("#000", 5)
-            .setDepth(DEPTH_DEBUG);
         for (let y = 0; y < STAGE_HEIGHT_TILES; ++y) {
             stage.tiles[y] = [];
             for (let x = 0; x < STAGE_WIDTH_TILES; ++x) {
                 const sprite = stage.scene.add.sprite(
-                    x * TILE_SIZE,
-                    y * TILE_SIZE
+                    x * tileScaledSize,
+                    y * tileScaledSize
                 );
                 sprite.setTexture("atlas", 0);
                 sprite.setOrigin(0, 0);
+                sprite.setScale(stage.tileScaling);
                 stage.tiles[y][x] = sprite;
             }
         }
@@ -116,8 +112,8 @@ const OnShowStage = ({
         },
         parent: "stage",
         pixelArt: true,
-        width: STAGE_WIDTH_PIXELS,
-        height: STAGE_HEIGHT_PIXELS,
+        width: STAGE_WIDTH_TILES * TILE_SIZE,
+        height: STAGE_HEIGHT_TILES * TILE_SIZE,
         scene: {
             init: phaserInit,
             preload: phaserPreload,
@@ -129,6 +125,7 @@ const OnShowStage = ({
 
 const handlers = {
     [actionTypes.HideStage]: OnHideStage,
+    [actionTypes.ReflectStageSize]: OnReflectStageSize,
     [actionTypes.ShowStage]: OnShowStage,
 };
 
@@ -140,6 +137,7 @@ export default function({ getState, dispatch }) {
         ready: false,
         scene: null,
         tiles: [],
+        tileScaling: 1,
         time: 0,
     };
     let deferredActions = [];
