@@ -9,6 +9,14 @@ import "./ReleaseNotes.css";
 
 const content = [
     {
+        version: "0.6.0 - 2020-04-20",
+        notes: <ul>
+            <li>Added ability to mark places where player believes there are mines</li>
+            <li>Detect win condition</li>
+            <li>Upon losing, show where markers are wrong.</li>
+        </ul>,
+    },
+    {
         version: "0.5.0 - 2020-04-20",
         notes: <ul>
             <li>Mines now explode (<em>Game Over man, <strong>GAME OVER!</strong></em>)</li>

@@ -2,6 +2,7 @@ import { actionTypes } from "../actions";
 
 import {
     GRID_CELL_MINE_PRESENT,
+    GRID_CELL_UNCOVERED,
     NUM_MINES,
     GRID_WIDTH_TILES,
     GRID_HEIGHT_TILES,
@@ -34,7 +35,9 @@ const MakeGrid = () => {
 
 const initialState = {
     active: true,
+    lost: false,
     grid: null,
+    cellsToClear: 0,
 };
 
 export default function (state = initialState, action) {
@@ -43,19 +46,37 @@ export default function (state = initialState, action) {
             return {
                 ...state,
                 active: false,
+                lost: true,
             };
         case actionTypes.Play:
             return {
                 ...state,
                 active: true,
+                lost: false,
                 grid: MakeGrid(),
+                cellsToClear: GRID_WIDTH_TILES * GRID_HEIGHT_TILES - NUM_MINES,
             };
         case actionTypes.ReflectGridUpdated:
+            const originalCell = state.grid[action.y][action.x];
             const grid = [...state.grid];
             grid[action.y] = [...grid[action.y]];
             grid[action.y][action.x] = action.cell;
+            let cellsToClear = state.cellsToClear;
+            if (
+                (originalCell !== action.cell)
+                && ((originalCell & GRID_CELL_MINE_PRESENT) === 0)
+                && ((originalCell & GRID_CELL_UNCOVERED) === 0)
+                && ((action.cell & GRID_CELL_UNCOVERED) !== 0)
+            ) {
+                --cellsToClear;
+            }
             return {
                 ...state,
+                active: (
+                    (cellsToClear > 0)
+                    && !state.lost
+                ),
+                cellsToClear,
                 grid,
             };
         default:

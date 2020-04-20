@@ -10,8 +10,17 @@ Rhymines:
     ✔ Show adjacent mine count for unmined revealed cells @created(2020-04-20 12:01) @done(2020-04-20 12:15)
     ✔ Auto-reveal all cells around a newly-exposed cell with no neighbor mines @created(2020-04-20 12:15) @done(2020-04-20 12:35)
     ✔ Detect game lost condition (exploded mine) @created(2020-04-20 09:47) @done(2020-04-20 13:10)
+    ☐ Further refinements to "GAME OVER" @created(2020-04-20 13:32)
+        [12:55] opieopie: the mine explosion, dim play area, game over overlay with a retry option
     ☐ Add ability to mark where players think mines are @created(2020-04-20 13:11)
-    ☐ Detect win condition (all mines flagged and all clear cells revealed) @created(2020-04-20 12:36)
+        ✔ Only allow marking spots not stepped on. @created(2020-04-20 14:01) @done(2020-04-20 14:01)
+        ✔ Right-click the first time should mark a spot. @created(2020-04-20 13:31) @done(2020-04-20 14:01)
+        ✔ Right-clicking a second time removes the mark. @created(2020-04-20 13:31) @done(2020-04-20 14:01)
+        ✔ Left-clicking a marked spot should *not* step on the spot. @created(2020-04-20 13:31) @done(2020-04-20 14:01)
+        ✔ At the end of the game, show wrong marks. @created(2020-04-20 13:31) @done(2020-04-20 14:21)
+    ✔ Detect win condition (all mines flagged and all clear cells revealed) @created(2020-04-20 12:36) @done(2020-04-20 14:21)
+    ☐ Make the first click a guarentee (no mine) @created(2020-04-20 13:36)
+        [13:34] tollus: are you also planning to make the first click a guarantee?
     ☐ Review pull request @created(2020-04-20 12:38)
         [12:37] Aiden_Garth: Pull created. Link: https://github.com/rhymu8354/Mines/pull/1
     ☐ Add game levels @created(2020-04-20 09:47)

@@ -9,6 +9,7 @@ const useOnceEffect = fn => useEffect(fn, []);
 
 const Play = ({
     gameActive,
+    gameLost,
     onHideStage,
     onQuit,
     onReflectStageSize,
@@ -52,7 +53,11 @@ const Play = ({
                 {(
                     gameActive
                     ? <>(Score and other stuff will go here!)</>
-                    : <span className="game-over-text">GAME OVER</span>
+                    : (
+                        gameLost
+                        ? <span className="game-over-text">GAME OVER</span>
+                        : <span className="game-won-text">* YOU WIN *</span>
+                    )
                 )}
             </p>
             <div className="Play-controls-buttons">
@@ -79,6 +84,7 @@ const Play = ({
 
 const mapStateToProps = (state, ownProps) => ({
     gameActive: state.game.active,
+    gameLost: state.game.lost,
 });
 
 const mapDispatchToProps = (dispatch, ownProps) => ({

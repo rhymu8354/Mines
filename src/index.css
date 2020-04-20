@@ -60,3 +60,8 @@ button:hover {
     color: red;
     font-size: 200%;
 }
+
+.game-won-text {
+    color: #00aa00;
+    font-size: 200%;
+}

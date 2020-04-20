@@ -10,6 +10,7 @@ const DefineAction = (type) => {
 
 [
     "GameLost",
+    "GameWon",
     "HideStage",
     "Play",
     "PopModal",
@@ -20,5 +21,6 @@ const DefineAction = (type) => {
     "SetActivity",
     "ShowReleaseNotes",
     "ShowStage",
-    "Step",
+    "StepIfNotTagged",
+    "ToggleMarker",
 ].forEach(actionType => DefineAction(actionType));

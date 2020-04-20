@@ -4,13 +4,14 @@ import { actionTypes, actions } from "../actions";
 
 import {
     IsMinePresent,
+    IsUncovered,
+    IsTagged,
     ComputeNeighborMines,
     WithAllGridCells,
 } from "../Utilities";
 
 import {
     GRID_CELL_MINE_EXPLODED,
-    GRID_CELL_UNCOVERED,
     GRID_WIDTH_TILES,
     GRID_HEIGHT_TILES,
     TILE_COVERED,
@@ -26,6 +27,8 @@ import {
     TILE_UNCOVERED_THREE_NEIGHBORS,
     TILE_UNCOVERED_TWO_NEIGHBORS,
     TILE_UNEXPLODED_MINE,
+    TILE_TAG,
+    TILE_TAGGED_BUT_NO_MINE,
 } from "../constants";
 
 const OnHideStage = ({
@@ -56,18 +59,29 @@ const tilesForNeighbors = [
     TILE_UNCOVERED_EIGHT_NEIGHBORS,
 ];
 
-const ComputeCellTexture = ({grid, x, y}) => {
+const ComputeCellTexture = ({gameActive, grid, x, y}) => {
     const cell = grid[y][x];
     if ((cell & GRID_CELL_MINE_EXPLODED) === 0) {
-        if ((cell & GRID_CELL_UNCOVERED) === 0) {
-            return TILE_COVERED;
-        } else {
+        if (IsUncovered({grid, x, y})) {
             if (IsMinePresent({grid, x, y})) {
                 return TILE_UNEXPLODED_MINE;
             } else {
                 return tilesForNeighbors[
                     ComputeNeighborMines({grid, x, y})
                 ];
+            }
+        } else {
+            if (IsTagged({grid, x, y})) {
+                if (
+                    gameActive
+                    || IsMinePresent({grid, x, y})
+                ) {
+                    return TILE_TAG;
+                } else {
+                    return TILE_TAGGED_BUT_NO_MINE;
+                }
+            } else {
+                return TILE_COVERED;
             }
         }
     } else {
@@ -90,7 +104,8 @@ const OnReflectGridUpdated = ({
     stage,
 }) => {
     const grid = getState().game.grid;
-    stage.tiles[y][x].setTexture("atlas", ComputeCellTexture({grid, x, y}));
+    const gameActive = getState().game.active;
+    stage.tiles[y][x].setTexture("atlas", ComputeCellTexture({gameActive, grid, x, y}));
 };
 
 const OnReflectStageSize = ({
@@ -136,7 +151,11 @@ const OnShowStage = ({
         const tileScaledSize = TILE_SIZE * stage.tileScaling;
         const x = Math.floor(pointer.x / tileScaledSize);
         const y = Math.floor(pointer.y / tileScaledSize);
-        dispatch(actions.Step({x, y}));
+        if (pointer.buttons === 1) {
+            dispatch(actions.StepIfNotTagged({x, y}));
+        } else {
+            dispatch(actions.ToggleMarker({x, y}));
+        }
     };
     const onGameOut = () => {
         stage.pointerOver = false;

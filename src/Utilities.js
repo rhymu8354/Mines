@@ -1,5 +1,6 @@
 import {
     GRID_CELL_MINE_PRESENT,
+    GRID_CELL_TAGGED,
     GRID_CELL_UNCOVERED,
     GRID_HEIGHT_TILES,
     GRID_WIDTH_TILES,
@@ -11,6 +12,10 @@ export function IsUncovered({grid, x, y}) {
 
 export function IsMinePresent({grid, x, y}) {
     return ((grid[y][x] & GRID_CELL_MINE_PRESENT) !== 0);
+}
+
+export function IsTagged({grid, x, y}) {
+    return ((grid[y][x] & GRID_CELL_TAGGED) !== 0);
 }
 
 export function WithAllGridCells(fn) {

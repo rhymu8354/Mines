@@ -1,5 +1,7 @@
-export const GRID_WIDTH_TILES = 35;
-export const GRID_HEIGHT_TILES = 20;
+export const GRID_WIDTH_TILES = 10;
+export const GRID_HEIGHT_TILES = 10;
+export const NUM_MINES = 15;
+
 export const TILE_SIZE = 16;
 
 export const ACTIVITY_PLAY = "ACTIVITY_PLAY";
@@ -7,7 +9,6 @@ export const ACTIVITY_SELECT_LEVEL = "ACTIVITY_SELECT_LEVEL";
 
 export const MODAL_RELEASE_NOTES = "MODAL_RELEASE_NOTES";
 
-export const NUM_MINES = 125;
 
 // "cell" means the game object holding state about one section of the game
 // grid.
@@ -32,7 +33,7 @@ export const TILE_POWER = 14;
 export const TILE_BONUS = 15;
 
 export const GRID_CELL_MINE_PRESENT = 1;
-export const GRID_CELL_MARKED = 2;
+export const GRID_CELL_TAGGED = 2;
 export const GRID_CELL_UNCOVERED = 4;
 // export const GRID_CELL_MINE_REVEALED = 8;
 export const GRID_CELL_MINE_EXPLODED = 16;
