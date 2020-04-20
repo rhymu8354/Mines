@@ -22,5 +22,6 @@ const DefineAction = (type) => {
     "ShowReleaseNotes",
     "ShowStage",
     "StepIfNotTagged",
+    "StepOnUntaggedNeighborsIfEnoughTagged",
     "ToggleMarker",
 ].forEach(actionType => DefineAction(actionType));

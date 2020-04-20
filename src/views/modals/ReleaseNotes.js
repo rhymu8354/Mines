@@ -9,17 +9,28 @@ import "./ReleaseNotes.css";
 
 const content = [
     {
+        version: "0.7.0 - 2020-04-20",
+        notes: <ul>
+            <li>Prevent loss on first move.</li>
+            <li>
+                Shift-left-click (or middle-click) on an uncovered cell will
+                step on all neighbors as long as there are as many markers
+                around the cell as there are mines detected nearby.
+            </li>
+        </ul>,
+    },
+    {
         version: "0.6.0 - 2020-04-20",
         notes: <ul>
-            <li>Added ability to mark places where player believes there are mines</li>
-            <li>Detect win condition</li>
+            <li>Added ability to mark places (by right-clicking) where player believes there are mines.</li>
+            <li>Detect win condition.</li>
             <li>Upon losing, show where markers are wrong.</li>
         </ul>,
     },
     {
         version: "0.5.0 - 2020-04-20",
         notes: <ul>
-            <li>Mines now explode (<em>Game Over man, <strong>GAME OVER!</strong></em>)</li>
+            <li>Mines now explode (<em>Game Over man, <strong>GAME OVER!</strong></em>).</li>
             <li>Add <code>RETRY</code> button to restart the game.</li>
             <li>Fix issues with game grid not resetting for the next game.</li>
         </ul>,
@@ -30,7 +41,7 @@ const content = [
             <li>Added mines (<em>they explode but you don't yet lose the game</em>).</li>
             <li>Added neighbor mine counters.</li>
             <li>Added revealing of open areas.</li>
-            <li>Added many bugs to be fixed later. Kappa</li>
+            <li>Added many bugs to be fixed later. :Kappa:</li>
         </ul>,
     },
     {

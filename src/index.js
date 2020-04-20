@@ -12,7 +12,12 @@ import middleware from "./middleware";
 
 import * as serviceWorker from "./serviceWorker";
 
-const composeEnhancers = window.__REDUX_DEVTOOLS_EXTENSION_COMPOSE__ || compose;
+const inProduction = process.env.NODE_ENV === 'production';
+const composeEnhancers = (
+    inProduction
+    ? compose
+    : window.__REDUX_DEVTOOLS_EXTENSION_COMPOSE__ || compose
+);
 const store = createStore(
     reducers,
     composeEnhancers(

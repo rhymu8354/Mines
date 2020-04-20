@@ -129,7 +129,6 @@ const OnReflectStageSize = ({
             sprite.setScale(stage.tileScaling);
         });
     }
-    console.log(`scaling factor: ${stage.tileScaling}`);
 };
 
 const OnShowStage = ({
@@ -151,7 +150,15 @@ const OnShowStage = ({
         const tileScaledSize = TILE_SIZE * stage.tileScaling;
         const x = Math.floor(pointer.x / tileScaledSize);
         const y = Math.floor(pointer.y / tileScaledSize);
-        if (pointer.buttons === 1) {
+        const leftClick = (pointer.buttons === 1);
+        const middleClick = (pointer.buttons === 4);
+        const isShift = pointer.event.shiftKey;
+        if (
+            middleClick || (leftClick && isShift)
+        ) {
+            dispatch(actions.StepOnUntaggedNeighborsIfEnoughTagged({x, y}));
+        }
+        else if (leftClick) {
             dispatch(actions.StepIfNotTagged({x, y}));
         } else {
             dispatch(actions.ToggleMarker({x, y}));

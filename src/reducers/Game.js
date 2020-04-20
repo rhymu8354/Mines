@@ -37,6 +37,7 @@ const initialState = {
     active: true,
     lost: false,
     grid: null,
+    cellsCleared: 0,
     cellsToClear: 0,
 };
 
@@ -54,6 +55,7 @@ export default function (state = initialState, action) {
                 active: true,
                 lost: false,
                 grid: MakeGrid(),
+                cellsCleared: 0,
                 cellsToClear: GRID_WIDTH_TILES * GRID_HEIGHT_TILES - NUM_MINES,
             };
         case actionTypes.ReflectGridUpdated:
@@ -61,13 +63,15 @@ export default function (state = initialState, action) {
             const grid = [...state.grid];
             grid[action.y] = [...grid[action.y]];
             grid[action.y][action.x] = action.cell;
+            let cellsCleared = state.cellsCleared;
             let cellsToClear = state.cellsToClear;
             if (
                 (originalCell !== action.cell)
-                && ((originalCell & GRID_CELL_MINE_PRESENT) === 0)
+                && ((action.cell & GRID_CELL_MINE_PRESENT) === 0)
                 && ((originalCell & GRID_CELL_UNCOVERED) === 0)
                 && ((action.cell & GRID_CELL_UNCOVERED) !== 0)
             ) {
+                ++cellsCleared;
                 --cellsToClear;
             }
             return {
@@ -76,6 +80,7 @@ export default function (state = initialState, action) {
                     (cellsToClear > 0)
                     && !state.lost
                 ),
+                cellsCleared,
                 cellsToClear,
                 grid,
             };

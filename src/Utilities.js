@@ -54,3 +54,13 @@ export function ComputeNeighborMines({grid, x, y}) {
     }});
     return neighborMines;
 }
+
+export function ComputeNeighborTags({grid, x, y}) {
+    let neighborTags = 0;
+    WithNeighborGridCells({x, y, fn: (x, y) => {
+        if (IsTagged({grid, x, y})) {
+            ++neighborTags;
+        }
+    }});
+    return neighborTags;
+}
