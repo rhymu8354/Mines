@@ -10,6 +10,11 @@ const DefineAction = (type) => {
 
 [
     "HideStage",
-    "Load",
+    "Play",
+    "PopModal",
+    "PushModal",
+    "Quit",
+    "SetActivity",
+    "ShowReleaseNotes",
     "ShowStage",
 ].forEach(actionType => DefineAction(actionType));

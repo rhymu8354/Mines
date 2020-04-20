@@ -1,9 +1,11 @@
-import Phaser from 'phaser';
+import Phaser from "phaser";
 
-import { actionTypes, actions } from "../actions";
+import { actionTypes } from "../actions";
 
 import {
+    STAGE_WIDTH_TILES,
     STAGE_WIDTH_PIXELS,
+    STAGE_HEIGHT_TILES,
     STAGE_HEIGHT_PIXELS,
     TILE_SIZE,
 } from "../constants";
@@ -17,26 +19,6 @@ const defaultFont = {
 
 const DEPTH_DEBUG = 0;
 
-const moveKeys = new Map([
-    [Phaser.Input.Keyboard.KeyCodes.A, "A"],
-    [Phaser.Input.Keyboard.KeyCodes.LEFT, "A"],
-    [Phaser.Input.Keyboard.KeyCodes.NUMPAD_FOUR, "A"],
-    [Phaser.Input.Keyboard.KeyCodes.S, "S"],
-    [Phaser.Input.Keyboard.KeyCodes.DOWN, "S"],
-    [Phaser.Input.Keyboard.KeyCodes.NUMPAD_TWO, "S"],
-    [Phaser.Input.Keyboard.KeyCodes.W, "W"],
-    [Phaser.Input.Keyboard.KeyCodes.UP, "W"],
-    [Phaser.Input.Keyboard.KeyCodes.NUMPAD_EIGHT, "W"],
-    [Phaser.Input.Keyboard.KeyCodes.D, "D"],
-    [Phaser.Input.Keyboard.KeyCodes.RIGHT, "D"],
-    [Phaser.Input.Keyboard.KeyCodes.NUMPAD_SIX, "D"],
-]);
-
-const StartLoader = (stage) => {
-    stage.loading = true;
-    stage.scene.load.start();
-};
-
 const OnHideStage = ({
     onPhaserNotReady,
     stage,
@@ -45,6 +27,12 @@ const OnHideStage = ({
     if (stage.debug) {
         stage.debug.destroy();
         stage.debug = null;
+    }
+    if (stage.tiles) {
+        stage.tiles.forEach(row => row.forEach(sprite => {
+            sprite.destroy();
+        }));
+        stage.tiles = [];
     }
     stage.scene = null;
     stage.game.destroy(true);
@@ -66,6 +54,9 @@ const OnShowStage = ({
         }
     };
     const onPointerDown = (pointer) => {
+        const x = Math.floor(pointer.x / TILE_SIZE);
+        const y = Math.floor(pointer.y / TILE_SIZE);
+        stage.tiles[y][x].setTexture("atlas", 1);
     };
     const onGameOut = () => {
         stage.pointerOver = false;
@@ -77,7 +68,14 @@ const OnShowStage = ({
         stage.scene = this;
     };
     const phaserPreload = function() {
-        // stage.scene.load.multiatlas("arrows", "arrows.json");
+        stage.scene.load.spritesheet(
+            "atlas",
+            "/atlas.png",
+            {
+                frameWidth: TILE_SIZE,
+                frameHeight: TILE_SIZE,
+            }
+        );
     };
     const phaserCreate = function() {
         onPhaserReady();
@@ -91,17 +89,23 @@ const OnShowStage = ({
             .setOrigin(0, 1)
             .setStroke("#000", 5)
             .setDepth(DEPTH_DEBUG);
-        // stage.scene.input.mouse.disableContextMenu();
+        for (let y = 0; y < STAGE_HEIGHT_TILES; ++y) {
+            stage.tiles[y] = [];
+            for (let x = 0; x < STAGE_WIDTH_TILES; ++x) {
+                const sprite = stage.scene.add.sprite(
+                    x * TILE_SIZE,
+                    y * TILE_SIZE
+                );
+                sprite.setTexture("atlas", 0);
+                sprite.setOrigin(0, 0);
+                stage.tiles[y][x] = sprite;
+            }
+        }
         stage.scene.input.keyboard.on("keydown", onKeyDown);
         stage.scene.input.on("pointermove", onPointerMove);
         stage.scene.input.on("pointerdown", onPointerDown);
         stage.scene.input.on("gameout", onGameOut);
         stage.scene.input.topOnly = false;
-    };
-    const phaserUpdate = function(time) {
-        if (stage.loading) {
-            return;
-        }
     };
     const config = {
         type: Phaser.AUTO,
@@ -118,8 +122,7 @@ const OnShowStage = ({
             init: phaserInit,
             preload: phaserPreload,
             create: phaserCreate,
-            update: phaserUpdate,
-        }
+        },
     };
     stage.game = new Phaser.Game(config);
 };
@@ -133,10 +136,10 @@ export default function({ getState, dispatch }) {
     const stage = {
         debug: null,
         game: null,
-        loading: false,
         pointerOver: false,
         ready: false,
         scene: null,
+        tiles: [],
         time: 0,
     };
     let deferredActions = [];
@@ -156,7 +159,6 @@ export default function({ getState, dispatch }) {
     const onPhaserReady = () => {
         stage.ready = true;
         stage.scene.load.on("complete", () => {
-            stage.loading = false;
             handleDeferredActions();
         });
         handleDeferredActions();
@@ -175,7 +177,7 @@ export default function({ getState, dispatch }) {
             });
             if (
                 (action.type !== actionTypes.ShowStage)
-                && (!stage.ready || stage.loading)
+                && !stage.ready
             ) {
                 deferredActions.push(callHandler);
             } else {

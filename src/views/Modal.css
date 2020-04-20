@@ -1,0 +1,24 @@
+.modal-overlay {
+    position: fixed;
+    left: 0;
+    top: 0;
+    right: 0;
+    bottom: 0;
+    background-color: #000;
+    opacity: 0.8;
+}
+
+.modal-box {
+    position: fixed;
+    left: 10vw;
+    width: 70vw;
+    top: 10vh;
+    height: 70vh;
+    min-width: 325px;
+    background-color: #222;
+    border: 2px solid #777;
+    border-radius: 5px;
+    box-shadow: 0px 0px 10px;
+    padding: 20px;
+    overflow: hidden;
+}

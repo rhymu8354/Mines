@@ -2,47 +2,47 @@
     width: 100vw;
     height: 100vh;
     display: flex;
-    flex-direction: row;
-    background-color: #282c34;
 }
 
-.App-stage {
-    flex: 0 0 auto;
-    border: solid 2px red;
-}
-
-.App-controls {
+.App-viewport {
     flex: 1 0 auto;
-    min-height: 100vh;
+    margin: 10px;
     display: flex;
     flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    text-align: center;
-    font-size: calc(10px + 2vmin);
+    background-color: #282c34;
     color: white;
 }
 
-.App-logo {
-    height: 40vmin;
-    pointer-events: none;
+.App-header {
+    flex: 0 0 auto;
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    width: 100%;
+    background-color: #383f4b;
+    margin-bottom: 10px;
 }
 
-.App-link {
-    color: #61dafb;
+.App-header > *:not(:last-child) {
+    flex: 1 0 auto;
+    margin-left: 10px;
 }
 
-@media (prefers-reduced-motion: no-preference) {
-    .App-logo {
-        animation: App-logo-spin infinite 20s linear;
-    }
+.App-header > *:last-child {
+    flex: 0 0 auto;
+    margin-right: 10px;
 }
 
-@keyframes App-logo-spin {
-    from {
-        transform: rotate(0deg);
-    }
-    to {
-        transform: rotate(360deg);
-    }
+.App-header h2 {
+    margin: 0;
+}
+
+.App-header p {
+    margin-top: 0;
+    padding-left: 50px;
+    font-style: italic;
+}
+
+.App-body {
+    flex: 1 0 auto;
 }

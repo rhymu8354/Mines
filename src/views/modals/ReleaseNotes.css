@@ -1,0 +1,33 @@
+.ReleaseNotes-container {
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+}
+
+.ReleaseNotes-container h2 {
+    margin-bottom: 0;
+    color: powderblue;
+}
+
+.ReleaseNotes-container h3:first-child {
+    margin-top: 0;
+}
+
+.ReleaseNotes-container h3 {
+    margin-bottom: 0;
+    color: dodgerblue;
+}
+
+.ReleaseNotes-container > * {
+    flex: 1 0 1px;
+    overflow-y: auto;
+}
+
+.ReleaseNotes-container > *:first-child {
+    flex: 0 0 auto;
+}
+
+.ReleaseNotes-container > *:last-child {
+    flex: 0 0 auto;
+    margin-top: 10px;
+}

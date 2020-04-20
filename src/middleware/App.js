@@ -1,11 +1,27 @@
 import { actionTypes, actions } from "../actions";
 
-const OnLoad = ({dispatch}) => {
-    dispatch(actions.ShowStage());
+import {
+    ACTIVITY_PLAY,
+    ACTIVITY_SELECT_LEVEL,
+    MODAL_RELEASE_NOTES,
+} from "../constants";
+
+const OnPlay = ({dispatch}) => {
+    dispatch(actions.SetActivity({activity: ACTIVITY_PLAY}));
+};
+
+const OnQuit = ({dispatch}) => {
+    dispatch(actions.SetActivity({activity: ACTIVITY_SELECT_LEVEL}));
+};
+
+const OnShowReleaseNotes = ({dispatch}) => {
+    dispatch(actions.PushModal({which: MODAL_RELEASE_NOTES}));
 };
 
 const handlers = {
-    [actionTypes.Load]: OnLoad,
+    [actionTypes.Play]: OnPlay,
+    [actionTypes.Quit]: OnQuit,
+    [actionTypes.ShowReleaseNotes]: OnShowReleaseNotes,
 };
 
 export default function({ getState, dispatch }) {

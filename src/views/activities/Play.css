@@ -1,0 +1,14 @@
+.Play {
+    display: flex;
+    flex-direction: row;
+}
+
+.Play-stage {
+    flex: 0 0 auto;
+    border: solid 2px red;
+}
+
+.Play-controls {
+    flex: 1 0 auto;
+    margin-left: 10px;
+}
