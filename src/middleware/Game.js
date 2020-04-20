@@ -4,13 +4,32 @@ import {
     ComputeNeighborMines,
     IsMinePresent,
     IsUncovered,
-    WithNeighbors,
+    WithAllGridCells,
+    WithNeighborGridCells,
 } from "../Utilities";
 
 import {
     GRID_CELL_MINE_EXPLODED,
     GRID_CELL_UNCOVERED,
 } from "../constants";
+
+const OnGameLost = ({
+    dispatch,
+    getState,
+}) => {
+    const grid = getState().game.grid;
+    WithAllGridCells((x, y) => {
+        let cell = grid[y][x];
+        if (IsMinePresent({grid, x, y})) {
+            if (!IsUncovered({grid, x, y})) {
+                cell |= GRID_CELL_UNCOVERED;
+            }
+        }
+        if (cell !== grid[y][x]) {
+            dispatch(actions.ReflectGridUpdated({x, y, cell}));
+        }
+    });
+};
 
 const OnStep = ({
     action: {x, y},
@@ -26,7 +45,7 @@ const OnStep = ({
         dispatch(actions.GameLost());
     } else {
         if (ComputeNeighborMines({grid, x, y}) === 0) {
-            WithNeighbors({x, y, fn: (x, y) => {
+            WithNeighborGridCells({x, y, fn: (x, y) => {
                 if (!IsUncovered({grid, x, y})) {
                     dispatch(actions.Step({x, y}));
                 }
@@ -36,6 +55,7 @@ const OnStep = ({
 };
 
 const handlers = {
+    [actionTypes.GameLost]: OnGameLost,
     [actionTypes.Step]: OnStep,
 };
 

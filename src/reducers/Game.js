@@ -33,11 +33,23 @@ const MakeGrid = () => {
 };
 
 const initialState = {
-    grid: MakeGrid(),
+    active: true,
+    grid: null,
 };
 
 export default function (state = initialState, action) {
     switch (action.type) {
+        case actionTypes.GameLost:
+            return {
+                ...state,
+                active: false,
+            };
+        case actionTypes.Play:
+            return {
+                ...state,
+                active: true,
+                grid: MakeGrid(),
+            };
         case actionTypes.ReflectGridUpdated:
             const grid = [...state.grid];
             grid[action.y] = [...grid[action.y]];

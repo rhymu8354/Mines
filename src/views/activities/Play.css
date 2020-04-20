@@ -22,6 +22,10 @@
 }
 
 .Play-controls {
-    flex: 0 0 auto;
+    flex: 0 0 200px;
+    margin-left: 10px;
+}
+
+.Play-controls-buttons > *:not(:first-child) {
     margin-left: 10px;
 }

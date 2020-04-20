@@ -9,7 +9,8 @@ Rhymines:
     ✔ Add mines @created(2020-04-20 09:47) @done(2020-04-20 12:01)
     ✔ Show adjacent mine count for unmined revealed cells @created(2020-04-20 12:01) @done(2020-04-20 12:15)
     ✔ Auto-reveal all cells around a newly-exposed cell with no neighbor mines @created(2020-04-20 12:15) @done(2020-04-20 12:35)
-    ☐ Detect game lost condition (exploded mine) @created(2020-04-20 09:47)
+    ✔ Detect game lost condition (exploded mine) @created(2020-04-20 09:47) @done(2020-04-20 13:10)
+    ☐ Add ability to mark where players think mines are @created(2020-04-20 13:11)
     ☐ Detect win condition (all mines flagged and all clear cells revealed) @created(2020-04-20 12:36)
     ☐ Review pull request @created(2020-04-20 12:38)
         [12:37] Aiden_Garth: Pull created. Link: https://github.com/rhymu8354/Mines/pull/1

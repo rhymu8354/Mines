@@ -8,9 +8,11 @@ import "./Play.css";
 const useOnceEffect = fn => useEffect(fn, []);
 
 const Play = ({
+    gameActive,
     onHideStage,
     onQuit,
     onReflectStageSize,
+    onRetry,
     onShowStage,
 }) => {
     const stageRef = useRef(null);
@@ -47,27 +49,43 @@ const Play = ({
         </div>
         <div className="Play-controls">
             <p>
-                (Score and other stuff will go here!)
+                {(
+                    gameActive
+                    ? <>(Score and other stuff will go here!)</>
+                    : <span className="game-over-text">GAME OVER</span>
+                )}
             </p>
-            <div>
+            <div className="Play-controls-buttons">
                 <button
                     type="button"
                     onClick={() => onQuit()}
                 >
                     Quit
                 </button>
+                {(
+                    gameActive
+                    ? null
+                    : <button
+                        type="button"
+                        onClick={() => onRetry()}
+                    >
+                        Retry
+                    </button>
+                )}
             </div>
         </div>
     </div>;
 }
 
 const mapStateToProps = (state, ownProps) => ({
+    gameActive: state.game.active,
 });
 
 const mapDispatchToProps = (dispatch, ownProps) => ({
     onHideStage: () => dispatch(actions.HideStage()),
     onReflectStageSize: (width, height) => dispatch(actions.ReflectStageSize({width, height})),
     onQuit: () => dispatch(actions.Quit()),
+    onRetry: () => dispatch(actions.Play()),
     onShowStage: () => dispatch(actions.ShowStage()),
 });
 

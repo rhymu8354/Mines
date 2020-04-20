@@ -13,7 +13,15 @@ export function IsMinePresent({grid, x, y}) {
     return ((grid[y][x] & GRID_CELL_MINE_PRESENT) !== 0);
 }
 
-export function WithNeighbors({x, y, fn}) {
+export function WithAllGridCells(fn) {
+    for (let y = 0; y < GRID_HEIGHT_TILES; ++y) {
+        for (let x = 0; x < GRID_WIDTH_TILES; ++x) {
+            fn(x, y);
+        }
+    }
+}
+
+export function WithNeighborGridCells({x, y, fn}) {
     for (let dy = -1; dy <= 1; ++dy) {
         for (let dx = -1; dx <= 1; ++dx) {
             if ((dx === 0) && (dy === 0)) {
@@ -34,7 +42,7 @@ export function WithNeighbors({x, y, fn}) {
 
 export function ComputeNeighborMines({grid, x, y}) {
     let neighborMines = 0;
-    WithNeighbors({x, y, fn: (x, y) => {
+    WithNeighborGridCells({x, y, fn: (x, y) => {
         if (IsMinePresent({grid, x, y})) {
             ++neighborMines;
         }

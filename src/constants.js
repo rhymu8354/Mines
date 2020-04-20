@@ -9,6 +9,11 @@ export const MODAL_RELEASE_NOTES = "MODAL_RELEASE_NOTES";
 
 export const NUM_MINES = 125;
 
+// "cell" means the game object holding state about one section of the game
+// grid.
+//
+// "tile" means the graphical representation of a "cell".
+
 export const TILE_COVERED = 0;
 export const TILE_UNCOVERED_NO_NEIGHBORS = 1;
 export const TILE_UNCOVERED_ONE_NEIGHBOR = 2;

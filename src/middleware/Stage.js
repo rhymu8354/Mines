@@ -5,6 +5,7 @@ import { actionTypes, actions } from "../actions";
 import {
     IsMinePresent,
     ComputeNeighborMines,
+    WithAllGridCells,
 } from "../Utilities";
 
 import {
@@ -74,6 +75,15 @@ const ComputeCellTexture = ({grid, x, y}) => {
     }
 };
 
+const OnPlay = ({
+    stage,
+}) => {
+    WithAllGridCells((x, y) => {
+        const sprite = stage.tiles[y][x];
+        sprite.setTexture("atlas", TILE_COVERED);
+    });
+};
+
 const OnReflectGridUpdated = ({
     action: {x, y},
     getState,
@@ -97,20 +107,19 @@ const OnReflectStageSize = ({
     if (newTileScaling !== stage.tileScaling) {
         stage.tileScaling = newTileScaling;
         const tileScaledSize = TILE_SIZE * stage.tileScaling;
-        for (let y = 0; y < GRID_HEIGHT_TILES; ++y) {
-            for (let x = 0; x < GRID_WIDTH_TILES; ++x) {
-                const sprite = stage.tiles[y][x];
-                sprite.setX(x * tileScaledSize);
-                sprite.setY(y * tileScaledSize);
-                sprite.setScale(stage.tileScaling);
-            }
-        }
+        WithAllGridCells((x, y) => {
+            const sprite = stage.tiles[y][x];
+            sprite.setX(x * tileScaledSize);
+            sprite.setY(y * tileScaledSize);
+            sprite.setScale(stage.tileScaling);
+        });
     }
     console.log(`scaling factor: ${stage.tileScaling}`);
 };
 
 const OnShowStage = ({
     dispatch,
+    getState,
     onPhaserReady,
     stage,
 }) => {
@@ -120,6 +129,10 @@ const OnShowStage = ({
         stage.pointerOver = true;
     };
     const onPointerDown = (pointer) => {
+        const gameActive = getState().game.active;
+        if (!gameActive) {
+            return;
+        }
         const tileScaledSize = TILE_SIZE * stage.tileScaling;
         const x = Math.floor(pointer.x / tileScaledSize);
         const y = Math.floor(pointer.y / tileScaledSize);
@@ -150,7 +163,6 @@ const OnShowStage = ({
                     x * tileScaledSize,
                     y * tileScaledSize
                 );
-                sprite.setTexture("atlas", 0);
                 sprite.setOrigin(0, 0);
                 sprite.setScale(stage.tileScaling);
                 stage.tiles[y][x] = sprite;
@@ -185,6 +197,7 @@ const OnShowStage = ({
 
 const handlers = {
     [actionTypes.HideStage]: OnHideStage,
+    [actionTypes.Play]: OnPlay,
     [actionTypes.ReflectGridUpdated]: OnReflectGridUpdated,
     [actionTypes.ReflectStageSize]: OnReflectStageSize,
     [actionTypes.ShowStage]: OnShowStage,

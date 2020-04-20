@@ -9,6 +9,14 @@ import "./ReleaseNotes.css";
 
 const content = [
     {
+        version: "0.5.0 - 2020-04-20",
+        notes: <ul>
+            <li>Mines now explode (<em>Game Over man, <strong>GAME OVER!</strong></em>)</li>
+            <li>Add <code>RETRY</code> button to restart the game.</li>
+            <li>Fix issues with game grid not resetting for the next game.</li>
+        </ul>,
+    },
+    {
         version: "0.4.0 - 2020-04-20",
         notes: <ul>
             <li>Added mines (<em>they explode but you don't yet lose the game</em>).</li>

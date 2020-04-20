@@ -55,3 +55,8 @@ button:hover {
 .horizontally-centered-row > *:not(:first-child) {
     margin-left: 10px;
 }
+
+.game-over-text {
+    color: red;
+    font-size: 200%;
+}
