@@ -9,6 +9,13 @@ import "./ReleaseNotes.css";
 
 const content = [
     {
+        version: "0.3.1 - 2020-04-20",
+        notes: <ul>
+            <li>Fixed bug in initial tile sizing/scaling</li>
+            <li>Fixed app title</li>
+        </ul>,
+    },
+    {
         version: "0.3.0 - 2020-04-20",
         notes: <ul>
             <li>Made the stage scale up with window size</li>

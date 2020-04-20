@@ -83,7 +83,6 @@ const OnShowStage = ({
     };
     const phaserCreate = function() {
         const tileScaledSize = TILE_SIZE * stage.tileScaling;
-        onPhaserReady();
         for (let y = 0; y < STAGE_HEIGHT_TILES; ++y) {
             stage.tiles[y] = [];
             for (let x = 0; x < STAGE_WIDTH_TILES; ++x) {
@@ -97,6 +96,7 @@ const OnShowStage = ({
                 stage.tiles[y][x] = sprite;
             }
         }
+        onPhaserReady();
         stage.scene.input.keyboard.on("keydown", onKeyDown);
         stage.scene.input.on("pointermove", onPointerMove);
         stage.scene.input.on("pointerdown", onPointerDown);
