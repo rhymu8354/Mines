@@ -1,0 +1,6 @@
+export const STAGE_WIDTH_TILES = 35;
+export const STAGE_HEIGHT_TILES = 20;
+export const TILE_SIZE = 16;
+
+export const STAGE_WIDTH_PIXELS = STAGE_WIDTH_TILES * TILE_SIZE;
+export const STAGE_HEIGHT_PIXELS = STAGE_HEIGHT_TILES * TILE_SIZE;
