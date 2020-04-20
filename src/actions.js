@@ -9,13 +9,16 @@ const DefineAction = (type) => {
 };
 
 [
+    "GameLost",
     "HideStage",
     "Play",
     "PopModal",
     "PushModal",
     "Quit",
+    "ReflectGridUpdated",
     "ReflectStageSize",
     "SetActivity",
     "ShowReleaseNotes",
     "ShowStage",
+    "Step",
 ].forEach(actionType => DefineAction(actionType));

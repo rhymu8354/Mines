@@ -9,24 +9,33 @@ import "./ReleaseNotes.css";
 
 const content = [
     {
+        version: "0.4.0 - 2020-04-20",
+        notes: <ul>
+            <li>Added mines (<em>they explode but you don't yet lose the game</em>).</li>
+            <li>Added neighbor mine counters.</li>
+            <li>Added revealing of open areas.</li>
+            <li>Added many bugs to be fixed later. Kappa</li>
+        </ul>,
+    },
+    {
         version: "0.3.1 - 2020-04-20",
         notes: <ul>
-            <li>Fixed bug in initial tile sizing/scaling</li>
-            <li>Fixed app title</li>
+            <li>Fixed bug in initial tile sizing/scaling.</li>
+            <li>Fixed app title.</li>
         </ul>,
     },
     {
         version: "0.3.0 - 2020-04-20",
         notes: <ul>
-            <li>Made the stage scale up with window size</li>
+            <li>Made the stage scale up with window size.</li>
         </ul>,
     },
     {
         version: "0.2.0 - 2020-04-20",
         notes: <ul>
-            <li>Added basic application structure</li>
-            <li>Added release notes modal</li>
-            <li>Added clickable cells (<em>no bombs yet!</em>)</li>
+            <li>Added basic application structure.</li>
+            <li>Added release notes modal.</li>
+            <li>Added clickable cells (<em>no bombs yet!</em>).</li>
         </ul>,
     },
     {

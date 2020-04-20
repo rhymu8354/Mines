@@ -1,11 +1,30 @@
 import Phaser from "phaser";
 
-import { actionTypes } from "../actions";
+import { actionTypes, actions } from "../actions";
 
 import {
-    STAGE_WIDTH_TILES,
-    STAGE_HEIGHT_TILES,
+    IsMinePresent,
+    ComputeNeighborMines,
+} from "../Utilities";
+
+import {
+    GRID_CELL_MINE_EXPLODED,
+    GRID_CELL_UNCOVERED,
+    GRID_WIDTH_TILES,
+    GRID_HEIGHT_TILES,
+    TILE_COVERED,
+    TILE_EXPLODED_MINE,
     TILE_SIZE,
+    TILE_UNCOVERED_EIGHT_NEIGHBORS,
+    TILE_UNCOVERED_FIVE_NEIGHBORS,
+    TILE_UNCOVERED_FOUR_NEIGHBORS,
+    TILE_UNCOVERED_NO_NEIGHBORS,
+    TILE_UNCOVERED_ONE_NEIGHBOR,
+    TILE_UNCOVERED_SEVEN_NEIGHBORS,
+    TILE_UNCOVERED_SIX_NEIGHBORS,
+    TILE_UNCOVERED_THREE_NEIGHBORS,
+    TILE_UNCOVERED_TWO_NEIGHBORS,
+    TILE_UNEXPLODED_MINE,
 } from "../constants";
 
 const OnHideStage = ({
@@ -24,6 +43,46 @@ const OnHideStage = ({
     stage.game = null;
 };
 
+const tilesForNeighbors = [
+    TILE_UNCOVERED_NO_NEIGHBORS,
+    TILE_UNCOVERED_ONE_NEIGHBOR,
+    TILE_UNCOVERED_TWO_NEIGHBORS,
+    TILE_UNCOVERED_THREE_NEIGHBORS,
+    TILE_UNCOVERED_FOUR_NEIGHBORS,
+    TILE_UNCOVERED_FIVE_NEIGHBORS,
+    TILE_UNCOVERED_SIX_NEIGHBORS,
+    TILE_UNCOVERED_SEVEN_NEIGHBORS,
+    TILE_UNCOVERED_EIGHT_NEIGHBORS,
+];
+
+const ComputeCellTexture = ({grid, x, y}) => {
+    const cell = grid[y][x];
+    if ((cell & GRID_CELL_MINE_EXPLODED) === 0) {
+        if ((cell & GRID_CELL_UNCOVERED) === 0) {
+            return TILE_COVERED;
+        } else {
+            if (IsMinePresent({grid, x, y})) {
+                return TILE_UNEXPLODED_MINE;
+            } else {
+                return tilesForNeighbors[
+                    ComputeNeighborMines({grid, x, y})
+                ];
+            }
+        }
+    } else {
+        return TILE_EXPLODED_MINE;
+    }
+};
+
+const OnReflectGridUpdated = ({
+    action: {x, y},
+    getState,
+    stage,
+}) => {
+    const grid = getState().game.grid;
+    stage.tiles[y][x].setTexture("atlas", ComputeCellTexture({grid, x, y}));
+};
+
 const OnReflectStageSize = ({
     getState,
     stage,
@@ -32,14 +91,14 @@ const OnReflectStageSize = ({
     const height = getState().app.height;
     stage.game.scale.setGameSize(width, height);
     const newTileScaling = Math.min(
-        Math.floor(width / (TILE_SIZE * STAGE_WIDTH_TILES)),
-        Math.floor(height / (TILE_SIZE * STAGE_HEIGHT_TILES)),
+        Math.floor(width / (TILE_SIZE * GRID_WIDTH_TILES)),
+        Math.floor(height / (TILE_SIZE * GRID_HEIGHT_TILES)),
     );
     if (newTileScaling !== stage.tileScaling) {
         stage.tileScaling = newTileScaling;
         const tileScaledSize = TILE_SIZE * stage.tileScaling;
-        for (let y = 0; y < STAGE_HEIGHT_TILES; ++y) {
-            for (let x = 0; x < STAGE_WIDTH_TILES; ++x) {
+        for (let y = 0; y < GRID_HEIGHT_TILES; ++y) {
+            for (let x = 0; x < GRID_WIDTH_TILES; ++x) {
                 const sprite = stage.tiles[y][x];
                 sprite.setX(x * tileScaledSize);
                 sprite.setY(y * tileScaledSize);
@@ -51,6 +110,7 @@ const OnReflectStageSize = ({
 };
 
 const OnShowStage = ({
+    dispatch,
     onPhaserReady,
     stage,
 }) => {
@@ -63,7 +123,7 @@ const OnShowStage = ({
         const tileScaledSize = TILE_SIZE * stage.tileScaling;
         const x = Math.floor(pointer.x / tileScaledSize);
         const y = Math.floor(pointer.y / tileScaledSize);
-        stage.tiles[y][x].setTexture("atlas", 1);
+        dispatch(actions.Step({x, y}));
     };
     const onGameOut = () => {
         stage.pointerOver = false;
@@ -83,9 +143,9 @@ const OnShowStage = ({
     };
     const phaserCreate = function() {
         const tileScaledSize = TILE_SIZE * stage.tileScaling;
-        for (let y = 0; y < STAGE_HEIGHT_TILES; ++y) {
+        for (let y = 0; y < GRID_HEIGHT_TILES; ++y) {
             stage.tiles[y] = [];
-            for (let x = 0; x < STAGE_WIDTH_TILES; ++x) {
+            for (let x = 0; x < GRID_WIDTH_TILES; ++x) {
                 const sprite = stage.scene.add.sprite(
                     x * tileScaledSize,
                     y * tileScaledSize
@@ -112,8 +172,8 @@ const OnShowStage = ({
         },
         parent: "stage",
         pixelArt: true,
-        width: STAGE_WIDTH_TILES * TILE_SIZE,
-        height: STAGE_HEIGHT_TILES * TILE_SIZE,
+        width: GRID_WIDTH_TILES * TILE_SIZE,
+        height: GRID_HEIGHT_TILES * TILE_SIZE,
         scene: {
             init: phaserInit,
             preload: phaserPreload,
@@ -125,6 +185,7 @@ const OnShowStage = ({
 
 const handlers = {
     [actionTypes.HideStage]: OnHideStage,
+    [actionTypes.ReflectGridUpdated]: OnReflectGridUpdated,
     [actionTypes.ReflectStageSize]: OnReflectStageSize,
     [actionTypes.ShowStage]: OnShowStage,
 };
