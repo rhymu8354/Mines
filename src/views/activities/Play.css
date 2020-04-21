@@ -26,6 +26,10 @@
     margin-left: 10px;
 }
 
+.Play-controls-buttons {
+    margin-bottom: 10px;
+}
+
 .Play-controls-buttons > *:not(:first-child) {
     margin-left: 10px;
 }
@@ -36,4 +40,17 @@
 
 .Player-controls-game-status {
     font-size: 200%;
+}
+
+.Play-controls-min-scaling {
+    display: flex;
+    align-items: center;
+}
+
+.Play-controls-min-scaling > *:not(:first-child) {
+    margin-left: 10px;
+}
+
+.Play-controls-min-scaling-slider {
+    width: 50px;
 }

@@ -25,7 +25,7 @@ Rhymines:
     ☐ Review pull request @created(2020-04-20 12:38)
         [12:37] Aiden_Garth: Pull created. Link: https://github.com/rhymu8354/Mines/pull/1
         The test build failed; looks like `typescript` needs to be added to the project in order for the build to work.
-    ☐ Add game levels @created(2020-04-20 09:47)
+    ✔ Add game levels @created(2020-04-20 09:47) @done(2020-04-21 01:08)
     ☐ Add explosion effects @created(2020-04-20 09:47)
     ☐ Get Gud at CSS @created(2020-04-20 10:54)
         [10:50] movAX13h: box-sizing: border-box; for all elements helps with the margin problem
@@ -37,3 +37,4 @@ Rhymines:
     ☐ Detonator @created(2020-04-20 15:16)
     ☐ Bonus games @created(2020-04-20 15:16)
     ☐ Add localStorage-based scoreboard @created(2020-04-20 15:57)
+    ☐ Add "about" link(s) @created(2020-04-20 16:23)

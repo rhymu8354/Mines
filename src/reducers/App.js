@@ -8,6 +8,7 @@ const initialState = {
     activity: ACTIVITY_SELECT_LEVEL,
     width: 1,
     height: 1,
+    minScaling: 2,
 };
 
 export default function (state = initialState, action) {
@@ -22,6 +23,11 @@ export default function (state = initialState, action) {
             return {
                 ...state,
                 activity: action.activity,
+            };
+        case actionTypes.SetMinScaling:
+            return {
+                ...state,
+                minScaling: action.minScaling,
             };
         default:
             return state;

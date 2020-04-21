@@ -66,3 +66,7 @@ export function ComputeNeighborTags({grid, x, y}) {
     }});
     return neighborTags;
 }
+
+export function Clamp(value, min, max) {
+    return Math.min(Math.max(value, min), max);
+}

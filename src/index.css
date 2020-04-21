@@ -45,6 +45,14 @@ button:hover {
     background-color: #00aa00;
 }
 
+input {
+    border: 2px solid grey;
+    background-color: transparent;
+    color: white;
+    padding: 2px 8px;
+    font-size: 100%;
+}
+
 .horizontally-centered-row {
     width: 100%;
     display: flex;

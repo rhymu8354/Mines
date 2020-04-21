@@ -3,6 +3,10 @@ import { connect } from "react-redux";
 
 import { actions } from "../../actions";
 
+import {
+    MAX_TILE_SCALING,
+} from "../../constants";
+
 import "./Play.css";
 
 const useOnceEffect = fn => useEffect(fn, []);
@@ -10,10 +14,12 @@ const useOnceEffect = fn => useEffect(fn, []);
 const Play = ({
     gameActive,
     gameLost,
+    minScaling,
     onHideStage,
     onQuit,
     onReflectStageSize,
     onRetry,
+    onSetMinScaling,
     onShowStage,
     score,
 }) => {
@@ -35,6 +41,7 @@ const Play = ({
             };
         }
     );
+    const onChangeField = setter => event => setter(event.target.value);
     return <div
         className="Play"
     >
@@ -82,6 +89,26 @@ const Play = ({
                     </button>
                 )}
             </div>
+            <div className="Play-controls-min-scaling">
+                <div>Zoom:</div>
+                <input
+                    type="range"
+                    className="Play-controls-min-scaling-slider"
+                    min={1}
+                    max={MAX_TILE_SCALING}
+                    step={1}
+                    value={minScaling}
+                    onChange={onChangeField(onSetMinScaling)}
+                />
+            </div>
+            <p>
+                You can also use the mouse wheel to zoom in/out.
+            </p>
+            <p>
+                When zoomed in, click and drag in the lower-right mini-map,
+                or use the WASD (or arrow) keys, to scroll the viewport
+                around the grid.
+            </p>
         </div>
     </div>;
 }
@@ -89,6 +116,7 @@ const Play = ({
 const mapStateToProps = (state, ownProps) => ({
     gameActive: state.game.active,
     gameLost: state.game.lost,
+    minScaling: state.app.minScaling,
     score: state.game.score,
 });
 
@@ -97,6 +125,7 @@ const mapDispatchToProps = (dispatch, ownProps) => ({
     onReflectStageSize: (width, height) => dispatch(actions.ReflectStageSize({width, height})),
     onQuit: () => dispatch(actions.Quit()),
     onRetry: () => dispatch(actions.Play({})),
+    onSetMinScaling: (minScaling) => dispatch(actions.SetMinScaling({minScaling})),
     onShowStage: () => dispatch(actions.ShowStage()),
 });
 

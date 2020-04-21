@@ -9,6 +9,18 @@ import "./ReleaseNotes.css";
 
 const content = [
     {
+        version: "0.9.0 - 2020-04-21",
+        notes: <ul>
+            <li>Fixed bug when clicking outside grid.</li>
+            <li>
+                Add ability to zoom and scroll around the grid.
+                When zoomed in, show what part of the grid is visible
+                in the viewport using a mini-map diagram in
+                the bottom-right corner.
+            </li>
+        </ul>,
+    },
+    {
         version: "0.8.0 - 2020-04-20",
         notes: <ul>
             <li>Enabled different levels of difficulty.</li>

@@ -1,10 +1,20 @@
 export const TILE_SIZE = 16;
+export const SCROLL_UNITS_PER_PAGE_X = 4;
+export const SCROLL_UNITS_PER_PAGE_Y = 4;
+
+export const DEPTH_TILE = 0;
+export const DEPTH_MINI_MAP = 1;
+
+export const MAX_TILE_SCALING = 10;
+
+export const MINI_MAP_OPACITY = 0.75;
+export const MINI_MAP_SIZE = 100;
+export const MINI_MAP_MARGIN = 10;
 
 export const ACTIVITY_PLAY = "ACTIVITY_PLAY";
 export const ACTIVITY_SELECT_LEVEL = "ACTIVITY_SELECT_LEVEL";
 
 export const MODAL_RELEASE_NOTES = "MODAL_RELEASE_NOTES";
-
 
 // "cell" means the game object holding state about one section of the game
 // grid.

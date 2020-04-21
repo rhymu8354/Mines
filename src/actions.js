@@ -20,6 +20,7 @@ const DefineAction = (type) => {
     "ReflectScore",
     "ReflectStageSize",
     "SetActivity",
+    "SetMinScaling",
     "ShowReleaseNotes",
     "ShowStage",
     "StepIfNotTagged",

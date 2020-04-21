@@ -48,7 +48,6 @@ const PlaceMineSomewhereExcept = ({
         if (!IsMinePresent({grid, x, y})) {
             const cell = grid[y][x] | GRID_CELL_MINE_PRESENT;
             dispatch(actions.ReflectGridUpdated({x, y, cell}));
-            console.log(`There was a mine at x=${exceptX}, y=${exceptY}, so moved it to x=${x}, y=${y}`);
             needMine = false;
         }
     }

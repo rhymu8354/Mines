@@ -42,7 +42,7 @@ const SelectLevel = ({
             Choose your level of difficulty:
         </h2>
         <div className="SelectLevel-grid">
-            {levelTable.map(level => <>
+            {levelTable.map(level => <React.Fragment key={level.title}>
                 <div>{level.title}</div>
                 <div>
                     <button
@@ -52,7 +52,7 @@ const SelectLevel = ({
                         Play
                     </button>
                 </div>
-            </>)}
+            </React.Fragment>)}
         </div>
     </div>;
 }
