@@ -1,5 +1,8 @@
 {
     "compilerOptions": {
-        "allowJs": true
+        "allowJs": true,
+        "checkJs": true,
+        "jsx": "react",
+        "sourceMap": false
     }
 }
