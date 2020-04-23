@@ -14,7 +14,9 @@ import {
 
 import {
     DEPTH_MINI_MAP,
+    DEPTH_SPRITE_CONTAINER,
     DEPTH_TILE,
+    DETONATION_SHAKE_COUNT,
     GRID_CELL_DARKENED,
     GRID_CELL_POWER,
     MAX_TILE_SCALING,
@@ -23,6 +25,7 @@ import {
     MINI_MAP_MARGIN,
     SCROLL_UNITS_PER_PAGE_X,
     SCROLL_UNITS_PER_PAGE_Y,
+    SHAKE_MAX_DISTANCE,
     TILE_COVERED,
     TILE_EXPLODED_MINE,
     TILE_POWER,
@@ -271,6 +274,7 @@ const UpdateTilePositionsAndScale = ({
                 if (sprite == null) {
                     if (stage.freeSprites.length === 0) {
                         sprite = stage.scene.add.sprite(spriteX, spriteY);
+                        stage.spriteContainer.add(sprite);
                         sprite.setDepth(DEPTH_TILE);
                         sprite.setOrigin(0, 0);
                         sprite.setScale(stage.tileScaling);
@@ -328,6 +332,12 @@ const UpdateTilePositionsAndScale = ({
         miniMapViewport.setDepth(1);
         stage.miniMap.add(miniMapViewport);
     }
+};
+
+const OnDetonate = ({
+    stage,
+}) => {
+    stage.shakeCount = DETONATION_SHAKE_COUNT;
 };
 
 const OnHideStage = ({
@@ -611,6 +621,8 @@ const OnShowStage = ({
         stage.miniMap = stage.scene.add.container();
         stage.miniMap.setDepth(DEPTH_MINI_MAP);
         stage.miniMap.setAlpha(MINI_MAP_OPACITY);
+        stage.spriteContainer = stage.scene.add.container();
+        stage.spriteContainer.setDepth(DEPTH_SPRITE_CONTAINER);
         onPhaserReady();
         stage.scene.input.keyboard.on("keydown", onKeyDown);
         stage.scene.input.on("pointermove", onPointerMove);
@@ -640,6 +652,15 @@ const OnShowStage = ({
                 dispatch(actions.ReflectScore({score: stage.time}));
             }
         }
+        if (stage.shakeCount > 0) {
+            if (--stage.shakeCount == 0) {
+                stage.spriteContainer.setX(0);
+                stage.spriteContainer.setY(0);
+            } else {
+                stage.spriteContainer.setX(Math.floor(Math.random() * SHAKE_MAX_DISTANCE));
+                stage.spriteContainer.setY(Math.floor(Math.random() * SHAKE_MAX_DISTANCE));
+            }
+        };
     };
     const config = {
         draggingViewportInMiniMap: false,
@@ -665,6 +686,7 @@ const OnShowStage = ({
 };
 
 const handlers = {
+    [actionTypes.Detonate]: OnDetonate,
     [actionTypes.HideStage]: OnHideStage,
     [actionTypes.Play]: OnPlay,
     [actionTypes.ReflectGridUpdated]: OnReflectGridUpdated,
@@ -688,6 +710,8 @@ export default function({ getState, dispatch }) {
         offsetY: 0,
         ready: false,
         scene: null,
+        shakeCount: 0,
+        spriteContainer: null,
         tiles: [],
         tileScaling: 1,
         time: null,

@@ -5,7 +5,11 @@ export const SCROLL_UNITS_PER_PAGE_X = 4;
 export const SCROLL_UNITS_PER_PAGE_Y = 4;
 
 export const DEPTH_TILE = 0;
+export const DEPTH_SPRITE_CONTAINER = 0;
 export const DEPTH_MINI_MAP = 1;
+
+export const DETONATION_SHAKE_COUNT = 30;
+export const SHAKE_MAX_DISTANCE = 10;
 
 export const MAX_TILE_SCALING = 10;
 

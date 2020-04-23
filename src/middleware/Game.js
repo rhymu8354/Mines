@@ -234,8 +234,7 @@ const OnStepIfNotTagged = ({
         && !IsMineExploded({grid, x, y})
         && (getState().game.cellsCleared > 0)
     ) {
-        cell = grid[y][x] | GRID_CELL_MINE_EXPLODED;
-        dispatch(actions.ReflectGridUpdated({x, y, cell}));
+        dispatch(actions.Detonate({x, y}));
         dispatch(actions.GameLost());
     } else {
         if (minePresent) {
