@@ -9,6 +9,13 @@ import "./ReleaseNotes.css";
 
 const content = [
     {
+        version: "0.12.0 - 2020-04-23",
+        notes: <ul>
+            <li>Added optional tinting of uncovered cells.</li>
+            <li>Added <code>ABOUT</code> button and information.</li>
+        </ul>,
+    },
+    {
         version: "0.11.1 - 2020-04-23",
         notes: <ul>
             <li>Corrected the date of the 0.11.0 release.  Oops!</li>

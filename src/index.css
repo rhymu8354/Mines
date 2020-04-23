@@ -78,7 +78,13 @@ input {
 }
 
 .power-text {
-    animation: power 2000ms infinite;
+    animation: power-text 2000ms infinite;
+}
+
+.power-border {
+    border-width: 2px;
+    border-style: solid;
+    animation: power-border 2000ms infinite;
 }
 
 .power-tool-selected {
@@ -97,7 +103,7 @@ input {
     color: #00aa00;
 }
 
-@keyframes power {
+@keyframes power-text {
     0% {
         color: goldenrod;
     }
@@ -112,5 +118,23 @@ input {
     }
     100% {
         color: goldenrod;
+    }
+}
+
+@keyframes power-border {
+    0% {
+        border-color: goldenrod;
+    }
+    25% {
+        border-color: red;
+    }
+    50% {
+        border-color: magenta;
+    }
+    75% {
+        border-color: red;
+    }
+    100% {
+        border-color: goldenrod;
     }
 }

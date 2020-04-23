@@ -17,8 +17,10 @@
 
 .SelectLevel-grid {
     margin-left: 50px;
+    margin-bottom: 20px;
     display: grid;
     grid-template-columns: max-content auto;
     column-gap: 10px;
     row-gap: 5px;
+    padding: 10px;
 }

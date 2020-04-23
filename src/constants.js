@@ -1,4 +1,4 @@
-export const APP_VERSION = "0.11.1";
+export const APP_VERSION = "0.12.0";
 
 export const TILE_SIZE = 16;
 export const SCROLL_UNITS_PER_PAGE_X = 4;
@@ -16,6 +16,7 @@ export const MINI_MAP_MARGIN = 10;
 export const ACTIVITY_PLAY = "ACTIVITY_PLAY";
 export const ACTIVITY_SELECT_LEVEL = "ACTIVITY_SELECT_LEVEL";
 
+export const MODAL_ABOUT = "MODAL_ABOUT";
 export const MODAL_RELEASE_NOTES = "MODAL_RELEASE_NOTES";
 
 export const POWER_TOOL_DETONATOR = "POWER_TOOL_DETONATOR";

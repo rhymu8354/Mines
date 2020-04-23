@@ -1,0 +1,28 @@
+.About-container {
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+}
+
+.About-container h2 {
+    margin-bottom: 0;
+    color: powderblue;
+}
+
+.About-container h3:first-child {
+    margin-top: 0;
+}
+
+.About-container > * {
+    flex: 1 0 1px;
+    overflow-y: auto;
+}
+
+.About-container > *:first-child {
+    flex: 0 0 auto;
+}
+
+.About-container > *:last-child {
+    flex: 0 0 auto;
+    margin-top: 10px;
+}

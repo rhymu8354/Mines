@@ -28,6 +28,7 @@ const DefineAction = (type) => {
     "SetActivity",
     "SetMinScaling",
     "SetTinting",
+    "ShowAbout",
     "ShowReleaseNotes",
     "ShowStage",
     "StepIfNotTagged",

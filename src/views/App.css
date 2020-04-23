@@ -33,6 +33,10 @@
     margin-right: 10px;
 }
 
+.App-header > *:last-child > *:not(:first-child) {
+    margin-left: 10px;
+}
+
 .App-header h2 {
     margin: 0;
 }

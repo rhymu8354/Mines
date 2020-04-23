@@ -25,6 +25,7 @@ const useOnceEffect = fn => useEffect(fn, []);
 const App = ({
     activity,
     onSelectWittyQuote,
+    onShowAbout,
     onShowReleaseNotes,
     wittyQuote,
 }) => {
@@ -52,6 +53,12 @@ const App = ({
                     >
                         Release&nbsp;Notes
                     </button>
+                    <button
+                        type="button"
+                        onClick={() => onShowAbout()}
+                    >
+                        About
+                    </button>
                 </div>
             </header>
             <div
@@ -71,6 +78,7 @@ const mapStateToProps = (state, ownProps) => ({
 
 const mapDispatchToProps = (dispatch, ownProps) => ({
     onSelectWittyQuote: () => dispatch(actions.SelectWittyQuote()),
+    onShowAbout: () => dispatch(actions.ShowAbout()),
     onShowReleaseNotes: () => dispatch(actions.ShowReleaseNotes()),
 });
 

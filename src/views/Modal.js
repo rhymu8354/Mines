@@ -2,16 +2,19 @@ import React from "react";
 import { connect } from "react-redux";
 
 import {
+    MODAL_ABOUT,
     MODAL_RELEASE_NOTES,
 } from "../constants";
 
 import {
+    About,
     ReleaseNotes,
 } from "./modals";
 
 import "./Modal.css";
 
 const modals = {
+    [MODAL_ABOUT]: About,
     [MODAL_RELEASE_NOTES]: ReleaseNotes,
 };
 

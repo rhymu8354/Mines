@@ -101,7 +101,7 @@ const SelectLevel = ({
                     </div>
                 </React.Fragment>)}
             </div>
-            <div className="SelectLevel-grid">
+            <div className="SelectLevel-grid power-border">
                 {extendedLevelTable.map(level => <React.Fragment key={level.title}>
                     <div>{level.title}</div>
                     <div>
@@ -115,6 +115,11 @@ const SelectLevel = ({
                 </React.Fragment>)}
             </div>
         </div>
+        <p>
+            <span className="power-text">POWER</span> levels are larger,
+            but include fancy gadgets to help speed up the process and
+            get you out of any tight spots!
+        </p>
     </div>;
 }
 
