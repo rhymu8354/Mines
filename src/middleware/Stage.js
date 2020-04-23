@@ -448,6 +448,8 @@ const OnShowStage = ({
         if (!stage.activeButton) {
             return;
         }
+        const button = stage.activeButton;
+        stage.activeButton = null;
         if (stage.draggingViewportInMiniMap) {
             stage.draggingViewportInMiniMap = false;
             return;
@@ -478,8 +480,8 @@ const OnShowStage = ({
         if (y >= grid.length) {
             return;
         }
-        const leftClick = (stage.activeButton === 1);
-        const middleClick = (stage.activeButton === 4);
+        const leftClick = (button === 1);
+        const middleClick = (button === 4);
         const isShift = pointer.event.shiftKey;
         if (
             middleClick || (leftClick && isShift)
@@ -499,7 +501,6 @@ const OnShowStage = ({
         } else {
             dispatch(actions.ToggleMarker({x, y}));
         }
-        stage.activeButton = null;
     };
     const onPointerUpOutside = (pointer) => {
         stage.draggingViewportInMiniMap = false;
