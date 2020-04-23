@@ -140,9 +140,16 @@ const OnDetonate = ({
     cell |= GRID_CELL_UNCOVERED;
     cell |= GRID_CELL_MINE_EXPLODED;
     dispatch(actions.ReflectGridUpdated({x, y, cell}));
+    const centerX = x;
+    const centerY = y;
     WithCellsWithinRange({grid, x, y, range: DETONATION_REVEAL_RANGE, fn: (x, y) => {
-        UntagIfTagged({dispatch, grid, x, y});
-        Detonate({dispatch, grid, x, y});
+        if (
+            (x !== centerX)
+            || (y !== centerY)
+        ) {
+            UntagIfTagged({dispatch, grid, x, y});
+            Detonate({dispatch, grid, x, y});
+        }
     }});
 };
 
