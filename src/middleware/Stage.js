@@ -232,7 +232,6 @@ const UpdateTilePositionsAndScale = ({
     const viewportWidthInPixels = getState().app.width;
     const viewportHeightInPixels = getState().app.height;
     const grid = getState().game.grid;
-    const gameActive = getState().game.active;
     const heightInTiles = grid.length;
     const widthInTiles = grid[0].length;
     stage.game.scale.setGameSize(viewportWidthInPixels, viewportHeightInPixels);
@@ -490,7 +489,6 @@ const OnSetTinting = ({
 }) => {
     ComputeSpriteTint({getState, stage});
     const grid = getState().game.grid;
-    const gameActive = getState().game.active;
     WithAllGridCells(grid, (x, y) => {
         const sprite = stage.tiles[y][x];
         if (sprite != null) {
@@ -761,7 +759,7 @@ const OnShowStage = ({
             }
         }
         if (stage.shakeCount > 0) {
-            if (--stage.shakeCount == 0) {
+            if (--stage.shakeCount === 0) {
                 stage.spriteContainer.setX(0);
                 stage.spriteContainer.setY(0);
             } else {
