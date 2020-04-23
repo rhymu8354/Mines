@@ -16,6 +16,7 @@ const inProduction = process.env.NODE_ENV === 'production';
 const composeEnhancers = (
     inProduction
     ? compose
+    // @ts-ignore
     : window.__REDUX_DEVTOOLS_EXTENSION_COMPOSE__ || compose
 );
 const store = createStore(
