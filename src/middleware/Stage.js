@@ -15,6 +15,7 @@ import {
 import {
     DEPTH_MINI_MAP,
     DEPTH_TILE,
+    GRID_CELL_DARKENED,
     GRID_CELL_POWER,
     MAX_TILE_SCALING,
     MINI_MAP_OPACITY,
@@ -146,6 +147,25 @@ const DropTiles = ({
     });
 };
 
+const SetSpriteTexture = ({
+    gameActive,
+    grid,
+    x,
+    y,
+    sprite,
+}) => {
+    sprite.setTexture(
+        "atlas",
+        ComputeCellFrame({gameActive, grid, x, y})
+    );
+    const cell = grid[y][x];
+    if ((cell & GRID_CELL_DARKENED) === 0) {
+        sprite.setTint(0xffffff);
+    } else {
+        sprite.setTint(0xaaaaaa);
+    }
+};
+
 const UpdateTilePositionsAndScale = ({
     getState,
     stage,
@@ -231,10 +251,7 @@ const UpdateTilePositionsAndScale = ({
                     } else {
                         sprite = stage.freeSprites.pop();
                     }
-                    sprite.setTexture(
-                        "atlas",
-                        ComputeCellFrame({gameActive, grid, x, y})
-                    );
+                    SetSpriteTexture({gameActive, grid, x, y, sprite});
                     stage.tiles[y][x] = sprite;
                 }
                 sprite.setX(spriteX);
@@ -348,7 +365,7 @@ const OnReflectGridUpdated = ({
     const gameActive = getState().game.active;
     const sprite = stage.tiles[y][x];
     if (sprite != null) {
-        sprite.setTexture("atlas", ComputeCellFrame({gameActive, grid, x, y}));
+        SetSpriteTexture({gameActive, grid, x, y, sprite});
     }
 };
 
@@ -362,7 +379,7 @@ const OnReflectGridUpdatedBatch = ({
     updates.forEach(({x, y}) => {
         const sprite = stage.tiles[y][x];
         if (sprite != null) {
-            sprite.setTexture("atlas", ComputeCellFrame({gameActive, grid, x, y}));
+            SetSpriteTexture({gameActive, grid, x, y, sprite});
         }
     });
 };
@@ -508,13 +525,13 @@ const OnShowStage = ({
                 const wasUncovered = IsUncovered({grid, x, y});
                 dispatch(actions.StepIfNotTagged({x, y}));
                 if (wasUncovered) {
-                    dispatch(actions.PickUp({x, y}));
+                    dispatch(actions.PickUpOrDarken({x, y}));
                 }
             } else {
                 dispatch(actions.UsePowerTool({x, y}));
             }
         } else {
-            dispatch(actions.ToggleMarker({x, y}));
+            dispatch(actions.ToggleMarkerOrLighten({x, y}));
         }
     };
     const onPointerUpOutside = (pointer) => {

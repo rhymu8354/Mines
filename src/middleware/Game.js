@@ -15,6 +15,7 @@ import {
 import {
     DETONATION_REVEAL_RANGE,
     DETONATOR_RANGE,
+    GRID_CELL_DARKENED,
     GRID_CELL_MINE_EXPLODED,
     GRID_CELL_MINE_PRESENT,
     GRID_CELL_POWER,
@@ -191,7 +192,7 @@ const OnGameWon = ({
     });
 };
 
-const OnPickUp = ({
+const OnPickUpOrDarken = ({
     action: {x, y},
     dispatch,
     getState,
@@ -200,9 +201,11 @@ const OnPickUp = ({
     let cell = grid[y][x];
     if ((grid[y][x] & GRID_CELL_POWER) !== 0) {
         cell &= ~GRID_CELL_POWER;
-        dispatch(actions.ReflectGridUpdated({x, y, cell}));
         dispatch(actions.AddPower({power: 1}));
+    } else {
+        cell |= GRID_CELL_DARKENED;
     }
+    dispatch(actions.ReflectGridUpdated({x, y, cell}));
 };
 
 const OnStepIfNotTagged = ({
@@ -261,17 +264,21 @@ const OnStepOnUntaggedNeighborsIfEnoughTagged = ({
     }
 };
 
-const OnToggleMarker = ({
+const OnToggleMarkerOrLighten = ({
     action: {x, y},
     dispatch,
     getState,
 }) => {
     const grid = getState().game.grid;
+    let cell = grid[y][x];
     if (IsUncovered({grid, x, y})) {
-        return;
+        cell &= ~GRID_CELL_DARKENED;
+    } else {
+        cell ^= GRID_CELL_TAGGED;
     }
-    const cell = grid[y][x] ^ GRID_CELL_TAGGED;
-    dispatch(actions.ReflectGridUpdated({x, y, cell}));
+    if (cell !== grid[y][x]) {
+        dispatch(actions.ReflectGridUpdated({x, y, cell}));
+    }
 };
 
 const OnUsePowerTool = ({
@@ -296,10 +303,10 @@ const handlers = {
     [actionTypes.Detonate]: OnDetonate,
     [actionTypes.GameLost]: OnGameLost,
     [actionTypes.GameWon]: OnGameWon,
-    [actionTypes.PickUp]: OnPickUp,
+    [actionTypes.PickUpOrDarken]: OnPickUpOrDarken,
     [actionTypes.StepIfNotTagged]: OnStepIfNotTagged,
     [actionTypes.StepOnUntaggedNeighborsIfEnoughTagged]: OnStepOnUntaggedNeighborsIfEnoughTagged,
-    [actionTypes.ToggleMarker]: OnToggleMarker,
+    [actionTypes.ToggleMarkerOrLighten]: OnToggleMarkerOrLighten,
     [actionTypes.UsePowerTool]: OnUsePowerTool,
 };
 

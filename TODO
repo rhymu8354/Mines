@@ -30,8 +30,9 @@ Rhymines:
     ☐ Get Gud at CSS @created(2020-04-20 10:54)
         [10:50] movAX13h: box-sizing: border-box; for all elements helps with the margin problem
         [10:51] domsson: "box-sizing: border-box" is really nice though, it makes everything work more consistently, or, at least, intuitively.
-    ✔ Fix version number not showing up in production @created(2020-04-20 11:23) @done(2020-04-22 23:40)
+    ☐ Fix version number not showing up in production @created(2020-04-20 11:23)
         I looked into this and it appears Vercel (now.sh) ignores the `.env` file when making the deployment.  I searched around a bit but could not find any convenient way to reuse the `version` number from `package.json` automatically in the production build.
+        -12:51] HiDeo: Rhymu I use Secrets for this and this can be automated at predeploy time https://vercel.com/docs/now-cli#commands/secrets
     ☐ [11:23] Neui: If you zoom out something weird happens (on Firefox): https://i.imgur.com/HID069U.png @created(2020-04-20 11:25)
     ✔ Power points and their collection @created(2020-04-20 15:15) @done(2020-04-22 22:07)
     ✔ Power probe @created(2020-04-20 15:16) @done(2020-04-22 22:07)
@@ -41,3 +42,5 @@ Rhymines:
     ☐ Add "about" link(s) @created(2020-04-20 16:23)
     ✔ Anchor mouse-wheel zoom on mouse position @created(2020-04-22 18:50) @done(2020-04-22 23:21)
     ✔ Step/mark/pickup on pointer up, not down @created(2020-04-22 21:36) @done(2020-04-22 22:47)
+    ✔ [5:43] nDoorn: Might to be an idea to make the numbers left/right clickable. Left clicking makes them darker and right clicking them makes them show normally.  That way you can manually mark numbers which are no longer of use for someone :slight_smile: @created(2020-04-23 10:36) @done(2020-04-23 10:51)
+    ☐ Make cell tint level configurable @created(2020-04-23 10:51)
