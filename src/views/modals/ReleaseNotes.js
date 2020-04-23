@@ -9,6 +9,25 @@ import "./ReleaseNotes.css";
 
 const content = [
     {
+        version: "0.11.0 - 2020-04-21",
+        notes: <ul>
+            <li>Fixed bugs in mouse up/down in mini-map.</li>
+            <li>
+                Improved performance in mine reveal on game loss
+                for large grids.
+            </li>
+            <li>
+                The power ability buttons are now disabled when
+                the game is over.
+            </li>
+            <li>
+                When zooming in/out with the mouse wheel over the grid,
+                the mouse position governs the zoom point.
+            </li>
+            <li>The <code>RETRY</code> button is now always available.</li>
+        </ul>,
+    },
+    {
         version: "0.10.0 - 2020-04-22",
         notes: <ul>
             <li>
