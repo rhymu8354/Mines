@@ -17,6 +17,7 @@ import {
     DEPTH_SPRITE_CONTAINER,
     DEPTH_TILE,
     DETONATION_SHAKE_COUNT,
+    DETONATION_SOUND_DURATION,
     GRID_CELL_DARKENED,
     GRID_CELL_POWER,
     MAX_TILE_SCALING,
@@ -343,7 +344,6 @@ const OnDetonate = ({
         && (stage.shakeCount === 0)
         && (stage.detonationSound == null)
     ) {
-        console.log("starting sound");
         stage.detonationSound = stage.scene.sound.addAudioSprite(
             "boom", {
                 volume: getState().app.soundLevel,
@@ -673,8 +673,7 @@ const OnShowStage = ({
             }
         }
         if (stage.detonationSoundStart != null) {
-            if (time - stage.detonationSoundStart > 2000) {
-                console.log("stopping sound");
+            if (time - stage.detonationSoundStart > DETONATION_SOUND_DURATION) {
                 stage.detonationSound.destroy();
                 stage.detonationSound = null;
                 stage.detonationSoundStart = null;

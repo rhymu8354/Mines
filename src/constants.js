@@ -9,6 +9,7 @@ export const DEPTH_SPRITE_CONTAINER = 0;
 export const DEPTH_MINI_MAP = 1;
 
 export const DETONATION_SHAKE_COUNT = 50;
+export const DETONATION_SOUND_DURATION = 1100;
 export const SHAKE_MAX_DISTANCE = 10;
 
 export const MAX_TILE_SCALING = 10;

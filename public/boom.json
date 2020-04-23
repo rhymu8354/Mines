@@ -5,7 +5,7 @@
     "spritemap": {
         "0": {
             "start": 0.0,
-            "end": 0.99,
+            "end": 1.1,
             "loop": false
         }
     }
