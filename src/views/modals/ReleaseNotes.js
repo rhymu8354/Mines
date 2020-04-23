@@ -9,6 +9,12 @@ import "./ReleaseNotes.css";
 
 const content = [
     {
+        version: "0.15.0 - 2020-04-23",
+        notes: <ul>
+            <li>Fixed management of app version when building.</li>
+        </ul>,
+    },
+    {
         version: "0.14.0 - 2020-04-23",
         notes: <ul>
             <li>
