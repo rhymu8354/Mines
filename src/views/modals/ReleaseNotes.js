@@ -105,10 +105,10 @@ const ReleaseNotes = ({
             <hr />
         </div>
         <div className="shrinking-container">
-            {content.map(section => <>
+            {content.map(section => <React.Fragment key={section.version}>
                 <h3>{section.version}</h3>
                 {section.notes}
-            </>)}
+            </React.Fragment>)}
         </div>
         <div className="horizontally-centered-row">
             <button
