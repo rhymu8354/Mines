@@ -2,7 +2,11 @@ import { actionTypes } from "../actions";
 
 import {
     ACTIVITY_SELECT_LEVEL,
+    DEFAULT_SOUND_LEVEL,
     DEFAULT_TINTING,
+    LOCAL_STORAGE_SHAKE_ENABLED,
+    LOCAL_STORAGE_SOUND_ENABLED,
+    LOCAL_STORAGE_SOUND_LEVEL,
     LOCAL_STORAGE_TINTING,
 } from "../constants";
 
@@ -23,12 +27,21 @@ const wittyQuotes = [
     "Today we must all be aware that protocol takes precedence over procedure.",
 ];
 
-const GetInitialTinting = () => {
-    const tinting = parseFloat(localStorage.getItem(LOCAL_STORAGE_TINTING));
+const GetInitialLevel = (settingKey, defaultSetting) => {
+    const setting = parseFloat(localStorage.getItem(settingKey));
     return (
-        isNaN(tinting)
-        ? DEFAULT_TINTING
-        : tinting
+        isNaN(setting)
+        ? defaultSetting
+        : setting
+    );
+};
+
+const GetInitialEnable = (settingKey, defaultSetting) => {
+    const setting = localStorage.getItem(settingKey);
+    return (
+        (setting == null)
+        ? defaultSetting
+        : (setting === "true")
     );
 };
 
@@ -37,7 +50,10 @@ const initialState = {
     width: 1,
     height: 1,
     minScaling: 2,
-    tinting: GetInitialTinting(),
+    shakeEnabled: GetInitialEnable(LOCAL_STORAGE_SHAKE_ENABLED, true),
+    soundEnabled: GetInitialEnable(LOCAL_STORAGE_SOUND_ENABLED, true),
+    soundLevel: GetInitialLevel(LOCAL_STORAGE_SOUND_LEVEL, DEFAULT_SOUND_LEVEL),
+    tinting: GetInitialLevel(LOCAL_STORAGE_TINTING, DEFAULT_TINTING),
     wittyQuote: "",
 };
 
@@ -65,6 +81,24 @@ export default function (state = initialState, action) {
             return {
                 ...state,
                 minScaling: action.minScaling,
+            };
+        case actionTypes.SetShakeEnabled:
+            localStorage.setItem(LOCAL_STORAGE_SHAKE_ENABLED, action.shakeEnabled ? "true" : "false");
+            return {
+                ...state,
+                shakeEnabled: action.shakeEnabled,
+            };
+        case actionTypes.SetSoundEnabled:
+            localStorage.setItem(LOCAL_STORAGE_SOUND_ENABLED, action.soundEnabled ? "true" : "false");
+            return {
+                ...state,
+                soundEnabled: action.soundEnabled,
+            };
+        case actionTypes.SetSoundLevel:
+            localStorage.setItem(LOCAL_STORAGE_SOUND_LEVEL, action.soundLevel.toString());
+            return {
+                ...state,
+                soundLevel: action.soundLevel,
             };
         case actionTypes.SetTinting:
             localStorage.setItem(LOCAL_STORAGE_TINTING, action.tinting.toString());

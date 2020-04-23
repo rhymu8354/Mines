@@ -25,11 +25,17 @@ const Play = ({
     onRetry,
     onSelectPowerTool,
     onSetMinScaling,
+    onSetShakeEnabled,
+    onSetSoundEnabled,
+    onSetSoundLevel,
     onSetTinting,
     onShowStage,
     power,
     powerTool,
     score,
+    shakeEnabled,
+    soundEnabled,
+    soundLevel,
     tinting,
 }) => {
     const stageRef = useRef(null);
@@ -167,19 +173,53 @@ const Play = ({
                     onChange={onChangeField(onSetTinting)}
                 />
             </div>
-            <p>
-                You can also use the mouse wheel to zoom in/out.
-            </p>
-            <p>
-                When zoomed in, click and drag in the lower-right mini-map,
-                or use the WASD (or arrow) keys, to scroll the viewport
-                around the grid.
-            </p>
-            <p>
-                Left-clicking an uncovered cell adds a tint to it, while
-                right-clicking removes tinting.  You can control the
-                tinting with the slider control above.
-            </p>
+            <div className="Play-controls-checkbox">
+                <div>Enable Sound:</div>
+                <input
+                    type="checkbox"
+                    checked={soundEnabled}
+                    onChange={(e) => onSetSoundEnabled(e.target.checked)}
+                />
+            </div>
+            {(
+                soundEnabled
+                ? <div className="Play-controls-slider">
+                    <div>Volume:</div>
+                    <input
+                        type="range"
+                        className="Play-controls-slider-input"
+                        min={0}
+                        max={1}
+                        step={0.05}
+                        value={soundLevel}
+                        onChange={onChangeField(onSetSoundLevel)}
+                    />
+                </div>
+                : null
+            )}
+            <div className="Play-controls-checkbox">
+                <div>Enable Shake:</div>
+                <input
+                    type="checkbox"
+                    checked={shakeEnabled}
+                    onChange={(e) => onSetShakeEnabled(e.target.checked)}
+                />
+            </div>
+            <div className="Play-controls-instructions">
+                <p>
+                    You can also use the mouse wheel to zoom in/out.
+                </p>
+                <p>
+                    When zoomed in, click and drag in the lower-right mini-map,
+                    or use the WASD (or arrow) keys, to scroll the viewport
+                    around the grid.
+                </p>
+                <p>
+                    Left-clicking an uncovered cell adds a tint to it, while
+                    right-clicking removes tinting.  You can control the
+                    tinting with the slider control above.
+                </p>
+            </div>
         </div>
     </div>;
 }
@@ -192,6 +232,9 @@ const mapStateToProps = (state, ownProps) => ({
     power: state.game.powerCollected,
     powerTool: state.game.powerTool,
     score: state.game.score,
+    shakeEnabled: state.app.shakeEnabled,
+    soundEnabled: state.app.soundEnabled,
+    soundLevel: state.app.soundLevel,
     tinting: state.app.tinting,
 });
 
@@ -202,6 +245,9 @@ const mapDispatchToProps = (dispatch, ownProps) => ({
     onRetry: () => dispatch(actions.Play({})),
     onSelectPowerTool: (powerTool) => dispatch(actions.SelectPowerTool({powerTool})),
     onSetMinScaling: (minScaling) => dispatch(actions.SetMinScaling({minScaling})),
+    onSetShakeEnabled: (shakeEnabled) => dispatch(actions.SetShakeEnabled({shakeEnabled})),
+    onSetSoundEnabled: (soundEnabled) => dispatch(actions.SetSoundEnabled({soundEnabled})),
+    onSetSoundLevel: (soundLevel) => dispatch(actions.SetSoundLevel({soundLevel})),
     onSetTinting: (tinting) => dispatch(actions.SetTinting({tinting})),
     onShowStage: () => dispatch(actions.ShowStage()),
 });

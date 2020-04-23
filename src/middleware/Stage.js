@@ -335,9 +335,27 @@ const UpdateTilePositionsAndScale = ({
 };
 
 const OnDetonate = ({
+    getState,
     stage,
 }) => {
-    stage.shakeCount = DETONATION_SHAKE_COUNT;
+    if (
+        getState().app.soundEnabled
+        && (stage.shakeCount === 0)
+        && (stage.detonationSound == null)
+    ) {
+        console.log("starting sound");
+        stage.detonationSound = stage.scene.sound.addAudioSprite(
+            "boom", {
+                volume: getState().app.soundLevel,
+                rate: 1.0
+            }
+        );
+        stage.detonationSound.play("0");
+        stage.detonationSoundStart = stage.lastTimeRaw;
+    }
+    if (getState().app.shakeEnabled) {
+        stage.shakeCount = DETONATION_SHAKE_COUNT;
+    }
 };
 
 const OnHideStage = ({
@@ -604,6 +622,7 @@ const OnShowStage = ({
                 frameHeight: TILE_SIZE,
             }
         );
+        stage.scene.load.audioSprite("boom", "boom.json");
     };
     const phaserCreate = function() {
         const grid = getState().game.grid;
@@ -641,6 +660,7 @@ const OnShowStage = ({
         stage.activeButton = null;
     };
     const phaserUpdate = function(time) {
+        stage.lastTimeRaw = time;
         if (getState().game.active) {
             if (stage.baseTime == null) {
                 stage.baseTime = time;
@@ -650,6 +670,14 @@ const OnShowStage = ({
             stage.time = Math.floor((time - stage.baseTime) / 1000);
             if (stage.lastTime !== stage.time) {
                 dispatch(actions.ReflectScore({score: stage.time}));
+            }
+        }
+        if (stage.detonationSoundStart != null) {
+            if (time - stage.detonationSoundStart > 2000) {
+                console.log("stopping sound");
+                stage.detonationSound.destroy();
+                stage.detonationSound = null;
+                stage.detonationSoundStart = null;
             }
         }
         if (stage.shakeCount > 0) {
@@ -703,7 +731,11 @@ export default function({ getState, dispatch }) {
         baseTime: null,
         activeButton: null,
         debug: null,
+        detonationSound: null,
+        detonationSoundStart: null,
         freeSprites: [],
+        lastTime: 0,
+        lastTimeRaw: 0,
         game: null,
         miniMapRatio: 1,
         offsetX: 0,

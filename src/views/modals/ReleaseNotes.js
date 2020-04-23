@@ -9,6 +9,12 @@ import "./ReleaseNotes.css";
 
 const content = [
     {
+        version: "0.13.0 - 2020-04-23",
+        notes: <ul>
+            <li>Added grid shake and sound effect on detonations.</li>
+        </ul>,
+    },
+    {
         version: "0.12.0 - 2020-04-23",
         notes: <ul>
             <li>Added optional tinting of uncovered cells.</li>

@@ -82,3 +82,17 @@
 .Play-controls-slider-input {
     width: 50px;
 }
+
+.Play-controls-checkbox {
+    display: flex;
+    align-items: baseline;
+    margin-top: 5px;
+}
+
+.Play-controls-checkbox > *:not(:first-child) {
+    margin-left: 10px;
+}
+
+.Play-controls-instructions {
+    margin-top: 10px;
+}
