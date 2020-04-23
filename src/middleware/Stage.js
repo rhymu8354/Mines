@@ -257,12 +257,14 @@ const DragViewportInMiniMap = ({getState, stage, pointer}) => {
         (
             pointer.x - (viewportWidthInPixels - MINI_MAP_SIZE - MINI_MAP_MARGIN)
         ) / stage.miniMapRatio / tileScaledSize
-    ) - viewportWidthInTiles / 2;
+        - viewportWidthInTiles / 2
+    );
     const offsetY = Math.floor(
         (
             pointer.y - (viewportHeightInPixels - MINI_MAP_SIZE - MINI_MAP_MARGIN)
         ) / stage.miniMapRatio / tileScaledSize
-    ) - viewportHeightInTiles / 2;
+        - viewportHeightInTiles / 2
+    );
     UpdateTilePositionsAndScale({
         getState,
         stage,
