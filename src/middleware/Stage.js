@@ -506,7 +506,10 @@ const OnShowStage = ({
         stage.draggingViewportInMiniMap = false;
         stage.activeButton = null;
     };
-    const onMouseWheel = (direction) => {
+    const onMouseWheel = (direction, x, y) => {
+        const oldTileScaledSize = TILE_SIZE * stage.tileScaling;
+        const anchorX = Math.floor(x / oldTileScaledSize) + stage.offsetX;
+        const anchorY = Math.floor(y / oldTileScaledSize) + stage.offsetY;
         let minScaling = getState().app.minScaling;
         if (direction === MOUSE_WHEEL_UP) {
             ++minScaling;
@@ -515,6 +518,13 @@ const OnShowStage = ({
         }
         minScaling = Clamp(minScaling, 1, MAX_TILE_SCALING);
         dispatch(actions.SetMinScaling({minScaling}));
+        const newTileScaledSize = TILE_SIZE * stage.tileScaling;
+        UpdateTilePositionsAndScale({
+            getState,
+            stage,
+            offsetX: anchorX - Math.floor(x / newTileScaledSize),
+            offsetY: anchorY - Math.floor(y / newTileScaledSize),
+        });
     };
     const phaserInit = function() {
         stage.scene = this;
@@ -552,7 +562,11 @@ const OnShowStage = ({
         stage.scene.input.on("pointerup", onPointerUp);
         stage.scene.input.on("pointerupoutside", onPointerUpOutside);
         document.getElementById("stage").addEventListener("wheel", (event) => {
-            onMouseWheel((event.deltaY < 0) ? MOUSE_WHEEL_UP : MOUSE_WHEEL_DOWN);
+            onMouseWheel(
+                (event.deltaY < 0) ? MOUSE_WHEEL_UP : MOUSE_WHEEL_DOWN,
+                event.offsetX,
+                event.offsetY
+            );
         });
         stage.scene.input.topOnly = false;
         stage.scene.input.setDefaultCursor("pointer");
