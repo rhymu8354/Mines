@@ -80,7 +80,7 @@ const Play = ({
                         <button
                             type="button"
                             className={(
-                                (powerTool == POWER_TOOL_PROBE)
+                                (powerTool === POWER_TOOL_PROBE)
                                 ? "power-tool-selected"
                                 : null
                             )}
@@ -92,7 +92,7 @@ const Play = ({
                         <button
                             type="button"
                             className={(
-                                (powerTool == POWER_TOOL_DETONATOR)
+                                (powerTool === POWER_TOOL_DETONATOR)
                                 ? "power-tool-selected"
                                 : null
                             )}

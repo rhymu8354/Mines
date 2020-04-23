@@ -385,7 +385,7 @@ const OnShowStage = ({
     stage,
 }) => {
     const onKeyDown = (e) => {
-        if (e.keyCode == Phaser.Input.Keyboard.KeyCodes.ESC) {
+        if (e.keyCode === Phaser.Input.Keyboard.KeyCodes.ESC) {
             dispatch(actions.SelectPowerTool({powerTool: null}));
             return;
         }

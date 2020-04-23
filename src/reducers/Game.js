@@ -170,7 +170,7 @@ export default function (state = initialState, action) {
             return {
                 ...state,
                 powerTool: (
-                    (state.powerTool == action.powerTool)
+                    (state.powerTool === action.powerTool)
                     ? null
                     : action.powerTool
                 ),
