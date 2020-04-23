@@ -84,7 +84,10 @@ const Play = ({
                                 ? "power-tool-selected"
                                 : null
                             )}
-                            disabled={power < POWER_COSTS[POWER_TOOL_PROBE]}
+                            disabled={
+                                !gameActive
+                                || (power < POWER_COSTS[POWER_TOOL_PROBE])
+                            }
                             onClick={() => onSelectPowerTool(POWER_TOOL_PROBE)}
                         >
                             Probe&nbsp;(2)
@@ -96,7 +99,10 @@ const Play = ({
                                 ? "power-tool-selected"
                                 : null
                             )}
-                            disabled={power < POWER_COSTS[POWER_TOOL_DETONATOR]}
+                            disabled={
+                                !gameActive
+                                || (power < POWER_COSTS[POWER_TOOL_DETONATOR])
+                            }
                             onClick={() => onSelectPowerTool(POWER_TOOL_DETONATOR)}
                         >
                             Detonator&nbsp;(4)
