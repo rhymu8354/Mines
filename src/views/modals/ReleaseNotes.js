@@ -9,7 +9,13 @@ import "./ReleaseNotes.css";
 
 const content = [
     {
-        version: "0.11.0 - 2020-04-21",
+        version: "0.11.1 - 2020-04-23",
+        notes: <ul>
+            <li>Corrected the date of the 0.11.0 release.  Oops!</li>
+        </ul>,
+    },
+    {
+        version: "0.11.0 - 2020-04-22",
         notes: <ul>
             <li>Fixed bugs in mouse up/down in mini-map.</li>
             <li>

@@ -1,4 +1,4 @@
-export const APP_VERSION = "0.11.0";
+export const APP_VERSION = "0.11.1";
 
 export const TILE_SIZE = 16;
 export const SCROLL_UNITS_PER_PAGE_X = 4;
