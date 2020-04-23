@@ -27,6 +27,7 @@ const DefineAction = (type) => {
     "SelectWittyQuote",
     "SetActivity",
     "SetMinScaling",
+    "SetRedBoxEnabled",
     "SetShakeEnabled",
     "SetSoundEnabled",
     "SetSoundLevel",

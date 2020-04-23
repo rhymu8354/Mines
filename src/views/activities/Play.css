@@ -24,6 +24,18 @@
 .Play-controls {
     flex: 0 0 250px;
     margin-left: 10px;
+    display: flex;
+    display: flex;
+    flex-direction: column;
+}
+
+.Play-controls > * {
+    flex: 0 0 auto;
+}
+
+.Play-controls-scrolled {
+    flex: 1 0 1px;
+    overflow-y: auto;
 }
 
 .Player-controls-score {

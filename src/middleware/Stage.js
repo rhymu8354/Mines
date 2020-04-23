@@ -15,7 +15,6 @@ import {
 import {
     DEPTH_MINI_MAP,
     DEPTH_SPRITE_CONTAINER,
-    DEPTH_TILE,
     DETONATION_SHAKE_COUNT,
     DETONATION_SOUND_DURATION,
     GRID_CELL_DARKENED,
@@ -175,6 +174,16 @@ const DropTiles = ({
     });
 };
 
+const SetRedBoxVisibility = ({
+    getState,
+    stage,
+}) => {
+    stage.redBox.setVisible(
+        getState().app.redBoxEnabled
+        && (stage.redBoxX != null)
+    );
+};
+
 const SetSpriteTexture = ({
     getState,
     stage,
@@ -193,6 +202,18 @@ const SetSpriteTexture = ({
         sprite.setTint(0xffffff);
     } else {
         sprite.setTint(stage.tinting);
+    }
+};
+
+const UpdateRedBoxPosition = ({
+    stage,
+}) => {
+    if (stage.redBoxX != null) {
+        const tileScaledSize = TILE_SIZE * stage.tileScaling;
+        stage.redBox.setX((stage.redBoxX - stage.offsetX) * tileScaledSize);
+        stage.redBox.setY((stage.redBoxY - stage.offsetY) * tileScaledSize);
+        stage.spriteContainer.remove(stage.redBox);
+        stage.spriteContainer.add(stage.redBox);
     }
 };
 
@@ -253,6 +274,10 @@ const UpdateTilePositionsAndScale = ({
         || (stage.baseTime == null)
     ) {
         stage.tileScaling = newTileScaling;
+        if (stage.redBoxX != null) {
+            stage.redBoxX += (offsetX - stage.offsetX);
+            stage.redBoxY += (offsetY - stage.offsetY);
+        }
         stage.offsetX = offsetX;
         stage.offsetY = offsetY;
         WithAllGridCells(grid, (x, y) => {
@@ -276,7 +301,6 @@ const UpdateTilePositionsAndScale = ({
                     if (stage.freeSprites.length === 0) {
                         sprite = stage.scene.add.sprite(spriteX, spriteY);
                         stage.spriteContainer.add(sprite);
-                        sprite.setDepth(DEPTH_TILE);
                         sprite.setOrigin(0, 0);
                         sprite.setScale(stage.tileScaling);
                     } else {
@@ -333,6 +357,8 @@ const UpdateTilePositionsAndScale = ({
         miniMapViewport.setDepth(1);
         stage.miniMap.add(miniMapViewport);
     }
+    stage.redBox.setScale(newTileScaling);
+    UpdateRedBoxPosition({stage});
 };
 
 const OnDetonate = ({
@@ -377,6 +403,10 @@ const OnHideStage = ({
     }
     stage.freeSprites.forEach(sprite => sprite.destroy());
     stage.freeSprites = [];
+    if (stage.redBox) {
+        stage.redBox.destroy();
+        stage.redBox = null;
+    }
     stage.scene = null;
     stage.game.destroy(true);
     stage.game = null;
@@ -447,6 +477,13 @@ const OnSetMinScaling = ({
     UpdateTilePositionsAndScale({getState, stage});
 };
 
+const OnSetRedBoxEnabled = ({
+    getState,
+    stage,
+}) => {
+    SetRedBoxVisibility({getState, stage});
+}
+
 const OnSetTinting = ({
     getState,
     stage,
@@ -504,6 +541,34 @@ const OnShowStage = ({
         if (stage.draggingViewportInMiniMap) {
             DragViewportInMiniMap({getState, stage, pointer});
         }
+        const viewportWidthInPixels = getState().app.width;
+        const viewportHeightInPixels = getState().app.height;
+        if (
+            (pointer.x >= viewportWidthInPixels - MINI_MAP_SIZE - MINI_MAP_MARGIN)
+            && (pointer.x < viewportWidthInPixels - MINI_MAP_MARGIN)
+            && (pointer.y >= viewportHeightInPixels - MINI_MAP_SIZE - MINI_MAP_MARGIN)
+            && (pointer.y < viewportHeightInPixels - MINI_MAP_MARGIN)
+        ) {
+            stage.redBoxX = null;
+            stage.redBoxY = null;
+        } else {
+            const tileScaledSize = TILE_SIZE * stage.tileScaling;
+            const x = stage.offsetX + Math.floor(pointer.x / tileScaledSize);
+            const y = stage.offsetY + Math.floor(pointer.y / tileScaledSize);
+            const grid = getState().game.grid;
+            if (
+                (x < grid[0].length)
+                && (y < grid.length)
+            ) {
+                stage.redBoxX = x;
+                stage.redBoxY = y;
+                UpdateRedBoxPosition({stage});
+            } else {
+                stage.redBoxX = null;
+                stage.redBoxY = null;
+            }
+        }
+        SetRedBoxVisibility({getState, stage});
     };
     const onPointerDown = (pointer) => {
         if (stage.activeButton != null) {
@@ -590,6 +655,11 @@ const OnShowStage = ({
         stage.draggingViewportInMiniMap = false;
         stage.activeButton = null;
     };
+    const onGameOut = () => {
+        stage.redBoxX = null;
+        stage.redBoxY = null;
+        SetRedBoxVisibility({getState, stage});
+    };
     const onMouseWheel = (direction, x, y) => {
         const oldTileScaledSize = TILE_SIZE * stage.tileScaling;
         const anchorX = Math.floor(x / oldTileScaledSize) + stage.offsetX;
@@ -642,12 +712,23 @@ const OnShowStage = ({
         stage.miniMap.setAlpha(MINI_MAP_OPACITY);
         stage.spriteContainer = stage.scene.add.container();
         stage.spriteContainer.setDepth(DEPTH_SPRITE_CONTAINER);
+        stage.redBox = stage.scene.add.graphics();
+        stage.redBox.lineStyle(2, 0xff0000, 1);
+        stage.redBox.strokeRect(
+            -TILE_SIZE - 1,
+            -TILE_SIZE - 1,
+            TILE_SIZE * 3 + 2,
+            TILE_SIZE * 3 + 2
+        );
+        stage.spriteContainer.add(stage.redBox);
+        SetRedBoxVisibility({getState, stage});
         onPhaserReady();
         stage.scene.input.keyboard.on("keydown", onKeyDown);
         stage.scene.input.on("pointermove", onPointerMove);
         stage.scene.input.on("pointerdown", onPointerDown);
         stage.scene.input.on("pointerup", onPointerUp);
         stage.scene.input.on("pointerupoutside", onPointerUpOutside);
+        stage.scene.input.on("gameout", onGameOut);
         document.getElementById("stage").addEventListener("wheel", (event) => {
             onMouseWheel(
                 (event.deltaY < 0) ? MOUSE_WHEEL_UP : MOUSE_WHEEL_DOWN,
@@ -721,6 +802,7 @@ const handlers = {
     [actionTypes.ReflectStageSize]: OnReflectStageSize,
     [actionTypes.SelectPowerTool]: OnSelectPowerTool,
     [actionTypes.SetMinScaling]: OnSetMinScaling,
+    [actionTypes.SetRedBoxEnabled]: OnSetRedBoxEnabled,
     [actionTypes.SetTinting]: OnSetTinting,
     [actionTypes.ShowStage]: OnShowStage,
 };
@@ -740,6 +822,9 @@ export default function({ getState, dispatch }) {
         offsetX: 0,
         offsetY: 0,
         ready: false,
+        redBox: null,
+        redBoxX: null,
+        redBoxY: null,
         scene: null,
         shakeCount: 0,
         spriteContainer: null,

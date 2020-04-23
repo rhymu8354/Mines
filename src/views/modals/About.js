@@ -15,7 +15,7 @@ const About = ({
             <h2>About Rhymines</h2>
             <hr />
         </div>
-        <div className="shrinking-container">
+        <div>
             <p>
                 Rhymines is a web port of a Minesweeper clone that Rhymu8354
                 originally wrote in C++ and assembly for MS-DOS in 1992.

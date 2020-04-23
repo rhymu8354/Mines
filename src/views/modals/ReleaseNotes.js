@@ -9,6 +9,20 @@ import "./ReleaseNotes.css";
 
 const content = [
     {
+        version: "0.14.0 - 2020-04-23",
+        notes: <ul>
+            <li>
+                Added optional "guide box" centered where the pointer is
+                placed on the grid, to aid in seeing where you're
+                going to click.
+            </li>
+            <li>
+                Put some controls and instructions inside a scroll box
+                on the right so it doesn't cause overflow.
+            </li>
+        </ul>,
+    },
+    {
         version: "0.13.0 - 2020-04-23",
         notes: <ul>
             <li>Added grid shake and sound effect on detonations.</li>
@@ -182,7 +196,7 @@ const ReleaseNotes = ({
             <h2>Release Notes</h2>
             <hr />
         </div>
-        <div className="shrinking-container">
+        <div>
             {content.map(section => <React.Fragment key={section.version}>
                 <h3>{section.version}</h3>
                 {section.notes}

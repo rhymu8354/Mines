@@ -4,6 +4,7 @@ import {
     ACTIVITY_SELECT_LEVEL,
     DEFAULT_SOUND_LEVEL,
     DEFAULT_TINTING,
+    LOCAL_STORAGE_RED_BOX_ENABLED,
     LOCAL_STORAGE_SHAKE_ENABLED,
     LOCAL_STORAGE_SOUND_ENABLED,
     LOCAL_STORAGE_SOUND_LEVEL,
@@ -50,6 +51,7 @@ const initialState = {
     width: 1,
     height: 1,
     minScaling: 2,
+    redBoxEnabled: GetInitialEnable(LOCAL_STORAGE_RED_BOX_ENABLED, false),
     shakeEnabled: GetInitialEnable(LOCAL_STORAGE_SHAKE_ENABLED, true),
     soundEnabled: GetInitialEnable(LOCAL_STORAGE_SOUND_ENABLED, true),
     soundLevel: GetInitialLevel(LOCAL_STORAGE_SOUND_LEVEL, DEFAULT_SOUND_LEVEL),
@@ -81,6 +83,12 @@ export default function (state = initialState, action) {
             return {
                 ...state,
                 minScaling: action.minScaling,
+            };
+        case actionTypes.SetRedBoxEnabled:
+            localStorage.setItem(LOCAL_STORAGE_RED_BOX_ENABLED, action.redBoxEnabled ? "true" : "false");
+            return {
+                ...state,
+                redBoxEnabled: action.redBoxEnabled,
             };
         case actionTypes.SetShakeEnabled:
             localStorage.setItem(LOCAL_STORAGE_SHAKE_ENABLED, action.shakeEnabled ? "true" : "false");

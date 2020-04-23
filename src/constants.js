@@ -1,10 +1,9 @@
-export const APP_VERSION = "0.13.0";
+export const APP_VERSION = "0.14.0";
 
 export const TILE_SIZE = 16;
 export const SCROLL_UNITS_PER_PAGE_X = 4;
 export const SCROLL_UNITS_PER_PAGE_Y = 4;
 
-export const DEPTH_TILE = 0;
 export const DEPTH_SPRITE_CONTAINER = 0;
 export const DEPTH_MINI_MAP = 1;
 
@@ -27,6 +26,7 @@ export const MODAL_RELEASE_NOTES = "MODAL_RELEASE_NOTES";
 export const POWER_TOOL_DETONATOR = "POWER_TOOL_DETONATOR";
 export const POWER_TOOL_PROBE = "POWER_TOOL_PROBE";
 
+export const LOCAL_STORAGE_RED_BOX_ENABLED = "redBoxEnabled";
 export const LOCAL_STORAGE_SHAKE_ENABLED = "shakeEnabled";
 export const LOCAL_STORAGE_SOUND_ENABLED = "soundEnabled";
 export const LOCAL_STORAGE_SOUND_LEVEL = "soundLevel";
