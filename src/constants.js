@@ -1,4 +1,4 @@
-export const APP_VERSION = "0.14.0";
+export { version as APP_VERSION } from "./version.json";
 
 export const TILE_SIZE = 16;
 export const SCROLL_UNITS_PER_PAGE_X = 4;
