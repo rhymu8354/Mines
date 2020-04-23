@@ -352,6 +352,21 @@ const OnReflectGridUpdated = ({
     }
 };
 
+const OnReflectGridUpdatedBatch = ({
+    action: {updates},
+    getState,
+    stage,
+}) => {
+    const grid = getState().game.grid;
+    const gameActive = getState().game.active;
+    updates.forEach(({x, y}) => {
+        const sprite = stage.tiles[y][x];
+        if (sprite != null) {
+            sprite.setTexture("atlas", ComputeCellFrame({gameActive, grid, x, y}));
+        }
+    });
+};
+
 const OnReflectStageSize = ({
     getState,
     stage,
@@ -612,6 +627,7 @@ const handlers = {
     [actionTypes.HideStage]: OnHideStage,
     [actionTypes.Play]: OnPlay,
     [actionTypes.ReflectGridUpdated]: OnReflectGridUpdated,
+    [actionTypes.ReflectGridUpdatedBatch]: OnReflectGridUpdatedBatch,
     [actionTypes.ReflectStageSize]: OnReflectStageSize,
     [actionTypes.SelectPowerTool]: OnSelectPowerTool,
     [actionTypes.SetMinScaling]: OnSetMinScaling,

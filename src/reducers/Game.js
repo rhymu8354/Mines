@@ -111,7 +111,7 @@ export default function (state = initialState, action) {
                 startPower,
             };
         }
-        case actionTypes.ReflectGridUpdated:
+        case actionTypes.ReflectGridUpdated: {
             const originalCell = state.grid[action.y][action.x];
             const grid = [...state.grid];
             grid[action.y] = [...grid[action.y]];
@@ -158,6 +158,61 @@ export default function (state = initialState, action) {
                 grid,
                 numMinesPlayerThinksAreUnaccounted,
             };
+        }
+        case actionTypes.ReflectGridUpdatedBatch: {
+            const grid = [...state.grid];
+            const rowsChanged = new Set();
+            let cellsCleared = state.cellsCleared;
+            let cellsToClear = state.cellsToClear;
+            let numMinesPlayerThinksAreUnaccounted = state.numMinesPlayerThinksAreUnaccounted;
+            action.updates.forEach(({x, y, cell}) => {
+                const originalCell = state.grid[y][x];
+                if (!rowsChanged.has(y)) {
+                    rowsChanged.add(y);
+                    grid[y] = [...grid[y]];
+                }
+                grid[y][x] = cell;
+                if (originalCell !== cell) {
+                    if (
+                        ((cell & GRID_CELL_MINE_PRESENT) === 0)
+                        && ((originalCell & GRID_CELL_UNCOVERED) === 0)
+                        && ((cell & GRID_CELL_UNCOVERED) !== 0)
+                    ) {
+                        ++cellsCleared;
+                        --cellsToClear;
+                    }
+                    if (
+                        ((originalCell & GRID_CELL_TAGGED) === 0)
+                        && ((cell & GRID_CELL_TAGGED) !== 0)
+                    ) {
+                        --numMinesPlayerThinksAreUnaccounted;
+                    } else if (
+                        ((originalCell & GRID_CELL_TAGGED) !== 0)
+                        && ((cell & GRID_CELL_TAGGED) === 0)
+                    ) {
+                        ++numMinesPlayerThinksAreUnaccounted;
+                    } else if (
+                        ((cell & GRID_CELL_MINE_PRESENT) !== 0)
+                        && ((originalCell & GRID_CELL_TAGGED) === 0)
+                        && ((originalCell & GRID_CELL_UNCOVERED) === 0)
+                        && ((cell & GRID_CELL_UNCOVERED) !== 0)
+                    ) {
+                        --numMinesPlayerThinksAreUnaccounted;
+                    }
+                }
+            });
+            return {
+                ...state,
+                active: (
+                    (cellsToClear > 0)
+                    && !state.lost
+                ),
+                cellsCleared,
+                cellsToClear,
+                grid,
+                numMinesPlayerThinksAreUnaccounted,
+            };
+        }
         case actionTypes.ReflectScore:
             return {
                 ...state,

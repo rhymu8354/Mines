@@ -20,6 +20,7 @@ const DefineAction = (type) => {
     "PushModal",
     "Quit",
     "ReflectGridUpdated",
+    "ReflectGridUpdatedBatch",
     "ReflectScore",
     "ReflectStageSize",
     "SelectPowerTool",

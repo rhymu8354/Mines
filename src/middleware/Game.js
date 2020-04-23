@@ -150,6 +150,8 @@ const OnGameLost = ({
     getState,
 }) => {
     const grid = getState().game.grid;
+    const updates = [
+    ];
     WithAllGridCells(grid, (x, y) => {
         let cell = grid[y][x];
         if (IsMinePresent({grid, x, y})) {
@@ -160,12 +162,15 @@ const OnGameLost = ({
             // Refresh the tile for any mis-tagged cell.
             // When the game is over, the "mis-tagged" tile replaces
             // the "tag" tile, even though the cell didn't change.
-            dispatch(actions.ReflectGridUpdated({x, y, cell}));
+            updates.push({x, y, cell});
         }
         if (cell !== grid[y][x]) {
-            dispatch(actions.ReflectGridUpdated({x, y, cell}));
+            updates.push({x, y, cell});
         }
     });
+    if (updates.length > 0) {
+        dispatch(actions.ReflectGridUpdatedBatch({updates}));
+    }
 };
 
 const OnGameWon = ({
