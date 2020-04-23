@@ -134,16 +134,12 @@ const Play = ({
                 >
                     Quit
                 </button>
-                {(
-                    gameActive
-                    ? null
-                    : <button
-                        type="button"
-                        onClick={() => onRetry()}
-                    >
-                        Retry
-                    </button>
-                )}
+                <button
+                    type="button"
+                    onClick={() => onRetry()}
+                >
+                    Retry
+                </button>
             </div>
             <div className="Play-controls-min-scaling">
                 <div>Zoom:</div>
