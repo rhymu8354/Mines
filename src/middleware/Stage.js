@@ -77,10 +77,14 @@ const OnHideStage = ({
     }
     if (stage.tiles) {
         stage.tiles.forEach(row => row.forEach(sprite => {
-            sprite.destroy();
+            if (sprite != null) {
+                sprite.destroy();
+            }
         }));
         stage.tiles = [];
     }
+    stage.freeSprites.forEach(sprite => sprite.destroy());
+    stage.freeSprites = [];
     stage.scene = null;
     stage.game.destroy(true);
     stage.game = null;
@@ -98,7 +102,7 @@ const tilesForNeighbors = [
     TILE_UNCOVERED_EIGHT_NEIGHBORS,
 ];
 
-const ComputeCellTexture = ({gameActive, grid, x, y}) => {
+const ComputeCellFrame = ({gameActive, grid, x, y}) => {
     const cell = grid[y][x];
     if ((cell & GRID_CELL_MINE_EXPLODED) === 0) {
         if (IsUncovered({grid, x, y})) {
@@ -143,6 +147,7 @@ const UpdateTilePositionsAndScale = ({
     const viewportWidthInPixels = getState().app.width;
     const viewportHeightInPixels = getState().app.height;
     const grid = getState().game.grid;
+    const gameActive = getState().game.active;
     const heightInTiles = grid.length;
     const widthInTiles = grid[0].length;
     stage.game.scale.setGameSize(viewportWidthInPixels, viewportHeightInPixels);
@@ -181,15 +186,48 @@ const UpdateTilePositionsAndScale = ({
         (newTileScaling !== stage.tileScaling)
         || (offsetX !== stage.offsetX)
         || (offsetY !== stage.offsetY)
+        || (stage.baseTime == null)
     ) {
         stage.tileScaling = newTileScaling;
         stage.offsetX = offsetX;
         stage.offsetY = offsetY;
         WithAllGridCells(grid, (x, y) => {
-            const sprite = stage.tiles[y][x];
-            sprite.setX((x - offsetX) * tileScaledSize);
-            sprite.setY((y - offsetY) * tileScaledSize);
-            sprite.setScale(newTileScaling);
+            const spriteX = (x - offsetX) * tileScaledSize;
+            const spriteY = (y - offsetY) * tileScaledSize;
+            if (
+                (spriteX + tileScaledSize < 0)
+                || (spriteX >= viewportWidthInPixels)
+                || (spriteY + tileScaledSize < 0)
+                || (spriteY >= viewportHeightInPixels)
+            ) {
+                const sprite = stage.tiles[y][x];
+                if (sprite != null) {
+                    sprite.setVisible(false);
+                    stage.freeSprites.push(sprite);
+                    stage.tiles[y][x] = null;
+                }
+            } else {
+                let sprite = stage.tiles[y][x];
+                if (sprite == null) {
+                    if (stage.freeSprites.length === 0) {
+                        sprite = stage.scene.add.sprite(spriteX, spriteY);
+                        sprite.setDepth(DEPTH_TILE);
+                        sprite.setOrigin(0, 0);
+                        sprite.setScale(stage.tileScaling);
+                    } else {
+                        sprite = stage.freeSprites.pop();
+                    }
+                    sprite.setTexture(
+                        "atlas",
+                        ComputeCellFrame({gameActive, grid, x, y})
+                    );
+                    stage.tiles[y][x] = sprite;
+                }
+                sprite.setX(spriteX);
+                sprite.setY(spriteY);
+                sprite.setScale(newTileScaling);
+                sprite.setVisible(true);
+            }
         });
     }
     const gridWidthInPixels = widthInTiles * tileScaledSize;
@@ -277,11 +315,6 @@ const OnPlay = ({
     getState,
     stage,
 }) => {
-    const grid = getState().game.grid;
-    WithAllGridCells(grid, (x, y) => {
-        const sprite = stage.tiles[y][x];
-        sprite.setTexture("atlas", TILE_COVERED);
-    });
     stage.baseTime = null;
     UpdateTilePositionsAndScale({
         getState,
@@ -298,7 +331,10 @@ const OnReflectGridUpdated = ({
 }) => {
     const grid = getState().game.grid;
     const gameActive = getState().game.active;
-    stage.tiles[y][x].setTexture("atlas", ComputeCellTexture({gameActive, grid, x, y}));
+    const sprite = stage.tiles[y][x];
+    if (sprite != null) {
+        sprite.setTexture("atlas", ComputeCellFrame({gameActive, grid, x, y}));
+    }
 };
 
 const OnReflectStageSize = ({
@@ -431,18 +467,10 @@ const OnShowStage = ({
         stage.baseTime = null;
         stage.time = null;
         stage.draggingViewportInMiniMap = false;
-        const tileScaledSize = TILE_SIZE * stage.tileScaling;
         for (let y = 0; y < height; ++y) {
             stage.tiles[y] = [];
             for (let x = 0; x < width; ++x) {
-                const sprite = stage.scene.add.sprite(
-                    x * tileScaledSize,
-                    y * tileScaledSize
-                );
-                sprite.setDepth(DEPTH_TILE);
-                sprite.setOrigin(0, 0);
-                sprite.setScale(stage.tileScaling);
-                stage.tiles[y][x] = sprite;
+                stage.tiles[y][x] = null;
             }
         }
         stage.miniMap = stage.scene.add.container();
@@ -508,6 +536,7 @@ export default function({ getState, dispatch }) {
     const stage = {
         baseTime: null,
         debug: null,
+        freeSprites: [],
         game: null,
         miniMapRatio: 1,
         offsetX: 0,
