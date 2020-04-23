@@ -1,11 +1,18 @@
 import { actionTypes } from "../actions";
 
 import {
+    GRID_CELL_BONUS,
     GRID_CELL_MINE_PRESENT,
+    GRID_CELL_POWER,
     GRID_CELL_UNCOVERED,
+    GRID_CELL_TAGGED,
 } from "../constants";
 
-const MakeGrid = (width, height, numMines) => {
+import {
+    FirstNonNull,
+} from "../Utilities";
+
+const MakeGrid = (width, height, numMines, numPower, numBonus) => {
     // Set up empty game grid.
     let grid = [];
     for (let y = 0; y < height; ++y) {
@@ -26,6 +33,28 @@ const MakeGrid = (width, height, numMines) => {
         }
     }
 
+    // Place power points.
+    let powerLeft = numPower;
+    while (powerLeft > 0) {
+        let x = Math.floor(Math.random() * width);
+        let y = Math.floor(Math.random() * height);
+        if (grid[y][x] === 0) {
+            grid[y][x] = GRID_CELL_POWER;
+            --powerLeft;
+        }
+    }
+
+    // Place bonus games.
+    let bonusLeft = numBonus;
+    while (bonusLeft > 0) {
+        let x = Math.floor(Math.random() * width);
+        let y = Math.floor(Math.random() * height);
+        if (grid[y][x] === 0) {
+            grid[y][x] = GRID_CELL_BONUS;
+            --bonusLeft;
+        }
+    }
+
     // Return the finished game grid.
     return grid;
 };
@@ -36,12 +65,22 @@ const initialState = {
     cellsToClear: 0,
     grid: null,
     lost: false,
+    numBonus: 0,
     numMines: 0,
+    numMinesPlayerThinksAreUnaccounted: 0,
+    numPower: 0,
+    powerCollected: 0,
+    powerTool: null,
     score: 0,
 };
 
 export default function (state = initialState, action) {
     switch (action.type) {
+        case actionTypes.AddPower:
+            return {
+                ...state,
+                powerCollected: state.powerCollected + action.power,
+            };
         case actionTypes.GameLost:
             return {
                 ...state,
@@ -49,18 +88,27 @@ export default function (state = initialState, action) {
                 lost: true,
             };
         case actionTypes.Play: {
-            const numMines = action.numMines || state.numMines;
-            const width = action.width || state.grid[0].length;
-            const height = action.height || state.grid.length;
+            const numMines = FirstNonNull([action.numMines, state.numMines]);
+            const numPower = FirstNonNull([action.numPower, state.numPower]);
+            const numBonus = FirstNonNull([action.numBonus, state.numBonus]);
+            const startPower = FirstNonNull([action.startPower, state.startPower]);
+            const width = FirstNonNull([action.width, (state.grid && (state.grid.length > 0)) ? state.grid[0].length : 0]);
+            const height = FirstNonNull([action.height, state.grid ? state.grid.length : 0]);
             return {
                 ...state,
                 active: true,
                 cellsCleared: 0,
                 cellsToClear: width * height - numMines,
-                grid: MakeGrid(width, height, numMines),
+                grid: MakeGrid(width, height, numMines, numPower, numBonus),
                 lost: false,
+                numBonus,
                 numMines,
+                numMinesPlayerThinksAreUnaccounted: numMines,
+                numPower,
+                powerCollected: startPower,
+                powerTool: null,
                 score: 0,
+                startPower,
             };
         }
         case actionTypes.ReflectGridUpdated:
@@ -70,14 +118,34 @@ export default function (state = initialState, action) {
             grid[action.y][action.x] = action.cell;
             let cellsCleared = state.cellsCleared;
             let cellsToClear = state.cellsToClear;
-            if (
-                (originalCell !== action.cell)
-                && ((action.cell & GRID_CELL_MINE_PRESENT) === 0)
-                && ((originalCell & GRID_CELL_UNCOVERED) === 0)
-                && ((action.cell & GRID_CELL_UNCOVERED) !== 0)
-            ) {
-                ++cellsCleared;
-                --cellsToClear;
+            let numMinesPlayerThinksAreUnaccounted = state.numMinesPlayerThinksAreUnaccounted;
+            if (originalCell !== action.cell) {
+                if (
+                    ((action.cell & GRID_CELL_MINE_PRESENT) === 0)
+                    && ((originalCell & GRID_CELL_UNCOVERED) === 0)
+                    && ((action.cell & GRID_CELL_UNCOVERED) !== 0)
+                ) {
+                    ++cellsCleared;
+                    --cellsToClear;
+                }
+                if (
+                    ((originalCell & GRID_CELL_TAGGED) === 0)
+                    && ((action.cell & GRID_CELL_TAGGED) !== 0)
+                ) {
+                    --numMinesPlayerThinksAreUnaccounted;
+                } else if (
+                    ((originalCell & GRID_CELL_TAGGED) !== 0)
+                    && ((action.cell & GRID_CELL_TAGGED) === 0)
+                ) {
+                    ++numMinesPlayerThinksAreUnaccounted;
+                } else if (
+                    ((action.cell & GRID_CELL_MINE_PRESENT) !== 0)
+                    && ((originalCell & GRID_CELL_TAGGED) === 0)
+                    && ((originalCell & GRID_CELL_UNCOVERED) === 0)
+                    && ((action.cell & GRID_CELL_UNCOVERED) !== 0)
+                ) {
+                    --numMinesPlayerThinksAreUnaccounted;
+                }
             }
             return {
                 ...state,
@@ -88,11 +156,24 @@ export default function (state = initialState, action) {
                 cellsCleared,
                 cellsToClear,
                 grid,
+                numMinesPlayerThinksAreUnaccounted,
             };
         case actionTypes.ReflectScore:
             return {
                 ...state,
                 score: action.score,
+            };
+        case actionTypes.SelectPowerTool:
+            if (!state.active) {
+                return state;
+            }
+            return {
+                ...state,
+                powerTool: (
+                    (state.powerTool == action.powerTool)
+                    ? null
+                    : action.powerTool
+                ),
             };
         default:
             return state;

@@ -9,6 +9,46 @@ import "./ReleaseNotes.css";
 
 const content = [
     {
+        version: "0.10.0 - 2020-04-22",
+        notes: <ul>
+            <li>
+                Added four new difficulty levels, with larger grids and
+                special features!
+                <ul>
+                    <li>
+                        Powerful fragments of elite roBOTic warriors from
+                        a distant LAND are scattered throughout the grid.
+                        Uncovering and clicking on them will give
+                        you <span className="power-text">POWER</span>!
+                        Gather this power for use in a tight spot:
+                    </li>
+                    <ul>
+                        <li>
+                            <span style={{color: "goldenrod"}}>Probe</span>: Scan
+                            a 5x5 area for mines.  (<em>Careful!</em>  Mines are revealed,
+                            but they remain <span style={{color: "red"}}>live</span>; <em>Do not touch!</em>)
+                        </li>
+                        <li>
+                            <span style={{color: "red"}}>Detonator</span>: Blow
+                            up all mines in 5x5 area.  This can result in
+                            chain-reactions, revealing large areas of the grid.
+                            Neat!
+                        </li>
+                    </ul>
+                </ul>
+            </li>
+            <li>
+                Actions are now performed on <em>mouse up</em>,
+                not <em>mouse down</em>.
+            </li>
+            <li>
+                The number of mines remaining in the grid is now displayed
+                during play.  <em>Beware</em>: marking a spot where you think
+                a mine is substracts from this number, even if you're wrong!
+            </li>
+        </ul>,
+    },
+    {
         version: "0.9.0 - 2020-04-21",
         notes: <ul>
             <li>Fixed bug when clicking outside grid.</li>

@@ -9,9 +9,12 @@ const DefineAction = (type) => {
 };
 
 [
+    "AddPower",
+    "Detonate",
     "GameLost",
     "GameWon",
     "HideStage",
+    "PickUp",
     "Play",
     "PopModal",
     "PushModal",
@@ -19,6 +22,8 @@ const DefineAction = (type) => {
     "ReflectGridUpdated",
     "ReflectScore",
     "ReflectStageSize",
+    "SelectPowerTool",
+    "SelectWittyQuote",
     "SetActivity",
     "SetMinScaling",
     "ShowReleaseNotes",
@@ -26,4 +31,5 @@ const DefineAction = (type) => {
     "StepIfNotTagged",
     "StepOnUntaggedNeighborsIfEnoughTagged",
     "ToggleMarker",
+    "UsePowerTool",
 ].forEach(actionType => DefineAction(actionType));

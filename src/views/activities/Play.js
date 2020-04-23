@@ -5,6 +5,9 @@ import { actions } from "../../actions";
 
 import {
     MAX_TILE_SCALING,
+    POWER_COSTS,
+    POWER_TOOL_DETONATOR,
+    POWER_TOOL_PROBE,
 } from "../../constants";
 
 import "./Play.css";
@@ -15,12 +18,16 @@ const Play = ({
     gameActive,
     gameLost,
     minScaling,
+    numMinesPlayerThinksAreUnaccounted,
     onHideStage,
     onQuit,
     onReflectStageSize,
     onRetry,
+    onSelectPowerTool,
     onSetMinScaling,
     onShowStage,
+    power,
+    powerTool,
     score,
 }) => {
     const stageRef = useRef(null);
@@ -60,6 +67,49 @@ const Play = ({
             <p className="Player-controls-score">
                 Score: <span className="score-text">{score}</span>
             </p>
+            <p className="Player-controls-mines-left">
+                Mines Left: <span className="mines-left-text">{numMinesPlayerThinksAreUnaccounted}</span>
+            </p>
+            {(
+                (power > 0)
+                ? <>
+                    <p className="Player-controls-power">
+                        <span className="power-text">Power: {power}</span>
+                    </p>
+                    <div className="Player-controls-power-buttons">
+                        <button
+                            type="button"
+                            className={(
+                                (powerTool == POWER_TOOL_PROBE)
+                                ? "power-tool-selected"
+                                : null
+                            )}
+                            disabled={power < POWER_COSTS[POWER_TOOL_PROBE]}
+                            onClick={() => onSelectPowerTool(POWER_TOOL_PROBE)}
+                        >
+                            Probe&nbsp;(2)
+                        </button>
+                        <button
+                            type="button"
+                            className={(
+                                (powerTool == POWER_TOOL_DETONATOR)
+                                ? "power-tool-selected"
+                                : null
+                            )}
+                            disabled={power < POWER_COSTS[POWER_TOOL_DETONATOR]}
+                            onClick={() => onSelectPowerTool(POWER_TOOL_DETONATOR)}
+                        >
+                            Detonator&nbsp;(4)
+                        </button>
+                    </div>
+                    <p className="Player-controls-power-info">
+                        The power of ancient bots courses through your
+                        veins!  Click a power move button above, then
+                        left-click in the grid to unleash it!
+                    </p>
+                </>
+                : null
+            )}
             {(
                 gameActive
                 ? null
@@ -117,6 +167,9 @@ const mapStateToProps = (state, ownProps) => ({
     gameActive: state.game.active,
     gameLost: state.game.lost,
     minScaling: state.app.minScaling,
+    numMinesPlayerThinksAreUnaccounted: state.game.numMinesPlayerThinksAreUnaccounted,
+    power: state.game.powerCollected,
+    powerTool: state.game.powerTool,
     score: state.game.score,
 });
 
@@ -125,6 +178,7 @@ const mapDispatchToProps = (dispatch, ownProps) => ({
     onReflectStageSize: (width, height) => dispatch(actions.ReflectStageSize({width, height})),
     onQuit: () => dispatch(actions.Quit()),
     onRetry: () => dispatch(actions.Play({})),
+    onSelectPowerTool: (powerTool) => dispatch(actions.SelectPowerTool({powerTool})),
     onSetMinScaling: (minScaling) => dispatch(actions.SetMinScaling({minScaling})),
     onShowStage: () => dispatch(actions.ShowStage()),
 });

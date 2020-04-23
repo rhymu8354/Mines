@@ -3,18 +3,27 @@ import { actionTypes, actions } from "../actions";
 import {
     ComputeNeighborMines,
     ComputeNeighborTags,
+    IsMineExploded,
     IsMinePresent,
     IsTagged,
     IsUncovered,
     WithAllGridCells,
+    WithCellsWithinRange,
     WithNeighborGridCells,
 } from "../Utilities";
 
 import {
+    DETONATION_REVEAL_RANGE,
+    DETONATOR_RANGE,
     GRID_CELL_MINE_EXPLODED,
     GRID_CELL_MINE_PRESENT,
+    GRID_CELL_POWER,
     GRID_CELL_TAGGED,
     GRID_CELL_UNCOVERED,
+    POWER_COSTS,
+    POWER_TOOL_DETONATOR,
+    POWER_TOOL_PROBE,
+    PROBE_RANGE,
 } from "../constants";
 
 const StepOnNeighbors = ({
@@ -51,6 +60,89 @@ const PlaceMineSomewhereExcept = ({
             needMine = false;
         }
     }
+};
+
+const UntagIfTagged = ({
+    dispatch,
+    grid,
+    x,
+    y
+}) => {
+    let cell = grid[y][x];
+    if ((cell & GRID_CELL_TAGGED) !== 0) {
+        cell &= ~GRID_CELL_TAGGED;
+        dispatch(actions.ReflectGridUpdated({x, y, cell}));
+    }
+};
+
+const UseDetonator = ({
+    dispatch,
+    getState,
+    x,
+    y,
+}) => {
+    const grid = getState().game.grid;
+    WithCellsWithinRange({grid, x, y, range: DETONATOR_RANGE, fn: (x, y) => {
+        UntagIfTagged({dispatch, grid, x, y});
+        Detonate({dispatch, grid, x, y});
+    }});
+};
+
+const UseProbe = ({
+    dispatch,
+    getState,
+    x,
+    y,
+}) => {
+    const grid = getState().game.grid;
+    WithCellsWithinRange({grid, x, y, range: PROBE_RANGE, fn: (x, y) => {
+        UntagIfTagged({dispatch, grid, x, y});
+        if (IsMinePresent({grid, x, y})) {
+            let cell = grid[y][x];
+            if ((cell & GRID_CELL_UNCOVERED) === 0) {
+                cell |= GRID_CELL_UNCOVERED;
+                dispatch(actions.ReflectGridUpdated({x, y, cell}));
+            }
+        } else {
+            dispatch(actions.StepIfNotTagged({x, y}));
+        }
+    }});
+};
+
+const Detonate = ({
+    dispatch,
+    grid,
+    x,
+    y,
+}) => {
+    if (IsMinePresent({grid, x, y})) {
+        if (!IsMineExploded({grid, x, y})) {
+            dispatch(actions.Detonate({x, y}));
+        }
+    } else {
+        dispatch(actions.StepIfNotTagged({x, y}));
+    }
+};
+
+const powerToolHandlers = {
+    [POWER_TOOL_DETONATOR]: UseDetonator,
+    [POWER_TOOL_PROBE]: UseProbe,
+};
+
+const OnDetonate = ({
+    action: {x, y},
+    dispatch,
+    getState,
+}) => {
+    const grid = getState().game.grid;
+    let cell = grid[y][x];
+    cell |= GRID_CELL_UNCOVERED;
+    cell |= GRID_CELL_MINE_EXPLODED;
+    dispatch(actions.ReflectGridUpdated({x, y, cell}));
+    WithCellsWithinRange({grid, x, y, range: DETONATION_REVEAL_RANGE, fn: (x, y) => {
+        UntagIfTagged({dispatch, grid, x, y});
+        Detonate({dispatch, grid, x, y});
+    }});
 };
 
 const OnGameLost = ({
@@ -94,6 +186,20 @@ const OnGameWon = ({
     });
 };
 
+const OnPickUp = ({
+    action: {x, y},
+    dispatch,
+    getState,
+}) => {
+    const grid = getState().game.grid;
+    let cell = grid[y][x];
+    if ((grid[y][x] & GRID_CELL_POWER) !== 0) {
+        cell &= ~GRID_CELL_POWER;
+        dispatch(actions.ReflectGridUpdated({x, y, cell}));
+        dispatch(actions.AddPower({power: 1}));
+    }
+};
+
 const OnStepIfNotTagged = ({
     action: {x, y},
     dispatch,
@@ -110,6 +216,7 @@ const OnStepIfNotTagged = ({
     }
     if (
         minePresent
+        && !IsMineExploded({grid, x, y})
         && (getState().game.cellsCleared > 0)
     ) {
         cell = grid[y][x] | GRID_CELL_MINE_EXPLODED;
@@ -149,7 +256,6 @@ const OnStepOnUntaggedNeighborsIfEnoughTagged = ({
     }
 };
 
-
 const OnToggleMarker = ({
     action: {x, y},
     dispatch,
@@ -163,12 +269,33 @@ const OnToggleMarker = ({
     dispatch(actions.ReflectGridUpdated({x, y, cell}));
 };
 
+const OnUsePowerTool = ({
+    action: {x, y},
+    dispatch,
+    getState,
+}) => {
+    const powerTool = getState().game.powerTool;
+    const powerCollected = getState().game.powerCollected;
+    const powerCost = POWER_COSTS[powerTool];
+    if (powerCollected >= powerCost) {
+        const powerToolHandler = powerToolHandlers[powerTool];
+        if (powerToolHandler) {
+            dispatch(actions.AddPower({power: -powerCost}));
+            dispatch(actions.SelectPowerTool({powerTool: null}));
+            powerToolHandler({dispatch, getState, x, y});
+        }
+    }
+};
+
 const handlers = {
+    [actionTypes.Detonate]: OnDetonate,
     [actionTypes.GameLost]: OnGameLost,
     [actionTypes.GameWon]: OnGameWon,
+    [actionTypes.PickUp]: OnPickUp,
     [actionTypes.StepIfNotTagged]: OnStepIfNotTagged,
     [actionTypes.StepOnUntaggedNeighborsIfEnoughTagged]: OnStepOnUntaggedNeighborsIfEnoughTagged,
     [actionTypes.ToggleMarker]: OnToggleMarker,
+    [actionTypes.UsePowerTool]: OnUsePowerTool,
 };
 
 export default function({ getState, dispatch }) {

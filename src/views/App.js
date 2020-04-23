@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useEffect } from "react";
 import { connect } from "react-redux";
 
 import { actions } from "../actions";
@@ -6,6 +6,7 @@ import { actions } from "../actions";
 import {
     ACTIVITY_PLAY,
     ACTIVITY_SELECT_LEVEL,
+    APP_VERSION,
 } from "../constants";
 
 import Modal from "./Modal";
@@ -19,10 +20,19 @@ const activities = {
     [ACTIVITY_SELECT_LEVEL]: SelectLevel,
 };
 
+const useOnceEffect = fn => useEffect(fn, []);
+
 const App = ({
     activity,
+    onSelectWittyQuote,
     onShowReleaseNotes,
+    wittyQuote,
 }) => {
+    useOnceEffect(
+        () => {
+            onSelectWittyQuote();
+        }
+    );
     const Activity = activities[activity];
     return <div
         className="App"
@@ -32,8 +42,8 @@ const App = ({
                 className="App-header"
             >
                 <div>
-                    <h2>Rhymines {process.env.REACT_APP_VERSION}</h2>
-                    <p>- It's like Rhymurang, only more explosive!</p>
+                    <h2>Rhymines {APP_VERSION}</h2>
+                    <p>- {wittyQuote}</p>
                 </div>
                 <div>
                     <button
@@ -56,9 +66,11 @@ const App = ({
 
 const mapStateToProps = (state, ownProps) => ({
     activity: state.app.activity,
+    wittyQuote: state.app.wittyQuote,
 });
 
 const mapDispatchToProps = (dispatch, ownProps) => ({
+    onSelectWittyQuote: () => dispatch(actions.SelectWittyQuote()),
     onShowReleaseNotes: () => dispatch(actions.ShowReleaseNotes()),
 });
 

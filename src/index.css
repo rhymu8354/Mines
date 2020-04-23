@@ -9,6 +9,7 @@ body {
     -moz-osx-font-smoothing: grayscale;
     --default-link-color: #16b8ff;
     --visited-link-color: #cb00da;
+    --power-tool-selected-color: #aa2222;
 }
 
 code {
@@ -45,6 +46,10 @@ button:hover {
     background-color: #00aa00;
 }
 
+button:disabled {
+    background-color: grey;
+}
+
 input {
     border: 2px solid grey;
     background-color: transparent;
@@ -68,10 +73,44 @@ input {
     color: goldenrod;
 }
 
+.mines-left-text {
+    color: red;
+}
+
+.power-text {
+    animation: power 2000ms infinite;
+}
+
+.power-tool-selected {
+    background-color: var(--power-tool-selected-color);
+}
+
+.power-tool-selected:hover {
+    background-color: var(--power-tool-selected-color);
+}
+
 .game-over-text {
     color: red;
 }
 
 .game-won-text {
     color: #00aa00;
+}
+
+@keyframes power {
+    0% {
+        color: goldenrod;
+    }
+    25% {
+        color: red;
+    }
+    50% {
+        color: magenta;
+    }
+    75% {
+        color: red;
+    }
+    100% {
+        color: goldenrod;
+    }
 }

@@ -22,11 +22,41 @@
 }
 
 .Play-controls {
-    flex: 0 0 200px;
+    flex: 0 0 250px;
     margin-left: 10px;
 }
 
+.Player-controls-score {
+    font-size: 150%;
+    margin-bottom: 0;
+}
+
+.Player-controls-mines-left {
+    font-size: 150%;
+    margin-bottom: 0;
+}
+
+.Player-controls-power {
+    font-size: 150%;
+    margin-bottom: 0;
+}
+
+.Player-controls-power-buttons {
+    margin-top: 10px;
+}
+
+.Player-controls-power-buttons > *:not(:first-child) {
+    margin-left: 10px;
+}
+
+.Player-controls-power-info {
+    color: goldenrod;
+    margin-top: 10px;
+    margin-bottom: 0px;
+}
+
 .Play-controls-buttons {
+    margin-top: 10px;
     margin-bottom: 10px;
 }
 
@@ -34,12 +64,10 @@
     margin-left: 10px;
 }
 
-.Player-controls-score {
-    font-size: 150%;
-}
-
 .Player-controls-game-status {
     font-size: 200%;
+    margin-top: 10px;
+    margin-bottom: 10px;
 }
 
 .Play-controls-min-scaling {

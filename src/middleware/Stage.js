@@ -3,6 +3,7 @@ import Phaser from "phaser";
 import { actionTypes, actions } from "../actions";
 
 import {
+    IsMineExploded,
     IsMinePresent,
     IsUncovered,
     IsTagged,
@@ -14,7 +15,7 @@ import {
 import {
     DEPTH_MINI_MAP,
     DEPTH_TILE,
-    GRID_CELL_MINE_EXPLODED,
+    GRID_CELL_POWER,
     MAX_TILE_SCALING,
     MINI_MAP_OPACITY,
     MINI_MAP_SIZE,
@@ -23,6 +24,7 @@ import {
     SCROLL_UNITS_PER_PAGE_Y,
     TILE_COVERED,
     TILE_EXPLODED_MINE,
+    TILE_POWER,
     TILE_SIZE,
     TILE_UNCOVERED_EIGHT_NEIGHBORS,
     TILE_UNCOVERED_FIVE_NEIGHBORS,
@@ -64,6 +66,7 @@ const MOUSE_WHEEL_UP = 0;
 const MOUSE_WHEEL_DOWN = 1;
 
 const OnHideStage = ({
+    getState,
     onPhaserNotReady,
     stage,
 }) => {
@@ -76,11 +79,7 @@ const OnHideStage = ({
         stage.miniMapViewport = null;
     }
     if (stage.tiles) {
-        stage.tiles.forEach(row => row.forEach(sprite => {
-            if (sprite != null) {
-                sprite.destroy();
-            }
-        }));
+        DropTiles({getState, stage});
         stage.tiles = [];
     }
     stage.freeSprites.forEach(sprite => sprite.destroy());
@@ -104,32 +103,47 @@ const tilesForNeighbors = [
 
 const ComputeCellFrame = ({gameActive, grid, x, y}) => {
     const cell = grid[y][x];
-    if ((cell & GRID_CELL_MINE_EXPLODED) === 0) {
-        if (IsUncovered({grid, x, y})) {
-            if (IsMinePresent({grid, x, y})) {
-                return TILE_UNEXPLODED_MINE;
-            } else {
-                return tilesForNeighbors[
-                    ComputeNeighborMines({grid, x, y})
-                ];
-            }
+    if (IsMineExploded({grid, x, y})) {
+        return TILE_EXPLODED_MINE;
+    } else if (IsUncovered({grid, x, y})) {
+        if (IsMinePresent({grid, x, y})) {
+            return TILE_UNEXPLODED_MINE;
+        } else if ((cell & GRID_CELL_POWER) !== 0) {
+            return TILE_POWER;
         } else {
-            if (IsTagged({grid, x, y})) {
-                if (
-                    gameActive
-                    || IsMinePresent({grid, x, y})
-                ) {
-                    return TILE_TAG;
-                } else {
-                    return TILE_TAGGED_BUT_NO_MINE;
-                }
-            } else {
-                return TILE_COVERED;
-            }
+            return tilesForNeighbors[
+                ComputeNeighborMines({grid, x, y})
+            ];
         }
     } else {
-        return TILE_EXPLODED_MINE;
+        if (IsTagged({grid, x, y})) {
+            if (
+                gameActive
+                || IsMinePresent({grid, x, y})
+            ) {
+                return TILE_TAG;
+            } else {
+                return TILE_TAGGED_BUT_NO_MINE;
+            }
+        } else {
+            return TILE_COVERED;
+        }
     }
+};
+
+const DropTiles = ({
+    getState,
+    stage
+}) => {
+    const grid = getState().game.grid;
+    WithAllGridCells(grid, (x, y) => {
+        const sprite = stage.tiles[y][x];
+        if (sprite != null) {
+            sprite.setVisible(false);
+            stage.freeSprites.push(sprite);
+            stage.tiles[y][x] = null;
+        }
+    });
 };
 
 const UpdateTilePositionsAndScale = ({
@@ -316,6 +330,7 @@ const OnPlay = ({
     stage,
 }) => {
     stage.baseTime = null;
+    DropTiles({getState, stage});
     UpdateTilePositionsAndScale({
         getState,
         stage,
@@ -344,6 +359,18 @@ const OnReflectStageSize = ({
     UpdateTilePositionsAndScale({getState, stage});
 };
 
+const OnSelectPowerTool = ({
+    getState,
+    stage,
+}) => {
+    const powerTool = getState().game.powerTool;
+    if (powerTool == null) {
+        stage.scene.input.setDefaultCursor("pointer");
+    } else {
+        stage.scene.input.setDefaultCursor("crosshair");
+    }
+};
+
 const OnSetMinScaling = ({
     getState,
     stage,
@@ -358,6 +385,10 @@ const OnShowStage = ({
     stage,
 }) => {
     const onKeyDown = (e) => {
+        if (e.keyCode == Phaser.Input.Keyboard.KeyCodes.ESC) {
+            dispatch(actions.SelectPowerTool({powerTool: null}));
+            return;
+        }
         const moveKey = moveKeys.get(e.keyCode);
         if (moveKey) {
             const direction = directions.get(moveKey);
@@ -391,6 +422,36 @@ const OnShowStage = ({
         }
     };
     const onPointerDown = (pointer) => {
+        if (stage.activeButton != null) {
+            return;
+        }
+        if (stage.draggingViewportInMiniMap) {
+            return;
+        }
+        const viewportWidthInPixels = getState().app.width;
+        const viewportHeightInPixels = getState().app.height;
+        if (
+            (pointer.x >= viewportWidthInPixels - MINI_MAP_SIZE - MINI_MAP_MARGIN)
+            && (pointer.x < viewportWidthInPixels - MINI_MAP_MARGIN)
+            && (pointer.y >= viewportHeightInPixels - MINI_MAP_SIZE - MINI_MAP_MARGIN)
+            && (pointer.y < viewportHeightInPixels - MINI_MAP_MARGIN)
+        ) {
+            stage.draggingViewportInMiniMap = true;
+            DragViewportInMiniMap({getState, stage, pointer});
+        }
+        stage.activeButton = pointer.buttons;
+    }
+    const onPointerUp = (pointer) => {
+        if (pointer.buttons) {
+            return;
+        }
+        if (!stage.activeButton) {
+            return;
+        }
+        if (stage.draggingViewportInMiniMap) {
+            stage.draggingViewportInMiniMap = false;
+            return;
+        }
         const viewportWidthInPixels = getState().app.width;
         const viewportHeightInPixels = getState().app.height;
         if (
@@ -415,27 +476,34 @@ const OnShowStage = ({
             return;
         }
         if (y >= grid.length) {
-            return
+            return;
         }
-        const leftClick = (pointer.buttons === 1);
-        const middleClick = (pointer.buttons === 4);
+        const leftClick = (stage.activeButton === 1);
+        const middleClick = (stage.activeButton === 4);
         const isShift = pointer.event.shiftKey;
         if (
             middleClick || (leftClick && isShift)
         ) {
             dispatch(actions.StepOnUntaggedNeighborsIfEnoughTagged({x, y}));
-        }
-        else if (leftClick) {
-            dispatch(actions.StepIfNotTagged({x, y}));
+        } else if (leftClick) {
+            const powerTool = getState().game.powerTool;
+            if (powerTool == null) {
+                const wasUncovered = IsUncovered({grid, x, y});
+                dispatch(actions.StepIfNotTagged({x, y}));
+                if (wasUncovered) {
+                    dispatch(actions.PickUp({x, y}));
+                }
+            } else {
+                dispatch(actions.UsePowerTool({x, y}));
+            }
         } else {
             dispatch(actions.ToggleMarker({x, y}));
         }
-    };
-    const onPointerUp = (pointer) => {
-        stage.draggingViewportInMiniMap = false;
+        stage.activeButton = null;
     };
     const onPointerUpOutside = (pointer) => {
         stage.draggingViewportInMiniMap = false;
+        stage.activeButton = null;
     };
     const onMouseWheel = (direction) => {
         let minScaling = getState().app.minScaling;
@@ -486,6 +554,8 @@ const OnShowStage = ({
             onMouseWheel((event.deltaY < 0) ? MOUSE_WHEEL_UP : MOUSE_WHEEL_DOWN);
         });
         stage.scene.input.topOnly = false;
+        stage.scene.input.setDefaultCursor("pointer");
+        stage.activeButton = null;
     };
     const phaserUpdate = function(time) {
         if (getState().game.active) {
@@ -528,6 +598,7 @@ const handlers = {
     [actionTypes.Play]: OnPlay,
     [actionTypes.ReflectGridUpdated]: OnReflectGridUpdated,
     [actionTypes.ReflectStageSize]: OnReflectStageSize,
+    [actionTypes.SelectPowerTool]: OnSelectPowerTool,
     [actionTypes.SetMinScaling]: OnSetMinScaling,
     [actionTypes.ShowStage]: OnShowStage,
 };
@@ -535,6 +606,7 @@ const handlers = {
 export default function({ getState, dispatch }) {
     const stage = {
         baseTime: null,
+        activeButton: null,
         debug: null,
         freeSprites: [],
         game: null,

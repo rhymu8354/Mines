@@ -6,6 +6,15 @@
     color: goldenrod;
 }
 
+.SelectLevel-groups {
+    display: flex;
+    flex-direction: row;
+}
+
+.SelectLevel-groups > *:not(:first-child) {
+    margin-left: 50px;
+}
+
 .SelectLevel-grid {
     margin-left: 50px;
     display: grid;

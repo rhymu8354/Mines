@@ -1,3 +1,5 @@
+export const APP_VERSION = "0.10.0";
+
 export const TILE_SIZE = 16;
 export const SCROLL_UNITS_PER_PAGE_X = 4;
 export const SCROLL_UNITS_PER_PAGE_Y = 4;
@@ -15,6 +17,18 @@ export const ACTIVITY_PLAY = "ACTIVITY_PLAY";
 export const ACTIVITY_SELECT_LEVEL = "ACTIVITY_SELECT_LEVEL";
 
 export const MODAL_RELEASE_NOTES = "MODAL_RELEASE_NOTES";
+
+export const POWER_TOOL_DETONATOR = "POWER_TOOL_DETONATOR";
+export const POWER_TOOL_PROBE = "POWER_TOOL_PROBE";
+
+export const POWER_COSTS = {
+    [POWER_TOOL_DETONATOR]: 4,
+    [POWER_TOOL_PROBE]: 2,
+};
+
+export const DETONATION_REVEAL_RANGE = 1;
+export const DETONATOR_RANGE = 2;
+export const PROBE_RANGE = 2;
 
 // "cell" means the game object holding state about one section of the game
 // grid.
