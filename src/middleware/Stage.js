@@ -66,30 +66,6 @@ const directions = new Map([
 const MOUSE_WHEEL_UP = 0;
 const MOUSE_WHEEL_DOWN = 1;
 
-const OnHideStage = ({
-    getState,
-    onPhaserNotReady,
-    stage,
-}) => {
-    onPhaserNotReady();
-    if (stage.miniMap) {
-        stage.miniMap.removeAll(true);
-        stage.miniMap.destroy();
-        stage.miniMap = null;
-        stage.miniMapGrid = null;
-        stage.miniMapViewport = null;
-    }
-    if (stage.tiles) {
-        DropTiles({getState, stage});
-        stage.tiles = [];
-    }
-    stage.freeSprites.forEach(sprite => sprite.destroy());
-    stage.freeSprites = [];
-    stage.scene = null;
-    stage.game.destroy(true);
-    stage.game = null;
-};
-
 const tilesForNeighbors = [
     TILE_UNCOVERED_NO_NEIGHBORS,
     TILE_UNCOVERED_ONE_NEIGHBOR,
@@ -101,6 +77,15 @@ const tilesForNeighbors = [
     TILE_UNCOVERED_SEVEN_NEIGHBORS,
     TILE_UNCOVERED_EIGHT_NEIGHBORS,
 ];
+
+const ComputeSpriteTint = ({getState, stage}) => {
+    const tintedChannel = Math.floor(0xff * getState().app.tinting);
+    stage.tinting = (
+        tintedChannel
+        + tintedChannel * 256
+        + tintedChannel * 65536
+    );
+};
 
 const ComputeCellFrame = ({gameActive, grid, x, y}) => {
     const cell = grid[y][x];
@@ -132,6 +117,45 @@ const ComputeCellFrame = ({gameActive, grid, x, y}) => {
     }
 };
 
+const DragViewportInMiniMap = ({getState, stage, pointer}) => {
+    const viewportWidthInPixels = getState().app.width;
+    const viewportHeightInPixels = getState().app.height;
+    const tileScaledSize = TILE_SIZE * stage.tileScaling;
+    const grid = getState().game.grid;
+    const heightInTiles = grid.length;
+    const widthInTiles = grid[0].length;
+    const viewportWidthInTiles = Math.min(
+        Math.floor(
+            viewportWidthInPixels / tileScaledSize
+        ),
+        widthInTiles
+    );
+    const viewportHeightInTiles = Math.min(
+        Math.floor(
+            viewportHeightInPixels / tileScaledSize
+        ),
+        heightInTiles
+    );
+    const offsetX = Math.floor(
+        (
+            pointer.x - (viewportWidthInPixels - MINI_MAP_SIZE - MINI_MAP_MARGIN)
+        ) / stage.miniMapRatio / tileScaledSize
+        - viewportWidthInTiles / 2
+    );
+    const offsetY = Math.floor(
+        (
+            pointer.y - (viewportHeightInPixels - MINI_MAP_SIZE - MINI_MAP_MARGIN)
+        ) / stage.miniMapRatio / tileScaledSize
+        - viewportHeightInTiles / 2
+    );
+    UpdateTilePositionsAndScale({
+        getState,
+        stage,
+        offsetX,
+        offsetY,
+    });
+};
+
 const DropTiles = ({
     getState,
     stage
@@ -148,12 +172,14 @@ const DropTiles = ({
 };
 
 const SetSpriteTexture = ({
-    gameActive,
-    grid,
+    getState,
+    stage,
     x,
     y,
     sprite,
 }) => {
+    const grid = getState().game.grid;
+    const gameActive = getState().game.active;
     sprite.setTexture(
         "atlas",
         ComputeCellFrame({gameActive, grid, x, y})
@@ -162,7 +188,7 @@ const SetSpriteTexture = ({
     if ((cell & GRID_CELL_DARKENED) === 0) {
         sprite.setTint(0xffffff);
     } else {
-        sprite.setTint(0xaaaaaa);
+        sprite.setTint(stage.tinting);
     }
 };
 
@@ -250,8 +276,9 @@ const UpdateTilePositionsAndScale = ({
                         sprite.setScale(stage.tileScaling);
                     } else {
                         sprite = stage.freeSprites.pop();
+                        sprite.setTint(0xffffff);
                     }
-                    SetSpriteTexture({gameActive, grid, x, y, sprite});
+                    SetSpriteTexture({getState, stage, x, y, sprite});
                     stage.tiles[y][x] = sprite;
                 }
                 sprite.setX(spriteX);
@@ -303,43 +330,28 @@ const UpdateTilePositionsAndScale = ({
     }
 };
 
-const DragViewportInMiniMap = ({getState, stage, pointer}) => {
-    const viewportWidthInPixels = getState().app.width;
-    const viewportHeightInPixels = getState().app.height;
-    const tileScaledSize = TILE_SIZE * stage.tileScaling;
-    const grid = getState().game.grid;
-    const heightInTiles = grid.length;
-    const widthInTiles = grid[0].length;
-    const viewportWidthInTiles = Math.min(
-        Math.floor(
-            viewportWidthInPixels / tileScaledSize
-        ),
-        widthInTiles
-    );
-    const viewportHeightInTiles = Math.min(
-        Math.floor(
-            viewportHeightInPixels / tileScaledSize
-        ),
-        heightInTiles
-    );
-    const offsetX = Math.floor(
-        (
-            pointer.x - (viewportWidthInPixels - MINI_MAP_SIZE - MINI_MAP_MARGIN)
-        ) / stage.miniMapRatio / tileScaledSize
-        - viewportWidthInTiles / 2
-    );
-    const offsetY = Math.floor(
-        (
-            pointer.y - (viewportHeightInPixels - MINI_MAP_SIZE - MINI_MAP_MARGIN)
-        ) / stage.miniMapRatio / tileScaledSize
-        - viewportHeightInTiles / 2
-    );
-    UpdateTilePositionsAndScale({
-        getState,
-        stage,
-        offsetX,
-        offsetY,
-    });
+const OnHideStage = ({
+    getState,
+    onPhaserNotReady,
+    stage,
+}) => {
+    onPhaserNotReady();
+    if (stage.miniMap) {
+        stage.miniMap.removeAll(true);
+        stage.miniMap.destroy();
+        stage.miniMap = null;
+        stage.miniMapGrid = null;
+        stage.miniMapViewport = null;
+    }
+    if (stage.tiles) {
+        DropTiles({getState, stage});
+        stage.tiles = [];
+    }
+    stage.freeSprites.forEach(sprite => sprite.destroy());
+    stage.freeSprites = [];
+    stage.scene = null;
+    stage.game.destroy(true);
+    stage.game = null;
 };
 
 const OnPlay = ({
@@ -347,6 +359,7 @@ const OnPlay = ({
     stage,
 }) => {
     stage.baseTime = null;
+    ComputeSpriteTint({getState, stage});
     DropTiles({getState, stage});
     UpdateTilePositionsAndScale({
         getState,
@@ -361,11 +374,9 @@ const OnReflectGridUpdated = ({
     getState,
     stage,
 }) => {
-    const grid = getState().game.grid;
-    const gameActive = getState().game.active;
     const sprite = stage.tiles[y][x];
     if (sprite != null) {
-        SetSpriteTexture({gameActive, grid, x, y, sprite});
+        SetSpriteTexture({getState, stage, x, y, sprite});
     }
 };
 
@@ -374,12 +385,10 @@ const OnReflectGridUpdatedBatch = ({
     getState,
     stage,
 }) => {
-    const grid = getState().game.grid;
-    const gameActive = getState().game.active;
     updates.forEach(({x, y}) => {
         const sprite = stage.tiles[y][x];
         if (sprite != null) {
-            SetSpriteTexture({gameActive, grid, x, y, sprite});
+            SetSpriteTexture({getState, stage, x, y, sprite});
         }
     });
 };
@@ -408,6 +417,21 @@ const OnSetMinScaling = ({
     stage,
 }) => {
     UpdateTilePositionsAndScale({getState, stage});
+};
+
+const OnSetTinting = ({
+    getState,
+    stage,
+}) => {
+    ComputeSpriteTint({getState, stage});
+    const grid = getState().game.grid;
+    const gameActive = getState().game.active;
+    WithAllGridCells(grid, (x, y) => {
+        const sprite = stage.tiles[y][x];
+        if (sprite != null) {
+            SetSpriteTexture({getState, stage, x, y, sprite});
+        }
+    });
 };
 
 const OnShowStage = ({
@@ -648,6 +672,7 @@ const handlers = {
     [actionTypes.ReflectStageSize]: OnReflectStageSize,
     [actionTypes.SelectPowerTool]: OnSelectPowerTool,
     [actionTypes.SetMinScaling]: OnSetMinScaling,
+    [actionTypes.SetTinting]: OnSetTinting,
     [actionTypes.ShowStage]: OnShowStage,
 };
 
@@ -666,6 +691,7 @@ export default function({ getState, dispatch }) {
         tiles: [],
         tileScaling: 1,
         time: null,
+        tinting: 0xffffff,
     };
     let deferredActions = [];
     let handlingDeferredActions = false;

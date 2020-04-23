@@ -70,15 +70,15 @@
     margin-bottom: 10px;
 }
 
-.Play-controls-min-scaling {
+.Play-controls-slider {
     display: flex;
     align-items: center;
 }
 
-.Play-controls-min-scaling > *:not(:first-child) {
+.Play-controls-slider > *:not(:first-child) {
     margin-left: 10px;
 }
 
-.Play-controls-min-scaling-slider {
+.Play-controls-slider-input {
     width: 50px;
 }

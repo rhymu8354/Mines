@@ -2,6 +2,8 @@ import { actionTypes } from "../actions";
 
 import {
     ACTIVITY_SELECT_LEVEL,
+    DEFAULT_TINTING,
+    LOCAL_STORAGE_TINTING,
 } from "../constants";
 
 const wittyQuotes = [
@@ -21,11 +23,21 @@ const wittyQuotes = [
     "Today we must all be aware that protocol takes precedence over procedure.",
 ];
 
+const GetInitialTinting = () => {
+    const tinting = parseFloat(localStorage.getItem(LOCAL_STORAGE_TINTING));
+    return (
+        isNaN(tinting)
+        ? DEFAULT_TINTING
+        : tinting
+    );
+};
+
 const initialState = {
     activity: ACTIVITY_SELECT_LEVEL,
     width: 1,
     height: 1,
     minScaling: 2,
+    tinting: GetInitialTinting(),
     wittyQuote: "",
 };
 
@@ -53,6 +65,12 @@ export default function (state = initialState, action) {
             return {
                 ...state,
                 minScaling: action.minScaling,
+            };
+        case actionTypes.SetTinting:
+            localStorage.setItem(LOCAL_STORAGE_TINTING, action.tinting.toString());
+            return {
+                ...state,
+                tinting: action.tinting,
             };
         default:
             return state;

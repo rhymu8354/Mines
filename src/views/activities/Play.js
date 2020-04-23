@@ -25,10 +25,12 @@ const Play = ({
     onRetry,
     onSelectPowerTool,
     onSetMinScaling,
+    onSetTinting,
     onShowStage,
     power,
     powerTool,
     score,
+    tinting,
 }) => {
     const stageRef = useRef(null);
     useOnceEffect(
@@ -141,16 +143,28 @@ const Play = ({
                     Retry
                 </button>
             </div>
-            <div className="Play-controls-min-scaling">
+            <div className="Play-controls-slider">
                 <div>Zoom:</div>
                 <input
                     type="range"
-                    className="Play-controls-min-scaling-slider"
+                    className="Play-controls-slider-input"
                     min={1}
                     max={MAX_TILE_SCALING}
                     step={1}
                     value={minScaling}
                     onChange={onChangeField(onSetMinScaling)}
+                />
+            </div>
+            <div className="Play-controls-slider">
+                <div>Tinting:</div>
+                <input
+                    type="range"
+                    className="Play-controls-slider-input"
+                    min={0}
+                    max={1}
+                    step={0.05}
+                    value={tinting}
+                    onChange={onChangeField(onSetTinting)}
                 />
             </div>
             <p>
@@ -160,6 +174,11 @@ const Play = ({
                 When zoomed in, click and drag in the lower-right mini-map,
                 or use the WASD (or arrow) keys, to scroll the viewport
                 around the grid.
+            </p>
+            <p>
+                Left-clicking an uncovered cell adds a tint to it, while
+                right-clicking removes tinting.  You can control the
+                tinting with the slider control above.
             </p>
         </div>
     </div>;
@@ -173,6 +192,7 @@ const mapStateToProps = (state, ownProps) => ({
     power: state.game.powerCollected,
     powerTool: state.game.powerTool,
     score: state.game.score,
+    tinting: state.app.tinting,
 });
 
 const mapDispatchToProps = (dispatch, ownProps) => ({
@@ -182,6 +202,7 @@ const mapDispatchToProps = (dispatch, ownProps) => ({
     onRetry: () => dispatch(actions.Play({})),
     onSelectPowerTool: (powerTool) => dispatch(actions.SelectPowerTool({powerTool})),
     onSetMinScaling: (minScaling) => dispatch(actions.SetMinScaling({minScaling})),
+    onSetTinting: (tinting) => dispatch(actions.SetTinting({tinting})),
     onShowStage: () => dispatch(actions.ShowStage()),
 });
 

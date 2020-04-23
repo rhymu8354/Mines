@@ -27,6 +27,7 @@ const DefineAction = (type) => {
     "SelectWittyQuote",
     "SetActivity",
     "SetMinScaling",
+    "SetTinting",
     "ShowReleaseNotes",
     "ShowStage",
     "StepIfNotTagged",

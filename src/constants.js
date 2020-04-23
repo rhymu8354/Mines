@@ -21,6 +21,10 @@ export const MODAL_RELEASE_NOTES = "MODAL_RELEASE_NOTES";
 export const POWER_TOOL_DETONATOR = "POWER_TOOL_DETONATOR";
 export const POWER_TOOL_PROBE = "POWER_TOOL_PROBE";
 
+export const LOCAL_STORAGE_TINTING = "tinting";
+
+export const DEFAULT_TINTING = 0.75;
+
 export const POWER_COSTS = {
     [POWER_TOOL_DETONATOR]: 4,
     [POWER_TOOL_PROBE]: 2,
