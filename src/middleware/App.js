@@ -35,6 +35,7 @@ export default function({ getState, dispatch }) {
         next(action);
         const handler = handlers[action.type];
         if (handler) {
+            // @ts-ignore
             handler({dispatch, action, getState});
         }
     };
