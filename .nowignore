@@ -1,0 +1,3 @@
+# Ignore typescript config and other stuff
+/tsconfig.json
+/src/react-app-env.d.ts

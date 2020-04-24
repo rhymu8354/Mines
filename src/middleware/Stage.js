@@ -454,6 +454,7 @@ const OnReflectStageSize = ({
     getState,
     stage,
 }) => {
+    // @ts-ignore
     UpdateTilePositionsAndScale({getState, stage});
 };
 
@@ -473,6 +474,7 @@ const OnSetMinScaling = ({
     getState,
     stage,
 }) => {
+    // @ts-ignore
     UpdateTilePositionsAndScale({getState, stage});
 };
 
@@ -857,6 +859,7 @@ export default function({ getState, dispatch }) {
         const handler = handlers[action.type];
         if (handler) {
             const callHandler = () => handler({
+                // @ts-ignore
                 action,
                 dispatch,
                 getState,
