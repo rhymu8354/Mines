@@ -26,6 +26,7 @@ const wittyQuotes = [
     "Marriage is like a bank account.  You put it in, you take it out, you lose interest.",
     "You can go a long way with a smile.  You can go a lot farther with a smile and a gun.",
     "Today we must all be aware that protocol takes precedence over procedure.",
+    "Boat Land coming soon™",
 ];
 
 const GetInitialLevel = (settingKey, defaultSetting) => {

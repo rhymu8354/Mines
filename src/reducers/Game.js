@@ -128,21 +128,22 @@ export default function (state = initialState, action) {
                     ++cellsCleared;
                     --cellsToClear;
                 }
-                if (
-                    ((originalCell & GRID_CELL_TAGGED) === 0)
-                    && ((action.cell & GRID_CELL_TAGGED) !== 0)
-                ) {
-                    --numMinesPlayerThinksAreUnaccounted;
+                if ((action.cell & GRID_CELL_UNCOVERED) === 0) {
+                    if (
+                        ((originalCell & GRID_CELL_TAGGED) === 0)
+                        && ((action.cell & GRID_CELL_TAGGED) !== 0)
+                    ) {
+                        --numMinesPlayerThinksAreUnaccounted;
+                    } else if (
+                        ((originalCell & GRID_CELL_TAGGED) !== 0)
+                        && ((action.cell & GRID_CELL_TAGGED) === 0)
+                    ) {
+                        ++numMinesPlayerThinksAreUnaccounted;
+                    }
                 } else if (
-                    ((originalCell & GRID_CELL_TAGGED) !== 0)
-                    && ((action.cell & GRID_CELL_TAGGED) === 0)
-                ) {
-                    ++numMinesPlayerThinksAreUnaccounted;
-                } else if (
-                    ((action.cell & GRID_CELL_MINE_PRESENT) !== 0)
+                    ((originalCell & GRID_CELL_UNCOVERED) === 0)
+                    && ((action.cell & GRID_CELL_MINE_PRESENT) !== 0)
                     && ((originalCell & GRID_CELL_TAGGED) === 0)
-                    && ((originalCell & GRID_CELL_UNCOVERED) === 0)
-                    && ((action.cell & GRID_CELL_UNCOVERED) !== 0)
                 ) {
                     --numMinesPlayerThinksAreUnaccounted;
                 }

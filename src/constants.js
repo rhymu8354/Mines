@@ -35,6 +35,8 @@ export const LOCAL_STORAGE_TINTING = "tinting";
 export const DEFAULT_SOUND_LEVEL = 1.0;
 export const DEFAULT_TINTING = 0.75;
 
+export const DOUBLE_CLICK_THRESHOLD_MILLISECONDS = 500;
+
 export const POWER_COSTS = {
     [POWER_TOOL_DETONATOR]: 4,
     [POWER_TOOL_PROBE]: 2,

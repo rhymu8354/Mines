@@ -9,6 +9,54 @@ import "./ReleaseNotes.css";
 
 const content = [
     {
+        version: "0.16.0 - 2020-04-25",
+        notes: <ul>
+            <li>Allow marking/unmarking revealed unexploded mines.</li>
+            <li>
+                Changed darkening of revealed cells from left-click
+                to right-click.  This makes right-click always "safe", meaning
+                it will never cause you to lose the game, whereas left-click
+                is "dangerous" and can cause you to lose if you click on
+                an unexploded mine or clear an area near a spot where you
+                have marked a mine which is really not there.
+            </li>
+            <li>
+                You can now scroll the viewport by dragging while holding
+                down the &lt;Alt&gt; key or both the left and right
+                mouse buttons.
+            </li>
+            <li>
+                Double-left-clicking now works like Shift-clicking:
+                doing either on an uncovered cell will step on all neighbors
+                as long as there are as many markers around the cell as there
+                are mines detected nearby.
+            </li>
+            <li>
+                The first left-click in the grid will now always reveal
+                an open area (no mines within the 3x3 area centered on
+                where you click).
+            </li>
+            <li>
+                Fixed bug in not showing mistakes adjacent to exploded mines.
+            </li>
+            <li>
+                Fixed bug in miscounting mines left after chain explosions.
+            </li>
+            <li>
+                Darkening/lightening uncovered cells is now applied when you
+                release the mouse button rather than when you press it.
+            </li>
+            <li>
+                You can now darken/lighten many unconvered cells by dragging
+                while holding down the right mouse button.
+            </li>
+            <li>
+                TypeScript-enabled checks are now enabled for development
+                environments such as VSCode (thanks to Aiden_Garth!)
+            </li>
+        </ul>,
+    },
+    {
         version: "0.15.0 - 2020-04-23",
         notes: <ul>
             <li>Fixed management of app version when building.</li>
@@ -164,7 +212,7 @@ const content = [
     {
         version: "0.3.1 - 2020-04-20",
         notes: <ul>
-            <li>Fixed bug in initial tile sizing/scaling.</li>
+            <li>Fixed bug in initial cell sizing/scaling.</li>
             <li>Fixed app title.</li>
         </ul>,
     },

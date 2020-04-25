@@ -17,8 +17,10 @@ import {
     DEPTH_SPRITE_CONTAINER,
     DETONATION_SHAKE_COUNT,
     DETONATION_SOUND_DURATION,
+    DOUBLE_CLICK_THRESHOLD_MILLISECONDS,
     GRID_CELL_DARKENED,
     GRID_CELL_POWER,
+    GRID_CELL_TAGGED,
     MAX_TILE_SCALING,
     MINI_MAP_OPACITY,
     MINI_MAP_SIZE,
@@ -94,6 +96,14 @@ const ComputeCellFrame = ({gameActive, grid, x, y}) => {
     const cell = grid[y][x];
     if (IsMineExploded({grid, x, y})) {
         return TILE_EXPLODED_MINE;
+    } else if (IsTagged({grid, x, y})) {
+        if (gameActive) {
+            return TILE_TAG;
+        } else if (IsMinePresent({grid, x, y})) {
+            return TILE_UNEXPLODED_MINE;
+        } else {
+            return TILE_TAGGED_BUT_NO_MINE;
+        }
     } else if (IsUncovered({grid, x, y})) {
         if (IsMinePresent({grid, x, y})) {
             return TILE_UNEXPLODED_MINE;
@@ -105,18 +115,7 @@ const ComputeCellFrame = ({gameActive, grid, x, y}) => {
             ];
         }
     } else {
-        if (IsTagged({grid, x, y})) {
-            if (
-                gameActive
-                || IsMinePresent({grid, x, y})
-            ) {
-                return TILE_TAG;
-            } else {
-                return TILE_TAGGED_BUT_NO_MINE;
-            }
-        } else {
-            return TILE_COVERED;
-        }
+        return TILE_COVERED;
     }
 };
 
@@ -159,6 +158,25 @@ const DragViewportInMiniMap = ({getState, stage, pointer}) => {
     });
 };
 
+const DragViewportInGrid = ({getState, stage, pointer}) => {
+    const tileScaledSize = TILE_SIZE * stage.tileScaling;
+    const x = stage.offsetX + Math.floor(pointer.x / tileScaledSize);
+    const y = stage.offsetY + Math.floor(pointer.y / tileScaledSize);
+    if (
+        (x !== stage.lastX)
+        || (y !== stage.lastY)
+    ) {
+        const offsetX = stage.offsetX + stage.lastX - x;
+        const offsetY = stage.offsetY + stage.lastY - y;
+        UpdateTilePositionsAndScale({
+            getState,
+            stage,
+            offsetX,
+            offsetY,
+        });
+    }
+};
+
 const DropTiles = ({
     getState,
     stage
@@ -174,13 +192,30 @@ const DropTiles = ({
     });
 };
 
+const SetCursor = ({
+    getState,
+    stage,
+}) => {
+    const powerTool = getState().game.powerTool;
+    if (
+        stage.draggingViewportInGrid
+        || stage.draggingViewportInMiniMap
+    ) {
+        stage.scene.input.setDefaultCursor("all-scroll");
+    } else if (powerTool == null) {
+        stage.scene.input.setDefaultCursor("pointer");
+    } else {
+        stage.scene.input.setDefaultCursor("crosshair");
+    }
+};
+
 const SetRedBoxVisibility = ({
     getState,
     stage,
 }) => {
     stage.redBox.setVisible(
         getState().app.redBoxEnabled
-        && (stage.redBoxX != null)
+        && (stage.lastX != null)
     );
 };
 
@@ -205,13 +240,44 @@ const SetSpriteTexture = ({
     }
 };
 
+const ToggleMarker = ({
+    dispatch,
+    getState,
+    x,
+    y,
+}) => {
+    const grid = getState().game.grid;
+    const cell = grid[y][x] ^ GRID_CELL_TAGGED;
+    dispatch(actions.ReflectGridUpdated({x, y, cell}));
+};
+
+const ToggleTint = ({
+    dispatch,
+    getState,
+    stage,
+    x,
+    y,
+}) => {
+    const grid = getState().game.grid;
+    const darkening = ((grid[y][x] & GRID_CELL_DARKENED) === 0);
+    if (
+        IsUncovered({grid, x, y})
+        && !IsMinePresent({grid, x, y})
+        && (darkening === stage.darkening)
+    ) {
+        const grid = getState().game.grid;
+        const cell = grid[y][x] ^ GRID_CELL_DARKENED;
+        dispatch(actions.ReflectGridUpdated({x, y, cell}));
+    }
+};
+
 const UpdateRedBoxPosition = ({
     stage,
 }) => {
-    if (stage.redBoxX != null) {
+    if (stage.lastX != null) {
         const tileScaledSize = TILE_SIZE * stage.tileScaling;
-        stage.redBox.setX((stage.redBoxX - stage.offsetX) * tileScaledSize);
-        stage.redBox.setY((stage.redBoxY - stage.offsetY) * tileScaledSize);
+        stage.redBox.setX((stage.lastX - stage.offsetX) * tileScaledSize);
+        stage.redBox.setY((stage.lastY - stage.offsetY) * tileScaledSize);
         stage.spriteContainer.remove(stage.redBox);
         stage.spriteContainer.add(stage.redBox);
     }
@@ -273,9 +339,9 @@ const UpdateTilePositionsAndScale = ({
         || (stage.baseTime == null)
     ) {
         stage.tileScaling = newTileScaling;
-        if (stage.redBoxX != null) {
-            stage.redBoxX += (offsetX - stage.offsetX);
-            stage.redBoxY += (offsetY - stage.offsetY);
+        if (stage.lastX != null) {
+            stage.lastX += (offsetX - stage.offsetX);
+            stage.lastY += (offsetY - stage.offsetY);
         }
         stage.offsetX = offsetX;
         stage.offsetY = offsetY;
@@ -462,13 +528,8 @@ const OnSelectPowerTool = ({
     getState,
     stage,
 }) => {
-    const powerTool = getState().game.powerTool;
-    if (powerTool == null) {
-        stage.scene.input.setDefaultCursor("pointer");
-    } else {
-        stage.scene.input.setDefaultCursor("crosshair");
-    }
-};
+    SetCursor({getState, stage});
+}
 
 const OnSetMinScaling = ({
     getState,
@@ -538,9 +599,6 @@ const OnShowStage = ({
         }
     };
     const onPointerMove = (pointer) => {
-        if (stage.draggingViewportInMiniMap) {
-            DragViewportInMiniMap({getState, stage, pointer});
-        }
         const viewportWidthInPixels = getState().app.width;
         const viewportHeightInPixels = getState().app.height;
         if (
@@ -549,9 +607,15 @@ const OnShowStage = ({
             && (pointer.y >= viewportHeightInPixels - MINI_MAP_SIZE - MINI_MAP_MARGIN)
             && (pointer.y < viewportHeightInPixels - MINI_MAP_MARGIN)
         ) {
-            stage.redBoxX = null;
-            stage.redBoxY = null;
+            stage.lastX = null;
+            stage.lastY = null;
+            if (stage.draggingViewportInMiniMap) {
+                DragViewportInMiniMap({getState, stage, pointer});
+            }
         } else {
+            if (stage.draggingViewportInGrid) {
+                DragViewportInGrid({getState, stage, pointer});
+            }
             const tileScaledSize = TILE_SIZE * stage.tileScaling;
             const x = stage.offsetX + Math.floor(pointer.x / tileScaledSize);
             const y = stage.offsetY + Math.floor(pointer.y / tileScaledSize);
@@ -560,35 +624,93 @@ const OnShowStage = ({
                 (x < grid[0].length)
                 && (y < grid.length)
             ) {
-                stage.redBoxX = x;
-                stage.redBoxY = y;
-                UpdateRedBoxPosition({stage});
+                if (
+                    (x !== stage.lastX)
+                    || (y !== stage.lastY)
+                ) {
+                    if (stage.activeButton === 2) {
+                        ToggleTint({dispatch, getState, stage, x: stage.lastX, y: stage.lastY});
+                    }
+                    stage.lastX = x;
+                    stage.lastY = y;
+                    UpdateRedBoxPosition({stage});
+                }
             } else {
-                stage.redBoxX = null;
-                stage.redBoxY = null;
+                stage.lastX = null;
+                stage.lastY = null;
             }
         }
         SetRedBoxVisibility({getState, stage});
     };
     const onPointerDown = (pointer) => {
-        if (stage.activeButton != null) {
-            return;
-        }
-        if (stage.draggingViewportInMiniMap) {
-            return;
-        }
-        const viewportWidthInPixels = getState().app.width;
-        const viewportHeightInPixels = getState().app.height;
+        stage.draggingViewportInGrid = false;
+        stage.draggingViewportInMiniMap = false;
+        stage.togglingTint = false;
+        const rightClick = (pointer.buttons === 2);
+        const leftAndRightClick = (pointer.buttons === 3);
+        const isAlt = pointer.event.altKey;
         if (
-            (pointer.x >= viewportWidthInPixels - MINI_MAP_SIZE - MINI_MAP_MARGIN)
-            && (pointer.x < viewportWidthInPixels - MINI_MAP_MARGIN)
-            && (pointer.y >= viewportHeightInPixels - MINI_MAP_SIZE - MINI_MAP_MARGIN)
-            && (pointer.y < viewportHeightInPixels - MINI_MAP_MARGIN)
+            isAlt
+            || leftAndRightClick
         ) {
-            stage.draggingViewportInMiniMap = true;
-            DragViewportInMiniMap({getState, stage, pointer});
+            stage.draggingViewportInGrid = true;
+        } else {
+            const viewportWidthInPixels = getState().app.width;
+            const viewportHeightInPixels = getState().app.height;
+            if (
+                (pointer.x >= viewportWidthInPixels - MINI_MAP_SIZE - MINI_MAP_MARGIN)
+                && (pointer.x < viewportWidthInPixels - MINI_MAP_MARGIN)
+                && (pointer.y >= viewportHeightInPixels - MINI_MAP_SIZE - MINI_MAP_MARGIN)
+                && (pointer.y < viewportHeightInPixels - MINI_MAP_MARGIN)
+            ) {
+                stage.draggingViewportInMiniMap = true;
+                DragViewportInMiniMap({getState, stage, pointer});
+            }
         }
         stage.activeButton = pointer.buttons;
+        SetCursor({getState, stage});
+        if (!getState().game.active) {
+            return;
+        }
+        const tileScaledSize = TILE_SIZE * stage.tileScaling;
+        const x = stage.offsetX + Math.floor(pointer.x / tileScaledSize);
+        const y = stage.offsetY + Math.floor(pointer.y / tileScaledSize);
+        const grid = getState().game.grid;
+        if (x >= grid[0].length) {
+            return;
+        }
+        if (y >= grid.length) {
+            return;
+        }
+        stage.lastButton = stage.activeButton;
+        if (stage.activeButton === 1) {
+            if (stage.lastButton === 1) {
+                if (stage.lastLeftClickTime == null) {
+                    stage.lastLeftClickTime = stage.lastTimeRaw;
+                } else {
+                    const timeBetweenClicks = stage.lastTimeRaw - stage.lastLeftClickTime;
+                    if (timeBetweenClicks < DOUBLE_CLICK_THRESHOLD_MILLISECONDS) {
+                        dispatch(actions.StepOnUntaggedNeighborsIfEnoughTagged({x, y}));
+                        stage.lastLeftClickTime = null;
+                    } else {
+                        stage.lastLeftClickTime = stage.lastTimeRaw;
+                    }
+                }
+            } else {
+                stage.lastLeftClickTime = stage.lastTimeRaw;
+            }
+        } else {
+            stage.lastLeftClickTime = null;
+        }
+        if (rightClick) {
+            if (
+                IsUncovered({grid, x, y})
+                && !IsMinePresent({grid, x, y})
+            ) {
+                stage.togglingTint = true;
+                stage.darkening = ((grid[y][x] & GRID_CELL_DARKENED) === 0);
+            }
+        }
     }
     const onPointerUp = (pointer) => {
         if (pointer.buttons) {
@@ -599,8 +721,16 @@ const OnShowStage = ({
         }
         const button = stage.activeButton;
         stage.activeButton = null;
+        const wasTogglingTint = stage.togglingTint;
+        stage.togglingTint = false;
         if (stage.draggingViewportInMiniMap) {
             stage.draggingViewportInMiniMap = false;
+            SetCursor({getState, stage});
+            return;
+        }
+        if (stage.draggingViewportInGrid) {
+            stage.draggingViewportInGrid = false;
+            SetCursor({getState, stage});
             return;
         }
         const viewportWidthInPixels = getState().app.width;
@@ -615,8 +745,7 @@ const OnShowStage = ({
             DragViewportInMiniMap({getState, stage, pointer});
             return;
         }
-        const gameActive = getState().game.active;
-        if (!gameActive) {
+        if (!getState().game.active) {
             return;
         }
         const tileScaledSize = TILE_SIZE * stage.tileScaling;
@@ -630,6 +759,7 @@ const OnShowStage = ({
             return;
         }
         const leftClick = (button === 1);
+        const rightClick = (button === 2);
         const middleClick = (button === 4);
         const isShift = pointer.event.shiftKey;
         if (
@@ -641,23 +771,34 @@ const OnShowStage = ({
             if (powerTool == null) {
                 const wasUncovered = IsUncovered({grid, x, y});
                 dispatch(actions.StepIfNotTagged({x, y}));
-                if (wasUncovered) {
-                    dispatch(actions.PickUpOrDarken({x, y}));
+                if (
+                    wasUncovered
+                    && !IsMinePresent({grid, x, y})
+                ) {
+                    dispatch(actions.PickUp({x, y}));
                 }
             } else {
                 dispatch(actions.UsePowerTool({x, y}));
             }
-        } else {
-            dispatch(actions.ToggleMarkerOrLighten({x, y}));
+        } else if (rightClick) {
+            if (wasTogglingTint) {
+                ToggleTint({dispatch, getState, stage, x, y});
+            } else if (
+                !IsUncovered({grid, x, y})
+                || IsMinePresent({grid, x, y})
+            ) {
+                ToggleMarker({dispatch, getState, x, y});
+            }
         }
     };
     const onPointerUpOutside = (pointer) => {
+        stage.draggingViewportInGrid = false;
         stage.draggingViewportInMiniMap = false;
         stage.activeButton = null;
     };
     const onGameOut = () => {
-        stage.redBoxX = null;
-        stage.redBoxY = null;
+        stage.lastX = null;
+        stage.lastY = null;
         SetRedBoxVisibility({getState, stage});
     };
     const onMouseWheel = (direction, x, y) => {
@@ -771,7 +912,6 @@ const OnShowStage = ({
         };
     };
     const config = {
-        draggingViewportInMiniMap: false,
         type: Phaser.AUTO,
         input: {
             keyboard: true,
@@ -811,10 +951,14 @@ export default function({ getState, dispatch }) {
     const stage = {
         baseTime: null,
         activeButton: null,
+        darkening: false,
         debug: null,
         detonationSound: null,
         detonationSoundStart: null,
+        draggingViewportInGrid: false,
+        draggingViewportInMiniMap: false,
         freeSprites: [],
+        lastButton: null,
         lastTime: 0,
         lastTimeRaw: 0,
         game: null,
@@ -823,8 +967,9 @@ export default function({ getState, dispatch }) {
         offsetY: 0,
         ready: false,
         redBox: null,
-        redBoxX: null,
-        redBoxY: null,
+        lastLeftClickTime: null,
+        lastX: null,
+        lastY: null,
         scene: null,
         shakeCount: 0,
         spriteContainer: null,
@@ -832,6 +977,7 @@ export default function({ getState, dispatch }) {
         tileScaling: 1,
         time: null,
         tinting: 0xffffff,
+        togglingTint: false,
     };
     let deferredActions = [];
     let handlingDeferredActions = false;

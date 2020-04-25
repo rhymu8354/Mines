@@ -15,7 +15,6 @@ import {
 import {
     DETONATION_REVEAL_RANGE,
     DETONATOR_RANGE,
-    GRID_CELL_DARKENED,
     GRID_CELL_MINE_EXPLODED,
     GRID_CELL_MINE_PRESENT,
     GRID_CELL_POWER,
@@ -38,10 +37,10 @@ const StepOnNeighbors = ({
     }});
 };
 
-const PlaceMineSomewhereExcept = ({
+const PlaceMineSomewhereBeyond = ({
     dispatch,
     grid,
-    except: {x: exceptX, y: exceptY},
+    beyond: {x: beyondX, y: beyondY},
 }) => {
     const height = grid.length;
     const width = grid[0].length;
@@ -50,8 +49,8 @@ const PlaceMineSomewhereExcept = ({
         let x = Math.floor(Math.random() * width);
         let y = Math.floor(Math.random() * height);
         if (
-            (x === exceptX)
-            && (y === exceptY)
+            (Math.abs(x - beyondX) <= 1)
+            && (Math.abs(y - beyondY) <= 1)
         ) {
             continue;
         }
@@ -121,6 +120,7 @@ const Detonate = ({
             dispatch(actions.Detonate({x, y}));
         }
     } else {
+        UntagIfTagged({dispatch, grid, x, y});
         dispatch(actions.StepIfNotTagged({x, y}));
     }
 };
@@ -147,7 +147,6 @@ const OnDetonate = ({
             (x !== centerX)
             || (y !== centerY)
         ) {
-            UntagIfTagged({dispatch, grid, x, y});
             Detonate({dispatch, grid, x, y});
         }
     }});
@@ -162,17 +161,16 @@ const OnGameLost = ({
     ];
     WithAllGridCells(grid, (x, y) => {
         let cell = grid[y][x];
-        if (IsMinePresent({grid, x, y})) {
-            if (!IsUncovered({grid, x, y})) {
-                cell |= GRID_CELL_UNCOVERED;
-            }
+        if (
+            IsMinePresent({grid, x, y})
+            && !IsUncovered({grid, x, y})
+        ) {
+            cell |= GRID_CELL_UNCOVERED;
+            updates.push({x, y, cell});
         } else if (IsTagged({grid, x, y})) {
             // Refresh the tile for any mis-tagged cell.
             // When the game is over, the "mis-tagged" tile replaces
             // the "tag" tile, even though the cell didn't change.
-            updates.push({x, y, cell});
-        }
-        if (cell !== grid[y][x]) {
             updates.push({x, y, cell});
         }
     });
@@ -199,20 +197,18 @@ const OnGameWon = ({
     });
 };
 
-const OnPickUpOrDarken = ({
+const OnPickUp = ({
     action: {x, y},
     dispatch,
     getState,
 }) => {
     const grid = getState().game.grid;
     let cell = grid[y][x];
-    if ((grid[y][x] & GRID_CELL_POWER) !== 0) {
+    if ((cell & GRID_CELL_POWER) !== 0) {
         cell &= ~GRID_CELL_POWER;
+        dispatch(actions.ReflectGridUpdated({x, y, cell}));
         dispatch(actions.AddPower({power: 1}));
-    } else {
-        cell |= GRID_CELL_DARKENED;
     }
-    dispatch(actions.ReflectGridUpdated({x, y, cell}));
 };
 
 const OnStepIfNotTagged = ({
@@ -224,28 +220,38 @@ const OnStepIfNotTagged = ({
     if (IsTagged({grid, x, y})) {
         return;
     }
-    const minePresent = IsMinePresent({grid, x, y});
-    let cell = grid[y][x] | GRID_CELL_UNCOVERED;
-    if (!minePresent) {
-        dispatch(actions.ReflectGridUpdated({x, y, cell}));
-    }
-    if (
-        minePresent
-        && !IsMineExploded({grid, x, y})
-        && (getState().game.cellsCleared > 0)
-    ) {
-        dispatch(actions.Detonate({x, y}));
-        dispatch(actions.GameLost());
-    } else {
-        if (minePresent) {
-            cell &= ~GRID_CELL_MINE_PRESENT;
-            PlaceMineSomewhereExcept({dispatch, grid, except: {x, y}});
+    if (getState().game.cellsCleared === 0) {
+        let minesRelocated = 0;
+        WithCellsWithinRange({grid, x, y, range: 1, fn: (x, y) => {
+            if (IsMinePresent({grid, x, y})) {
+                ++minesRelocated;
+                let cell = grid[y][x] & ~GRID_CELL_MINE_PRESENT;
+                dispatch(actions.ReflectGridUpdated({x, y, cell}));
+                PlaceMineSomewhereBeyond({dispatch, grid, beyond: {x, y}});
+            }
+        }});
+        if (minesRelocated > 0) {
+            dispatch(actions.StepIfNotTagged({x, y}));
+            return;
         }
+    }
+    if (IsMinePresent({grid, x, y})) {
+        if (!IsMineExploded({grid, x, y})) {
+            if (getState().game.active) {
+                dispatch(actions.GameLost());
+            }
+            dispatch(actions.Detonate({x, y}));
+        }
+    } else {
+        let cell = grid[y][x] | GRID_CELL_UNCOVERED;
         dispatch(actions.ReflectGridUpdated({x, y, cell}));
         if (ComputeNeighborMines({grid, x, y}) === 0) {
             StepOnNeighbors({dispatch, grid, x, y});
         }
-        if (getState().game.cellsToClear === 0) {
+        if (
+            (getState().game.cellsToClear === 0)
+            && (getState().game.active)
+        ) {
             dispatch(actions.GameWon());
         }
     }
@@ -267,23 +273,6 @@ const OnStepOnUntaggedNeighborsIfEnoughTagged = ({
     const neighborTags = ComputeNeighborTags({grid, x, y});
     if (neighborTags >= neighborMines) {
         StepOnNeighbors({dispatch, grid, x, y});
-    }
-};
-
-const OnToggleMarkerOrLighten = ({
-    action: {x, y},
-    dispatch,
-    getState,
-}) => {
-    const grid = getState().game.grid;
-    let cell = grid[y][x];
-    if (IsUncovered({grid, x, y})) {
-        cell &= ~GRID_CELL_DARKENED;
-    } else {
-        cell ^= GRID_CELL_TAGGED;
-    }
-    if (cell !== grid[y][x]) {
-        dispatch(actions.ReflectGridUpdated({x, y, cell}));
     }
 };
 
@@ -309,10 +298,9 @@ const handlers = {
     [actionTypes.Detonate]: OnDetonate,
     [actionTypes.GameLost]: OnGameLost,
     [actionTypes.GameWon]: OnGameWon,
-    [actionTypes.PickUpOrDarken]: OnPickUpOrDarken,
+    [actionTypes.PickUp]: OnPickUp,
     [actionTypes.StepIfNotTagged]: OnStepIfNotTagged,
     [actionTypes.StepOnUntaggedNeighborsIfEnoughTagged]: OnStepOnUntaggedNeighborsIfEnoughTagged,
-    [actionTypes.ToggleMarkerOrLighten]: OnToggleMarkerOrLighten,
     [actionTypes.UsePowerTool]: OnUsePowerTool,
 };
 

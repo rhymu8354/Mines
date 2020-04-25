@@ -22,9 +22,10 @@ Rhymines:
     ✔ Shift-click or middle-click number should step on all untagged neighbors as long as there are enough tagged neighbors. @created(2020-04-20 14:25) @done(2020-04-20 14:36)
     ✔ Make the first click a guarantee (no mine) @created(2020-04-20 13:36) @done(2020-04-20 14:58)
         [13:34] tollus: are you also planning to make the first click a guarantee?
-    ☐ Review pull request @created(2020-04-20 12:38)
+    ✔ Review pull request @created(2020-04-20 12:38) @done(2020-04-25 16:42)
         [12:37] Aiden_Garth: Pull created. Link: https://github.com/rhymu8354/Mines/pull/1
         The test build failed; looks like `typescript` needs to be added to the project in order for the build to work.
+        Aiden_Garth submitted closed the original PR and opened a second PR, which they got working.  I merged it into master, so now various TypeScript-enabled checking features are enabled for VSCode even for plain JavaScript.
     ✔ Add game levels @created(2020-04-20 09:47) @done(2020-04-21 01:08)
     ✔ Add explosion effects @created(2020-04-20 09:47) @done(2020-04-23 15:14)
     ☐ Get Gud at CSS @created(2020-04-20 10:54)
@@ -45,3 +46,9 @@ Rhymines:
     ✔ Step/mark/pickup on pointer up, not down @created(2020-04-22 21:36) @done(2020-04-22 22:47)
     ✔ [5:43] nDoorn: Might to be an idea to make the numbers left/right clickable. Left clicking makes them darker and right clicking them makes them show normally.  That way you can manually mark numbers which are no longer of use for someone :slight_smile: @created(2020-04-23 10:36) @done(2020-04-23 10:51)
     ✔ Make cell tint level configurable @created(2020-04-23 10:51) @done(2020-04-23 11:18)
+    ✔ Allow marking/unmarking revealed bombs @created(2020-04-25 12:23) @done(2020-04-25 15:06)
+    ✔ Change tint-on from left-click to right-click @created(2020-04-25 12:23) @done(2020-04-25 15:07)
+    ✔ Make <Alt>+click+drag scroll the viewport @created(2020-04-25 12:23) @done(2020-04-25 16:16)
+    ☐ Allow the game to be saved/loaded, using localStorage to hold the game state @created(2020-04-25 12:25)
+    ✔ Make left+right-click an alternate to <Alt>+click @created(2020-04-25 12:25) @done(2020-04-25 16:31)
+    ✔ Make double-left-click an alternate to middle-click @created(2020-04-25 16:17) @done(2020-04-25 16:31)

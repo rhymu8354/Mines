@@ -14,7 +14,7 @@ const DefineAction = (type) => {
     "GameLost",
     "GameWon",
     "HideStage",
-    "PickUpOrDarken",
+    "PickUp",
     "Play",
     "PopModal",
     "PushModal",
@@ -37,6 +37,5 @@ const DefineAction = (type) => {
     "ShowStage",
     "StepIfNotTagged",
     "StepOnUntaggedNeighborsIfEnoughTagged",
-    "ToggleMarkerOrLighten",
     "UsePowerTool",
 ].forEach(actionType => DefineAction(actionType));
