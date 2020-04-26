@@ -7,25 +7,25 @@ import "./SelectLevel.css";
 
 const originalLevelTable = [
     {
-        title: "Easy",
+        title: "Simple",
         width: 10,
         height: 10,
         numMines: 15,
     },
     {
-        title: "Moderate",
+        title: "Warm-up",
         width: 15,
         height: 12,
         numMines: 30,
     },
     {
-        title: "Difficult",
+        title: "Moderate",
         width: 20,
         height: 15,
         numMines: 50,
     },
     {
-        title: "Brain-melting",
+        title: "Difficult",
         width: 35,
         height: 20,
         numMines: 125,
@@ -34,7 +34,7 @@ const originalLevelTable = [
 
 const extendedLevelTable = [
     {
-        title: "Mine-opolis",
+        title: "Strenuous",
         width: 50,
         height: 50,
         numMines: 450,
@@ -43,7 +43,7 @@ const extendedLevelTable = [
         startPower: 5,
     },
     {
-        title: "Mine-country",
+        title: "Aggravating",
         width: 100,
         height: 100,
         numMines: 1800,
@@ -52,7 +52,7 @@ const extendedLevelTable = [
         startPower: 5,
     },
     {
-        title: "Mine-world",
+        title: "Tormenting",
         width: 175,
         height: 175,
         numMines: 5500,
@@ -61,7 +61,7 @@ const extendedLevelTable = [
         startPower: 5,
     },
     {
-        title: "Mega-maze",
+        title: "Impossible",
         width: 250,
         height: 250,
         numMines: 11000,
