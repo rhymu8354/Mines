@@ -226,6 +226,10 @@ const Play = ({
                         around the grid.
                     </p>
                     <p>
+                        Right-clicking a covered cell toggles the location of a
+                        mine.
+                    </p>
+                    <p>
                         Right-clicking an uncovered cell toggles the tint to it.
                         You can control the tinting with the slider control.
                     </p>
