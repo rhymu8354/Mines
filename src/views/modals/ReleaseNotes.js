@@ -9,6 +9,12 @@ import "./ReleaseNotes.css";
 
 const content = [
     {
+        version: "0.16.1 - 2020-04-26",
+        notes: <ul>
+            <li>Several documentation errors fixed (thanks to nD00rn!)</li>
+        </ul>,
+    },
+    {
         version: "0.16.0 - 2020-04-25",
         notes: <ul>
             <li>Allow marking/unmarking revealed unexploded mines.</li>
