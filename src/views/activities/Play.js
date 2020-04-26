@@ -226,8 +226,12 @@ const Play = ({
                         around the grid.
                     </p>
                     <p>
-                        Right-clicking a covered cell toggles the location of a
-                        mine.
+                        Right-clicking a covered cell toggles the mark of a mine.
+                    </p>
+                    <p>
+                        Middle-clicking will explore all surrounding cells.
+                        Locations of marked mines will be skipped. The clicked
+                        number must match the number of surrounding marked mines.
                     </p>
                     <p>
                         Right-clicking an uncovered cell toggles the tint to it.
