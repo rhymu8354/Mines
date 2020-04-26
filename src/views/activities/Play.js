@@ -226,9 +226,8 @@ const Play = ({
                         around the grid.
                     </p>
                     <p>
-                        Left-clicking an uncovered cell adds a tint to it, while
-                        right-clicking removes tinting.  You can control the
-                        tinting with the slider control above.
+                        Right-clicking an uncovered cell toggles the tint to it.
+                        You can control the tinting with the slider control.
                     </p>
                 </div>
             </div>
