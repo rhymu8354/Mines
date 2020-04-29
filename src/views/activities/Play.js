@@ -6,6 +6,7 @@ import { actions } from "../../actions";
 import {
     MAX_TILE_SCALING,
     POWER_COSTS,
+    POWER_TOOL_ARMOR,
     POWER_TOOL_DETONATOR,
     POWER_TOOL_PROBE,
 } from "../../constants";
@@ -15,10 +16,12 @@ import "./Play.css";
 const useOnceEffect = fn => useEffect(fn, []);
 
 const Play = ({
+    armor,
     gameActive,
     gameLost,
     minScaling,
     numMinesPlayerThinksAreUnaccounted,
+    onAddArmor,
     onHideStage,
     onQuit,
     onReflectStageSize,
@@ -36,6 +39,7 @@ const Play = ({
     redBoxEnabled,
     score,
     shakeEnabled,
+    showArmor,
     soundEnabled,
     soundLevel,
     tinting,
@@ -81,6 +85,13 @@ const Play = ({
                 Mines Left: <span className="mines-left-text">{numMinesPlayerThinksAreUnaccounted}</span>
             </p>
             {(
+                showArmor
+                ? <p className="Player-controls-power">
+                    <span className="armor-text">Armor: {armor}</span>
+                </p>
+                : null
+            )}
+            {(
                 (power > 0)
                 ? <>
                     <p className="Player-controls-power">
@@ -100,7 +111,7 @@ const Play = ({
                             }
                             onClick={() => onSelectPowerTool(POWER_TOOL_PROBE)}
                         >
-                            Probe&nbsp;(2)
+                            Probe&nbsp;({POWER_COSTS[POWER_TOOL_PROBE]})
                         </button>
                         <button
                             type="button"
@@ -115,7 +126,17 @@ const Play = ({
                             }
                             onClick={() => onSelectPowerTool(POWER_TOOL_DETONATOR)}
                         >
-                            Detonator&nbsp;(4)
+                            Detonator&nbsp;({POWER_COSTS[POWER_TOOL_DETONATOR]})
+                        </button>
+                        <button
+                            type="button"
+                            disabled={
+                                !gameActive
+                                || (power < POWER_COSTS[POWER_TOOL_ARMOR])
+                            }
+                            onClick={() => onAddArmor()}
+                        >
+                            Armor&nbsp;({POWER_COSTS[POWER_TOOL_ARMOR]})
                         </button>
                     </div>
                     <p className="Player-controls-power-info">
@@ -244,6 +265,7 @@ const Play = ({
 }
 
 const mapStateToProps = (state, ownProps) => ({
+    armor: state.game.armor,
     gameActive: state.game.active,
     gameLost: state.game.lost,
     minScaling: state.app.minScaling,
@@ -253,12 +275,18 @@ const mapStateToProps = (state, ownProps) => ({
     redBoxEnabled: state.app.redBoxEnabled,
     score: state.game.score,
     shakeEnabled: state.app.shakeEnabled,
+    showArmor: state.game.showArmor,
     soundEnabled: state.app.soundEnabled,
     soundLevel: state.app.soundLevel,
     tinting: state.app.tinting,
 });
 
 const mapDispatchToProps = (dispatch, ownProps) => ({
+    onAddArmor: () => {
+        const powerCost = POWER_COSTS[POWER_TOOL_ARMOR];
+        dispatch(actions.AddPower({power: -powerCost}));
+        dispatch(actions.AddArmor({armor: 1}));
+    },
     onHideStage: () => dispatch(actions.HideStage()),
     onReflectStageSize: (width, height) => dispatch(actions.ReflectStageSize({width, height})),
     onQuit: () => dispatch(actions.Quit()),

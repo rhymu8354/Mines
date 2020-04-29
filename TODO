@@ -53,4 +53,6 @@ Rhymines:
     ☐ Allow the game to be saved/loaded, using localStorage to hold the game state @created(2020-04-25 12:25)
     ✔ Make left+right-click an alternate to <Alt>+click @created(2020-04-25 12:25) @done(2020-04-25 16:31)
     ✔ Make double-left-click an alternate to middle-click @created(2020-04-25 16:17) @done(2020-04-25 16:31)
-    ☐ Show clear progress in mini-map @created(2020-04-25 20:12)
+    ☐ Show clear progress in mini-map. @created(2020-04-25 20:12)
+    ✔ Add armor (5 points). @created(2020-04-28 17:22) @done(2020-04-28 17:49)
+    ✔ Change cost of detonator from 4 to 3 points. @created(2020-04-28 17:22) @done(2020-04-28 17:50)

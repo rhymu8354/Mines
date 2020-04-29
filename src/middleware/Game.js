@@ -238,7 +238,11 @@ const OnStepIfNotTagged = ({
     if (IsMinePresent({grid, x, y})) {
         if (!IsMineExploded({grid, x, y})) {
             if (getState().game.active) {
-                dispatch(actions.GameLost());
+                if (getState().game.armor > 0) {
+                    dispatch(actions.AddArmor({armor: -1}));
+                } else {
+                    dispatch(actions.GameLost());
+                }
             }
             dispatch(actions.Detonate({x, y}));
         }

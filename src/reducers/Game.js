@@ -61,6 +61,7 @@ const MakeGrid = (width, height, numMines, numPower, numBonus) => {
 
 const initialState = {
     active: true,
+    armor: 0,
     cellsCleared: 0,
     cellsToClear: 0,
     grid: null,
@@ -72,10 +73,18 @@ const initialState = {
     powerCollected: 0,
     powerTool: null,
     score: 0,
+    showArmor: false,
+    startArmor: 0,
+    startPower: 0
 };
 
 export default function (state = initialState, action) {
     switch (action.type) {
+        case actionTypes.AddArmor:
+            return {
+                ...state,
+                armor: state.armor + action.armor,
+            };
         case actionTypes.AddPower:
             return {
                 ...state,
@@ -91,11 +100,14 @@ export default function (state = initialState, action) {
             const numMines = FirstNonNull([action.numMines, state.numMines]);
             const numPower = FirstNonNull([action.numPower, state.numPower]);
             const numBonus = FirstNonNull([action.numBonus, state.numBonus]);
+            const showArmor = FirstNonNull([action.showArmor, state.showArmor]);
+            const startArmor = FirstNonNull([action.startArmor, state.startArmor]);
             const startPower = FirstNonNull([action.startPower, state.startPower]);
             const width = FirstNonNull([action.width, (state.grid && (state.grid.length > 0)) ? state.grid[0].length : 0]);
             const height = FirstNonNull([action.height, state.grid ? state.grid.length : 0]);
             return {
                 ...state,
+                armor: startArmor,
                 active: true,
                 cellsCleared: 0,
                 cellsToClear: width * height - numMines,
@@ -107,7 +119,9 @@ export default function (state = initialState, action) {
                 numPower,
                 powerCollected: startPower,
                 powerTool: null,
+                showArmor,
                 score: 0,
+                startArmor,
                 startPower,
             };
         }

@@ -9,6 +9,7 @@ const DefineAction = (type) => {
 };
 
 [
+    "AddArmor",
     "AddPower",
     "Detonate",
     "GameLost",

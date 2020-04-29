@@ -40,6 +40,7 @@ const extendedLevelTable = [
         numMines: 450,
         numPower: 10,
         numBonus: 5,
+        startArmor: 1,
         startPower: 5,
     },
     {
@@ -49,6 +50,7 @@ const extendedLevelTable = [
         numMines: 1800,
         numPower: 40,
         numBonus: 20,
+        startArmor: 1,
         startPower: 5,
     },
     {
@@ -58,6 +60,7 @@ const extendedLevelTable = [
         numMines: 5500,
         numPower: 125,
         numBonus: 60,
+        startArmor: 1,
         startPower: 5,
     },
     {
@@ -67,6 +70,7 @@ const extendedLevelTable = [
         numMines: 11000,
         numPower: 250,
         numBonus: 125,
+        startArmor: 1,
         startPower: 5,
     },
 ];
@@ -92,6 +96,8 @@ const SelectLevel = ({
                                     ...level,
                                     numPower: 0,
                                     numBonus: 0,
+                                    showArmor: false,
+                                    startArmor: 0,
                                     startPower: 0,
                                 })
                             }
@@ -107,7 +113,12 @@ const SelectLevel = ({
                     <div>
                         <button
                             type="button"
-                            onClick={() => onPlay(level)}
+                            onClick={
+                                () => onPlay({
+                                    ...level,
+                                    showArmor: true,
+                                })
+                            }
                         >
                             Play
                         </button>

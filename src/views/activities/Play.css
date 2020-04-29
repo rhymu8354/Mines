@@ -53,12 +53,12 @@
     margin-bottom: 0;
 }
 
-.Player-controls-power-buttons {
+.Player-controls-power-buttons > * {
     margin-top: 10px;
 }
 
-.Player-controls-power-buttons > *:not(:first-child) {
-    margin-left: 10px;
+.Player-controls-power-buttons > *:not(:last-child) {
+    margin-right: 10px;
 }
 
 .Player-controls-power-info {

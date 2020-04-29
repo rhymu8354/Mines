@@ -77,6 +77,10 @@ input {
     color: red;
 }
 
+.armor-text {
+    color: skyblue;
+}
+
 .power-text {
     animation: power-text 2000ms infinite;
 }
