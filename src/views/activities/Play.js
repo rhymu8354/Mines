@@ -17,8 +17,10 @@ const useOnceEffect = fn => useEffect(fn, []);
 
 const Play = ({
     armor,
+    bonusPower,
     gameActive,
     gameLost,
+    isBonus,
     minScaling,
     numMinesPlayerThinksAreUnaccounted,
     onAddArmor,
@@ -48,7 +50,7 @@ const Play = ({
     const stageRef = useRef(null);
     useOnceEffect(
         () => {
-            onShowStage();
+            onShowStage("stage");
             const onResize = () => {
                 onReflectStageSize(
                     stageRef.current.clientWidth,
@@ -79,15 +81,22 @@ const Play = ({
             />
         </div>
         <div className="Play-controls">
-            <p className="Player-controls-score">
-                Score: <span className="score-text">{score}</span>
+            {(
+                isBonus
+                ? <p className="Play-controls-bonus">
+                    BONUS GAME
+                </p>
+                : null
+            )}
+            <p className="Play-controls-score">
+                Time: <span className="score-text">{score}</span>
             </p>
-            <p className="Player-controls-mines-left">
+            <p className="Play-controls-mines-left">
                 Mines Left: <span className="mines-left-text">{numMinesPlayerThinksAreUnaccounted}</span>
             </p>
             {(
                 showArmor
-                ? <p className="Player-controls-power">
+                ? <p className="Play-controls-power">
                     <span className="armor-text">Armor: {armor}</span>
                 </p>
                 : null
@@ -95,10 +104,10 @@ const Play = ({
             {(
                 (power > 0)
                 ? <>
-                    <p className="Player-controls-power">
+                    <p className="Play-controls-power">
                         <span className="power-text">Power: {power}</span>
                     </p>
-                    <div className="Player-controls-power-buttons">
+                    <div className="Play-controls-power-buttons">
                         <button
                             type="button"
                             className={(
@@ -140,7 +149,7 @@ const Play = ({
                             Armor&nbsp;({POWER_COSTS[POWER_TOOL_ARMOR]})
                         </button>
                     </div>
-                    <p className="Player-controls-power-info">
+                    <p className="Play-controls-power-info">
                         The power of ancient bots courses through your
                         veins!  Click a power move button above, then
                         left-click in the grid to unleash it!
@@ -151,11 +160,23 @@ const Play = ({
             {(
                 gameActive
                 ? null
-                : <p className="Player-controls-game-status">
+                : <p className="Play-controls-game-status">
                     {(
                         gameLost
-                        ? <span className="game-over-text">GAME OVER</span>
-                        : <span className="game-won-text">* YOU WIN *</span>
+                        ? <span className="game-over-text">
+                            {(
+                                isBonus
+                                ? "NICE TRY"
+                                : "GAME OVER"
+                            )}
+                        </span>
+                        : <span className="game-won-text">
+                            {(
+                                isBonus
+                                ? `GG! +${bonusPower} power!`
+                                : "* YOU WIN *"
+                            )}
+                        </span>
                     )}
                 </p>
             )}
@@ -164,20 +185,26 @@ const Play = ({
                     type="button"
                     onClick={() => onQuit()}
                 >
-                    Quit
+                    {(isBonus ? "Back" : "Quit")}
                 </button>
-                <button
-                    type="button"
-                    onClick={() => onRetry()}
-                >
-                    Retry
-                </button>
-                <button
-                    type="button"
-                    onClick={() => onSave()}
-                >
-                    Save
-                </button>
+                {(
+                    isBonus
+                    ? null
+                    : <>
+                        <button
+                            type="button"
+                            onClick={() => onRetry()}
+                        >
+                            Retry
+                        </button>
+                        <button
+                            type="button"
+                            onClick={() => onSave()}
+                        >
+                            Save
+                        </button>
+                    </>
+                )}
             </div>
             <div className="Play-controls-scrolled">
                 <div className="Play-controls-slider">
@@ -273,8 +300,10 @@ const Play = ({
 
 const mapStateToProps = (state, ownProps) => ({
     armor: state.game.armor,
+    bonusPower: state.app.bonusPower,
     gameActive: state.game.active,
     gameLost: state.game.lost,
+    isBonus: state.app.gameStack.length > 0,
     minScaling: state.app.minScaling,
     numMinesPlayerThinksAreUnaccounted: state.game.numMinesPlayerThinksAreUnaccounted,
     power: state.game.powerCollected,
@@ -306,7 +335,7 @@ const mapDispatchToProps = (dispatch, ownProps) => ({
     onSetSoundEnabled: (soundEnabled) => dispatch(actions.SetSoundEnabled({soundEnabled})),
     onSetSoundLevel: (soundLevel) => dispatch(actions.SetSoundLevel({soundLevel})),
     onSetTinting: (tinting) => dispatch(actions.SetTinting({tinting})),
-    onShowStage: () => dispatch(actions.ShowStage()),
+    onShowStage: (parentId) => dispatch(actions.ShowStage({parentId})),
 });
 
 export default connect(

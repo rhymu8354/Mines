@@ -18,6 +18,7 @@ import {
     DETONATION_SHAKE_COUNT,
     DETONATION_SOUND_DURATION,
     DOUBLE_CLICK_THRESHOLD_MILLISECONDS,
+    GRID_CELL_BONUS,
     GRID_CELL_DARKENED,
     GRID_CELL_POWER,
     GRID_CELL_TAGGED,
@@ -28,6 +29,7 @@ import {
     SCROLL_UNITS_PER_PAGE_X,
     SCROLL_UNITS_PER_PAGE_Y,
     SHAKE_MAX_DISTANCE,
+    TILE_BONUS,
     TILE_COVERED,
     TILE_EXPLODED_MINE,
     TILE_POWER,
@@ -107,6 +109,8 @@ const ComputeCellFrame = ({gameActive, grid, x, y}) => {
     } else if (IsUncovered({grid, x, y})) {
         if (IsMinePresent({grid, x, y})) {
             return TILE_UNEXPLODED_MINE;
+        } else if ((cell & GRID_CELL_BONUS) !== 0) {
+            return TILE_BONUS;
         } else if ((cell & GRID_CELL_POWER) !== 0) {
             return TILE_POWER;
         } else {
@@ -119,9 +123,14 @@ const ComputeCellFrame = ({gameActive, grid, x, y}) => {
     }
 };
 
-const DragViewportInMiniMap = ({getState, stage, pointer}) => {
-    const viewportWidthInPixels = getState().app.width;
-    const viewportHeightInPixels = getState().app.height;
+const DragViewportInMiniMap = ({
+    dispatch,
+    getState,
+    stage,
+    pointer
+}) => {
+    const viewportWidthInPixels = getState().game.width;
+    const viewportHeightInPixels = getState().game.height;
     const tileScaledSize = TILE_SIZE * stage.tileScaling;
     const grid = getState().game.grid;
     const heightInTiles = grid.length;
@@ -150,30 +159,24 @@ const DragViewportInMiniMap = ({getState, stage, pointer}) => {
         ) / stage.miniMapRatio / tileScaledSize
         - viewportHeightInTiles / 2
     );
-    UpdateTilePositionsAndScale({
-        getState,
-        stage,
-        offsetX,
-        offsetY,
-    });
+    dispatch(actions.SetViewport({offsetX, offsetY}));
 };
 
-const DragViewportInGrid = ({getState, stage, pointer}) => {
+const DragViewportInGrid = ({dispatch, getState, stage, pointer}) => {
     const tileScaledSize = TILE_SIZE * stage.tileScaling;
-    const x = stage.offsetX + Math.floor(pointer.x / tileScaledSize);
-    const y = stage.offsetY + Math.floor(pointer.y / tileScaledSize);
+    const {offsetX, offsetY} = getState().game;
+    const x = offsetX + Math.floor(pointer.x / tileScaledSize);
+    const y = offsetY + Math.floor(pointer.y / tileScaledSize);
     if (
         (x !== stage.lastX)
         || (y !== stage.lastY)
     ) {
-        const offsetX = stage.offsetX + stage.lastX - x;
-        const offsetY = stage.offsetY + stage.lastY - y;
-        UpdateTilePositionsAndScale({
-            getState,
-            stage,
-            offsetX,
-            offsetY,
-        });
+        dispatch(
+            actions.SetViewport({
+                offsetX: offsetX + stage.lastX - x,
+                offsetY: offsetY + stage.lastY - y,
+            })
+        );
     }
 };
 
@@ -181,8 +184,7 @@ const DropTiles = ({
     getState,
     stage
 }) => {
-    const grid = getState().game.grid;
-    WithAllGridCells(grid, (x, y) => {
+    WithAllGridCells(stage.tiles, (x, y) => {
         const sprite = stage.tiles[y][x];
         if (sprite != null) {
             sprite.setVisible(false);
@@ -272,31 +274,33 @@ const ToggleTint = ({
 };
 
 const UpdateRedBoxPosition = ({
+    getState,
     stage,
 }) => {
     if (stage.lastX != null) {
         const tileScaledSize = TILE_SIZE * stage.tileScaling;
-        stage.redBox.setX((stage.lastX - stage.offsetX) * tileScaledSize);
-        stage.redBox.setY((stage.lastY - stage.offsetY) * tileScaledSize);
+        stage.redBox.setX((stage.lastX - getState().game.offsetX) * tileScaledSize);
+        stage.redBox.setY((stage.lastY - getState().game.offsetY) * tileScaledSize);
         stage.spriteContainer.remove(stage.redBox);
         stage.spriteContainer.add(stage.redBox);
     }
 };
 
 const UpdateTilePositionsAndScale = ({
+    dispatch,
     getState,
     stage,
-    offsetX,
-    offsetY,
 }) => {
+    let offsetX = getState().game.offsetX;
     if (offsetX == null) {
-        offsetX = stage.offsetX;
+        offsetX = 0;
     }
+    let offsetY = getState().game.offsetY;
     if (offsetY == null) {
-        offsetY = stage.offsetY;
+        offsetY = 0;
     }
-    const viewportWidthInPixels = getState().app.width;
-    const viewportHeightInPixels = getState().app.height;
+    const viewportWidthInPixels = getState().game.width;
+    const viewportHeightInPixels = getState().game.height;
     const grid = getState().game.grid;
     const heightInTiles = grid.length;
     const widthInTiles = grid[0].length;
@@ -333,6 +337,13 @@ const UpdateTilePositionsAndScale = ({
         heightInTiles - viewportHeightInTiles
     );
     if (
+        (offsetX !== getState().game.offsetX)
+        || (offsetY !== getState().game.offsetY)
+    ) {
+        dispatch(actions.SetViewport({offsetX, offsetY}));
+        return;
+    }
+    if (
         (newTileScaling !== stage.tileScaling)
         || (offsetX !== stage.offsetX)
         || (offsetY !== stage.offsetY)
@@ -340,11 +351,9 @@ const UpdateTilePositionsAndScale = ({
     ) {
         stage.tileScaling = newTileScaling;
         if (stage.lastX != null) {
-            stage.lastX += (offsetX - stage.offsetX);
-            stage.lastY += (offsetY - stage.offsetY);
+            stage.lastX += (offsetX - getState().game.offsetX);
+            stage.lastY += (offsetY - getState().game.offsetY);
         }
-        stage.offsetX = offsetX;
-        stage.offsetY = offsetY;
         WithAllGridCells(grid, (x, y) => {
             const spriteX = (x - offsetX) * tileScaledSize;
             const spriteY = (y - offsetY) * tileScaledSize;
@@ -423,7 +432,7 @@ const UpdateTilePositionsAndScale = ({
         stage.miniMap.add(miniMapViewport);
     }
     stage.redBox.setScale(newTileScaling);
-    UpdateRedBoxPosition({stage});
+    UpdateRedBoxPosition({getState, stage});
 };
 
 const OnDetonate = ({
@@ -472,24 +481,29 @@ const OnHideStage = ({
         stage.redBox.destroy();
         stage.redBox = null;
     }
+    if (stage.spriteContainer) {
+        stage.spriteContainer.destroy();
+        stage.spriteContainer = null;
+    }
     stage.scene = null;
+    stage.removeWheelListener();
+    stage.removeWheelListener = null;
     stage.game.destroy(true);
     stage.game = null;
 };
 
-const OnPlay = ({
+const OnPlayOrRestoreGame = ({
+    dispatch,
     getState,
     stage,
 }) => {
+    stage.startingScore = getState().game.score;
     stage.baseTime = null;
+    stage.offsetX = getState().game.offsetX;
+    stage.offsetY = getState().game.offsetY;
     ComputeSpriteTint({getState, stage});
     DropTiles({getState, stage});
-    UpdateTilePositionsAndScale({
-        getState,
-        stage,
-        offsetX: 0,
-        offsetY: 0
-    });
+    UpdateTilePositionsAndScale({dispatch, getState, stage});
 };
 
 const OnReflectGridUpdated = ({
@@ -517,11 +531,11 @@ const OnReflectGridUpdatedBatch = ({
 };
 
 const OnReflectStageSize = ({
+    dispatch,
     getState,
     stage,
 }) => {
-    // @ts-ignore
-    UpdateTilePositionsAndScale({getState, stage});
+    UpdateTilePositionsAndScale({dispatch, getState, stage});
 };
 
 const OnSelectPowerTool = ({
@@ -532,11 +546,11 @@ const OnSelectPowerTool = ({
 }
 
 const OnSetMinScaling = ({
+    dispatch,
     getState,
     stage,
 }) => {
-    // @ts-ignore
-    UpdateTilePositionsAndScale({getState, stage});
+    UpdateTilePositionsAndScale({dispatch, getState, stage});
 };
 
 const OnSetRedBoxEnabled = ({
@@ -560,13 +574,21 @@ const OnSetTinting = ({
     });
 };
 
+const OnSetViewport = ({
+    dispatch,
+    getState,
+    stage,
+}) => {
+    UpdateTilePositionsAndScale({dispatch, getState, stage});
+};
+
 const OnShowStage = ({
+    action: {parentId},
     dispatch,
     getState,
     onPhaserReady,
     stage,
 }) => {
-    const startingScore = getState().game.score;
     const onKeyDown = (e) => {
         if (e.keyCode === Phaser.Input.Keyboard.KeyCodes.ESC) {
             dispatch(actions.SelectPowerTool({powerTool: null}));
@@ -578,30 +600,30 @@ const OnShowStage = ({
             const grid = getState().game.grid;
             const width = Math.min(
                 Math.ceil(
-                    getState().app.width / (TILE_SIZE * stage.tileScaling)
+                    getState().game.width / (TILE_SIZE * stage.tileScaling)
                 ),
                 grid[0].length
             );
             const height = Math.min(
                 Math.ceil(
-                    getState().app.height / (TILE_SIZE * stage.tileScaling)
+                    getState().game.height / (TILE_SIZE * stage.tileScaling)
                 ),
                 grid.length
             );
             const dx = Math.max(1, Math.floor(width / SCROLL_UNITS_PER_PAGE_X));
             const dy = Math.max(1, Math.floor(height / SCROLL_UNITS_PER_PAGE_Y));
-            UpdateTilePositionsAndScale({
-                getState,
-                stage,
-                offsetX: stage.offsetX + dx * direction.x,
-                offsetY: stage.offsetY + dy * direction.y
-            });
+            dispatch(
+                actions.SetViewport({
+                    offsetX: getState().game.offsetX + dx * direction.x,
+                    offsetY: getState().game.offsetY + dy * direction.y,
+                })
+            );
             e.preventDefault();
         }
     };
     const onPointerMove = (pointer) => {
-        const viewportWidthInPixels = getState().app.width;
-        const viewportHeightInPixels = getState().app.height;
+        const viewportWidthInPixels = getState().game.width;
+        const viewportHeightInPixels = getState().game.height;
         if (
             (pointer.x >= viewportWidthInPixels - MINI_MAP_SIZE - MINI_MAP_MARGIN)
             && (pointer.x < viewportWidthInPixels - MINI_MAP_MARGIN)
@@ -611,15 +633,15 @@ const OnShowStage = ({
             stage.lastX = null;
             stage.lastY = null;
             if (stage.draggingViewportInMiniMap) {
-                DragViewportInMiniMap({getState, stage, pointer});
+                DragViewportInMiniMap({dispatch, getState, stage, pointer});
             }
         } else {
             if (stage.draggingViewportInGrid) {
-                DragViewportInGrid({getState, stage, pointer});
+                DragViewportInGrid({dispatch, getState, stage, pointer});
             }
             const tileScaledSize = TILE_SIZE * stage.tileScaling;
-            const x = stage.offsetX + Math.floor(pointer.x / tileScaledSize);
-            const y = stage.offsetY + Math.floor(pointer.y / tileScaledSize);
+            const x = getState().game.offsetX + Math.floor(pointer.x / tileScaledSize);
+            const y = getState().game.offsetY + Math.floor(pointer.y / tileScaledSize);
             const grid = getState().game.grid;
             if (
                 (x < grid[0].length)
@@ -634,7 +656,7 @@ const OnShowStage = ({
                     }
                     stage.lastX = x;
                     stage.lastY = y;
-                    UpdateRedBoxPosition({stage});
+                    UpdateRedBoxPosition({getState, stage});
                 }
             } else {
                 stage.lastX = null;
@@ -656,8 +678,8 @@ const OnShowStage = ({
         ) {
             stage.draggingViewportInGrid = true;
         } else {
-            const viewportWidthInPixels = getState().app.width;
-            const viewportHeightInPixels = getState().app.height;
+            const viewportWidthInPixels = getState().game.width;
+            const viewportHeightInPixels = getState().game.height;
             if (
                 (pointer.x >= viewportWidthInPixels - MINI_MAP_SIZE - MINI_MAP_MARGIN)
                 && (pointer.x < viewportWidthInPixels - MINI_MAP_MARGIN)
@@ -665,7 +687,7 @@ const OnShowStage = ({
                 && (pointer.y < viewportHeightInPixels - MINI_MAP_MARGIN)
             ) {
                 stage.draggingViewportInMiniMap = true;
-                DragViewportInMiniMap({getState, stage, pointer});
+                DragViewportInMiniMap({dispatch, getState, stage, pointer});
             }
         }
         stage.activeButton = pointer.buttons;
@@ -674,8 +696,8 @@ const OnShowStage = ({
             return;
         }
         const tileScaledSize = TILE_SIZE * stage.tileScaling;
-        const x = stage.offsetX + Math.floor(pointer.x / tileScaledSize);
-        const y = stage.offsetY + Math.floor(pointer.y / tileScaledSize);
+        const x = getState().game.offsetX + Math.floor(pointer.x / tileScaledSize);
+        const y = getState().game.offsetY + Math.floor(pointer.y / tileScaledSize);
         const grid = getState().game.grid;
         if (x >= grid[0].length) {
             return;
@@ -734,8 +756,8 @@ const OnShowStage = ({
             SetCursor({getState, stage});
             return;
         }
-        const viewportWidthInPixels = getState().app.width;
-        const viewportHeightInPixels = getState().app.height;
+        const viewportWidthInPixels = getState().game.width;
+        const viewportHeightInPixels = getState().game.height;
         if (
             (pointer.x >= viewportWidthInPixels - MINI_MAP_SIZE - MINI_MAP_MARGIN)
             && (pointer.x < viewportWidthInPixels - MINI_MAP_MARGIN)
@@ -743,15 +765,15 @@ const OnShowStage = ({
             && (pointer.y < viewportHeightInPixels - MINI_MAP_MARGIN)
         ) {
             stage.draggingViewportInMiniMap = true;
-            DragViewportInMiniMap({getState, stage, pointer});
+            DragViewportInMiniMap({dispatch, getState, stage, pointer});
             return;
         }
         if (!getState().game.active) {
             return;
         }
         const tileScaledSize = TILE_SIZE * stage.tileScaling;
-        const x = stage.offsetX + Math.floor(pointer.x / tileScaledSize);
-        const y = stage.offsetY + Math.floor(pointer.y / tileScaledSize);
+        const x = getState().game.offsetX + Math.floor(pointer.x / tileScaledSize);
+        const y = getState().game.offsetY + Math.floor(pointer.y / tileScaledSize);
         const grid = getState().game.grid;
         if (x >= grid[0].length) {
             return;
@@ -802,10 +824,13 @@ const OnShowStage = ({
         stage.lastY = null;
         SetRedBoxVisibility({getState, stage});
     };
-    const onMouseWheel = (direction, x, y) => {
+    const onMouseWheel = event => {
+        const direction = (event.deltaY < 0) ? MOUSE_WHEEL_UP : MOUSE_WHEEL_DOWN;
+        const x = event.offsetX;
+        const y = event.offsetY;
         const oldTileScaledSize = TILE_SIZE * stage.tileScaling;
-        const anchorX = Math.floor(x / oldTileScaledSize) + stage.offsetX;
-        const anchorY = Math.floor(y / oldTileScaledSize) + stage.offsetY;
+        const anchorX = Math.floor(x / oldTileScaledSize) + getState().game.offsetX;
+        const anchorY = Math.floor(y / oldTileScaledSize) + getState().game.offsetY;
         let minScaling = getState().app.minScaling;
         if (direction === MOUSE_WHEEL_UP) {
             ++minScaling;
@@ -815,12 +840,12 @@ const OnShowStage = ({
         minScaling = Clamp(minScaling, 1, MAX_TILE_SCALING);
         dispatch(actions.SetMinScaling({minScaling}));
         const newTileScaledSize = TILE_SIZE * stage.tileScaling;
-        UpdateTilePositionsAndScale({
-            getState,
-            stage,
-            offsetX: anchorX - Math.floor(x / newTileScaledSize),
-            offsetY: anchorY - Math.floor(y / newTileScaledSize),
-        });
+        dispatch(
+            actions.SetViewport({
+                offsetX: anchorX - Math.floor(x / newTileScaledSize),
+                offsetY: anchorY - Math.floor(y / newTileScaledSize),
+            })
+        );
     };
     const phaserInit = function() {
         stage.scene = this;
@@ -842,8 +867,6 @@ const OnShowStage = ({
         const width = grid[0].length;
         stage.baseTime = null;
         stage.time = null;
-        stage.offsetX = 0;
-        stage.offsetY = 0;
         stage.draggingViewportInMiniMap = false;
         for (let y = 0; y < height; ++y) {
             stage.tiles[y] = [];
@@ -873,13 +896,10 @@ const OnShowStage = ({
         stage.scene.input.on("pointerup", onPointerUp);
         stage.scene.input.on("pointerupoutside", onPointerUpOutside);
         stage.scene.input.on("gameout", onGameOut);
-        document.getElementById("stage").addEventListener("wheel", (event) => {
-            onMouseWheel(
-                (event.deltaY < 0) ? MOUSE_WHEEL_UP : MOUSE_WHEEL_DOWN,
-                event.offsetX,
-                event.offsetY
-            );
-        });
+        document.getElementById(parentId).addEventListener("wheel", onMouseWheel);
+        stage.removeWheelListener = () => {
+            document.getElementById(parentId).removeEventListener("wheel", onMouseWheel);
+        };
         stage.scene.input.topOnly = false;
         stage.scene.input.setDefaultCursor("pointer");
         stage.activeButton = null;
@@ -895,7 +915,7 @@ const OnShowStage = ({
             stage.lastTime = stage.time;
             stage.time = Math.floor((time - stage.baseTime) / 1000);
             if (stage.lastTime !== stage.time) {
-                dispatch(actions.ReflectScore({score: startingScore + stage.time}));
+                dispatch(actions.ReflectScore({score: stage.startingScore + stage.time}));
             }
         }
         if (stage.detonationSoundStart != null) {
@@ -923,7 +943,7 @@ const OnShowStage = ({
             touch: true,
         },
         miniMap: null,
-        parent: "stage",
+        parent: parentId,
         pixelArt: true,
         width: 1,
         height: 1,
@@ -940,43 +960,46 @@ const OnShowStage = ({
 const handlers = {
     [actionTypes.Detonate]: OnDetonate,
     [actionTypes.HideStage]: OnHideStage,
-    [actionTypes.Play]: OnPlay,
+    [actionTypes.Play]: OnPlayOrRestoreGame,
     [actionTypes.ReflectGridUpdated]: OnReflectGridUpdated,
     [actionTypes.ReflectGridUpdatedBatch]: OnReflectGridUpdatedBatch,
     [actionTypes.ReflectStageSize]: OnReflectStageSize,
+    [actionTypes.RestoreGame]: OnPlayOrRestoreGame,
     [actionTypes.SelectPowerTool]: OnSelectPowerTool,
     [actionTypes.SetMinScaling]: OnSetMinScaling,
     [actionTypes.SetRedBoxEnabled]: OnSetRedBoxEnabled,
     [actionTypes.SetTinting]: OnSetTinting,
+    [actionTypes.SetViewport]: OnSetViewport,
     [actionTypes.ShowStage]: OnShowStage,
 };
 
 export default function({ getState, dispatch }) {
     const stage = {
-        baseTime: null,
         activeButton: null,
+        baseTime: null,
         darkening: false,
-        debug: null,
         detonationSound: null,
         detonationSoundStart: null,
         draggingViewportInGrid: false,
         draggingViewportInMiniMap: false,
         freeSprites: [],
+        game: null,
         lastButton: null,
+        lastLeftClickTime: null,
         lastTime: 0,
         lastTimeRaw: 0,
-        game: null,
+        lastX: null,
+        lastY: null,
         miniMapRatio: 1,
         offsetX: 0,
         offsetY: 0,
         ready: false,
         redBox: null,
-        lastLeftClickTime: null,
-        lastX: null,
-        lastY: null,
+        removeWheelListener: null,
         scene: null,
         shakeCount: 0,
         spriteContainer: null,
+        startingScore: 0,
         tiles: [],
         tileScaling: 1,
         time: null,
@@ -1027,4 +1050,4 @@ export default function({ getState, dispatch }) {
             }
         }
     };
-};
+}

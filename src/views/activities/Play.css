@@ -38,30 +38,36 @@
     overflow-y: auto;
 }
 
-.Player-controls-score {
+.Play-controls-bonus {
+    font-size: 200%;
+    animation: bonus-text 2000ms infinite;
+    margin-bottom: 0;
+}
+
+.Play-controls-score {
     font-size: 150%;
     margin-bottom: 0;
 }
 
-.Player-controls-mines-left {
+.Play-controls-mines-left {
     font-size: 150%;
     margin-bottom: 0;
 }
 
-.Player-controls-power {
+.Play-controls-power {
     font-size: 150%;
     margin-bottom: 0;
 }
 
-.Player-controls-power-buttons > * {
+.Play-controls-power-buttons > * {
     margin-top: 10px;
 }
 
-.Player-controls-power-buttons > *:not(:last-child) {
+.Play-controls-power-buttons > *:not(:last-child) {
     margin-right: 10px;
 }
 
-.Player-controls-power-info {
+.Play-controls-power-info {
     color: goldenrod;
     margin-top: 10px;
     margin-bottom: 0px;
@@ -76,7 +82,7 @@
     margin-left: 10px;
 }
 
-.Player-controls-game-status {
+.Play-controls-game-status {
     font-size: 200%;
     margin-top: 10px;
     margin-bottom: 10px;
@@ -107,4 +113,16 @@
 
 .Play-controls-instructions {
     margin-top: 10px;
+}
+
+@keyframes bonus-text {
+    0% {
+        color: limegreen;
+    }
+    50% {
+        color: yellow;
+    }
+    100% {
+        color: limegreen;
+    }
 }

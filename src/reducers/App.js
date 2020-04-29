@@ -50,8 +50,8 @@ const GetInitialEnable = (settingKey, defaultSetting) => {
 
 const initialState = {
     activity: ACTIVITY_SELECT_LEVEL,
-    width: 1,
-    height: 1,
+    bonusPower: 0,
+    gameStack: [],
     minScaling: 2,
     redBoxEnabled: GetInitialEnable(LOCAL_STORAGE_RED_BOX_ENABLED, false),
     savedGame: localStorage.getItem(LOCAL_STORAGE_SAVED_GAME),
@@ -69,16 +69,33 @@ export default function (state = initialState, action) {
                 ...state,
                 savedGame: null,
             };
+        case actionTypes.PopGame:
+            return {
+                ...state,
+                gameStack: state.gameStack.slice(0, state.gameStack.length - 1),
+            };
+        case actionTypes.PushGame:
+            return {
+                ...state,
+                gameStack: [...state.gameStack, action.game],
+            };
         case actionTypes.ReflectSavedGame:
             return {
                 ...state,
                 savedGame: action.game,
             };
-        case actionTypes.ReflectStageSize:
+        case actionTypes.ReflectScore:
             return {
                 ...state,
-                width: action.width,
-                height: action.height,
+                bonusPower: (
+                    (state.gameStack.length === 0)
+                    ? 0
+                    : (
+                        (action.score >= 40)
+                        ? 1
+                        : 1 + Math.ceil((41 - action.score) / 5)
+                    )
+                ),
             };
         case actionTypes.SelectWittyQuote:
             return {

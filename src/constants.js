@@ -27,6 +27,10 @@ export const POWER_TOOL_ARMOR = "POWER_TOOL_ARMOR";
 export const POWER_TOOL_DETONATOR = "POWER_TOOL_DETONATOR";
 export const POWER_TOOL_PROBE = "POWER_TOOL_PROBE";
 
+export const BONUS_GAME_HEIGHT = 15;
+export const BONUS_GAME_MINES = 20;
+export const BONUS_GAME_WIDTH = 15;
+
 export const LOCAL_STORAGE_SAVED_GAME = "save";
 export const LOCAL_STORAGE_RED_BOX_ENABLED = "redBoxEnabled";
 export const LOCAL_STORAGE_SHAKE_ENABLED = "shakeEnabled";

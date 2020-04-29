@@ -65,17 +65,21 @@ const initialState = {
     cellsCleared: 0,
     cellsToClear: 0,
     grid: null,
+    height: 1,
     lost: false,
     numBonus: 0,
     numMines: 0,
     numMinesPlayerThinksAreUnaccounted: 0,
     numPower: 0,
+    offsetX: 0,
+    offsetY: 0,
     powerCollected: 0,
     powerTool: null,
     score: 0,
     showArmor: false,
     startArmor: 0,
-    startPower: 0
+    startPower: 0,
+    width: 1,
 };
 
 export default function (state = initialState, action) {
@@ -117,6 +121,8 @@ export default function (state = initialState, action) {
                 numMines,
                 numMinesPlayerThinksAreUnaccounted: numMines,
                 numPower,
+                offsetX: 0,
+                offsetY: 0,
                 powerCollected: startPower,
                 powerTool: null,
                 showArmor,
@@ -228,7 +234,7 @@ export default function (state = initialState, action) {
                 numMinesPlayerThinksAreUnaccounted,
             };
         }
-        case actionTypes.ReflectRestoredGame:
+        case actionTypes.RestoreGame:
             return {
                 ...action.game
             };
@@ -236,6 +242,12 @@ export default function (state = initialState, action) {
             return {
                 ...state,
                 score: action.score,
+            };
+        case actionTypes.ReflectStageSize:
+            return {
+                ...state,
+                width: action.width,
+                height: action.height,
             };
         case actionTypes.SelectPowerTool:
             if (!state.active) {
@@ -248,6 +260,12 @@ export default function (state = initialState, action) {
                     ? null
                     : action.powerTool
                 ),
+            };
+        case actionTypes.SetViewport:
+            return {
+                ...state,
+                offsetX: action.offsetX,
+                offsetY: action.offsetY,
             };
         default:
             return state;
