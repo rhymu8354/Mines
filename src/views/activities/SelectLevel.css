@@ -2,6 +2,23 @@
     flex: 1 0 auto;
 }
 
+.SelectLevel-saved-game {
+    color: skyblue;
+}
+
+.SelectLevel-saved-game-header {
+    font-style: italic;
+}
+
+.SelectLevel-saved-game-buttons {
+    display: flex;
+    flex-direction: row;
+}
+
+.SelectLevel-saved-game-buttons > *:not(:last-child) {
+    margin-right: 20px;
+}
+
 .SelectLevel-header {
     color: goldenrod;
 }

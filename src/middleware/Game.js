@@ -1,3 +1,5 @@
+import Pako from "pako";
+
 import { actionTypes, actions } from "../actions";
 
 import {
@@ -13,6 +15,7 @@ import {
 } from "../Utilities";
 
 import {
+    ACTIVITY_PLAY,
     DETONATION_REVEAL_RANGE,
     DETONATOR_RANGE,
     GRID_CELL_MINE_EXPLODED,
@@ -20,6 +23,7 @@ import {
     GRID_CELL_POWER,
     GRID_CELL_TAGGED,
     GRID_CELL_UNCOVERED,
+    LOCAL_STORAGE_SAVED_GAME,
     POWER_COSTS,
     POWER_TOOL_DETONATOR,
     POWER_TOOL_PROBE,
@@ -152,6 +156,10 @@ const OnDetonate = ({
     }});
 };
 
+const OnDropSavedGame = () => {
+    localStorage.removeItem(LOCAL_STORAGE_SAVED_GAME);
+};
+
 const OnGameLost = ({
     dispatch,
     getState,
@@ -209,6 +217,29 @@ const OnPickUp = ({
         dispatch(actions.ReflectGridUpdated({x, y, cell}));
         dispatch(actions.AddPower({power: 1}));
     }
+};
+
+const OnSave = ({
+    dispatch,
+    getState,
+}) => {
+    const uncompressedGameState = JSON.stringify(getState().game);
+    const compressedGameState = btoa(
+        Pako.deflate(uncompressedGameState, {"to": "string"})
+    );
+    localStorage.setItem(LOCAL_STORAGE_SAVED_GAME, compressedGameState);
+    dispatch(actions.ReflectSavedGame({game: compressedGameState}));
+    dispatch(actions.Quit());
+};
+
+const OnRestoreSavedGame = ({
+    dispatch,
+    getState,
+}) => {
+    const compressedGameState = getState().app.savedGame;
+    const decompressedGameState = Pako.inflate(atob(compressedGameState), {"to": "string"});
+    dispatch(actions.ReflectRestoredGame({game: JSON.parse(decompressedGameState)}));
+    dispatch(actions.SetActivity({activity: ACTIVITY_PLAY}));
 };
 
 const OnStepIfNotTagged = ({
@@ -300,9 +331,12 @@ const OnUsePowerTool = ({
 
 const handlers = {
     [actionTypes.Detonate]: OnDetonate,
+    [actionTypes.DropSavedGame]: OnDropSavedGame,
     [actionTypes.GameLost]: OnGameLost,
     [actionTypes.GameWon]: OnGameWon,
     [actionTypes.PickUp]: OnPickUp,
+    [actionTypes.RestoreSavedGame]: OnRestoreSavedGame,
+    [actionTypes.Save]: OnSave,
     [actionTypes.StepIfNotTagged]: OnStepIfNotTagged,
     [actionTypes.StepOnUntaggedNeighborsIfEnoughTagged]: OnStepOnUntaggedNeighborsIfEnoughTagged,
     [actionTypes.UsePowerTool]: OnUsePowerTool,

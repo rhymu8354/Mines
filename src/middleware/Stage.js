@@ -566,6 +566,7 @@ const OnShowStage = ({
     onPhaserReady,
     stage,
 }) => {
+    const startingScore = getState().game.score;
     const onKeyDown = (e) => {
         if (e.keyCode === Phaser.Input.Keyboard.KeyCodes.ESC) {
             dispatch(actions.SelectPowerTool({powerTool: null}));
@@ -841,6 +842,8 @@ const OnShowStage = ({
         const width = grid[0].length;
         stage.baseTime = null;
         stage.time = null;
+        stage.offsetX = 0;
+        stage.offsetY = 0;
         stage.draggingViewportInMiniMap = false;
         for (let y = 0; y < height; ++y) {
             stage.tiles[y] = [];
@@ -880,6 +883,7 @@ const OnShowStage = ({
         stage.scene.input.topOnly = false;
         stage.scene.input.setDefaultCursor("pointer");
         stage.activeButton = null;
+        SetCursor({getState, stage});
     };
     const phaserUpdate = function(time) {
         stage.lastTimeRaw = time;
@@ -891,7 +895,7 @@ const OnShowStage = ({
             stage.lastTime = stage.time;
             stage.time = Math.floor((time - stage.baseTime) / 1000);
             if (stage.lastTime !== stage.time) {
-                dispatch(actions.ReflectScore({score: stage.time}));
+                dispatch(actions.ReflectScore({score: startingScore + stage.time}));
             }
         }
         if (stage.detonationSoundStart != null) {

@@ -26,6 +26,7 @@ const Play = ({
     onQuit,
     onReflectStageSize,
     onRetry,
+    onSave,
     onSelectPowerTool,
     onSetMinScaling,
     onSetRedBoxEnabled,
@@ -171,6 +172,12 @@ const Play = ({
                 >
                     Retry
                 </button>
+                <button
+                    type="button"
+                    onClick={() => onSave()}
+                >
+                    Save
+                </button>
             </div>
             <div className="Play-controls-scrolled">
                 <div className="Play-controls-slider">
@@ -291,6 +298,7 @@ const mapDispatchToProps = (dispatch, ownProps) => ({
     onReflectStageSize: (width, height) => dispatch(actions.ReflectStageSize({width, height})),
     onQuit: () => dispatch(actions.Quit()),
     onRetry: () => dispatch(actions.Play({})),
+    onSave: () => dispatch(actions.Save()),
     onSelectPowerTool: (powerTool) => dispatch(actions.SelectPowerTool({powerTool})),
     onSetMinScaling: (minScaling) => dispatch(actions.SetMinScaling({minScaling})),
     onSetRedBoxEnabled: (redBoxEnabled) => dispatch(actions.SetRedBoxEnabled({redBoxEnabled})),

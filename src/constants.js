@@ -27,6 +27,7 @@ export const POWER_TOOL_ARMOR = "POWER_TOOL_ARMOR";
 export const POWER_TOOL_DETONATOR = "POWER_TOOL_DETONATOR";
 export const POWER_TOOL_PROBE = "POWER_TOOL_PROBE";
 
+export const LOCAL_STORAGE_SAVED_GAME = "save";
 export const LOCAL_STORAGE_RED_BOX_ENABLED = "redBoxEnabled";
 export const LOCAL_STORAGE_SHAKE_ENABLED = "shakeEnabled";
 export const LOCAL_STORAGE_SOUND_ENABLED = "soundEnabled";

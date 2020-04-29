@@ -228,6 +228,10 @@ export default function (state = initialState, action) {
                 numMinesPlayerThinksAreUnaccounted,
             };
         }
+        case actionTypes.ReflectRestoredGame:
+            return {
+                ...action.game
+            };
         case actionTypes.ReflectScore:
             return {
                 ...state,

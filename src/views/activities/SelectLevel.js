@@ -76,11 +76,37 @@ const extendedLevelTable = [
 ];
 
 const SelectLevel = ({
+    onDropSavedGame,
     onPlay,
+    onRestoreSavedGame,
+    savedGameAvailable,
 }) => {
     return <div
         className="SelectLevel"
     >
+        {(
+            savedGameAvailable
+            ? <div className="SelectLevel-saved-game">
+                <h2 className="SelectLevel-saved-game-header">
+                    You have a saved game in your localStorage!  Would you like to resume it?
+                </h2>
+                <div className="SelectLevel-saved-game-buttons">
+                    <button
+                        type="button"
+                        onClick={() => onRestoreSavedGame()}
+                    >
+                        Why yes, yes I would!
+                    </button>
+                    <button
+                        type="button"
+                        onClick={() => onDropSavedGame()}
+                    >
+                        Nah, forget it.
+                    </button>
+                </div>
+            </div>
+            : null
+        )}
         <h2 className="SelectLevel-header">
             Choose your level of difficulty:
         </h2>
@@ -135,10 +161,13 @@ const SelectLevel = ({
 }
 
 const mapStateToProps = (state, ownProps) => ({
+    savedGameAvailable: (state.app.savedGame != null),
 });
 
 const mapDispatchToProps = (dispatch, ownProps) => ({
+    onDropSavedGame: () => dispatch(actions.DropSavedGame()),
     onPlay: (level) => dispatch(actions.Play(level)),
+    onRestoreSavedGame: () => dispatch(actions.RestoreSavedGame()),
 });
 
 export default connect(

@@ -5,6 +5,7 @@ import {
     DEFAULT_SOUND_LEVEL,
     DEFAULT_TINTING,
     LOCAL_STORAGE_RED_BOX_ENABLED,
+    LOCAL_STORAGE_SAVED_GAME,
     LOCAL_STORAGE_SHAKE_ENABLED,
     LOCAL_STORAGE_SOUND_ENABLED,
     LOCAL_STORAGE_SOUND_LEVEL,
@@ -53,6 +54,7 @@ const initialState = {
     height: 1,
     minScaling: 2,
     redBoxEnabled: GetInitialEnable(LOCAL_STORAGE_RED_BOX_ENABLED, false),
+    savedGame: localStorage.getItem(LOCAL_STORAGE_SAVED_GAME),
     shakeEnabled: GetInitialEnable(LOCAL_STORAGE_SHAKE_ENABLED, true),
     soundEnabled: GetInitialEnable(LOCAL_STORAGE_SOUND_ENABLED, true),
     soundLevel: GetInitialLevel(LOCAL_STORAGE_SOUND_LEVEL, DEFAULT_SOUND_LEVEL),
@@ -62,6 +64,16 @@ const initialState = {
 
 export default function (state = initialState, action) {
     switch (action.type) {
+        case actionTypes.DropSavedGame:
+            return {
+                ...state,
+                savedGame: null,
+            };
+        case actionTypes.ReflectSavedGame:
+            return {
+                ...state,
+                savedGame: action.game,
+            };
         case actionTypes.ReflectStageSize:
             return {
                 ...state,
