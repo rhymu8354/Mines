@@ -349,6 +349,8 @@ const UpdateTilePositionsAndScale = ({
         || (offsetY !== stage.offsetY)
         || (stage.baseTime == null)
     ) {
+        stage.offsetX = offsetX;
+        stage.offsetY = offsetY;
         stage.tileScaling = newTileScaling;
         if (stage.lastX != null) {
             stage.lastX += (offsetX - getState().game.offsetX);
@@ -793,7 +795,9 @@ const OnShowStage = ({
             const powerTool = getState().game.powerTool;
             if (powerTool == null) {
                 const wasUncovered = IsUncovered({grid, x, y});
-                dispatch(actions.StepIfNotTagged({x, y}));
+                if (!IsTagged({grid, x, y})) {
+                    dispatch(actions.Step({x, y}));
+                }
                 if (
                     wasUncovered
                     && !IsMinePresent({grid, x, y})

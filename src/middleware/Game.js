@@ -32,8 +32,11 @@ const StepOnNeighbors = ({
     grid, x, y
 }) => {
     WithNeighborGridCells({grid, x, y, fn: (x, y) => {
-        if (!IsUncovered({grid, x, y})) {
-            dispatch(actions.StepIfNotTagged({x, y}));
+        if (
+            !IsUncovered({grid, x, y})
+            && !IsTagged({grid, x, y})
+        ) {
+            dispatch(actions.Step({x, y}));
         }
     }});
 };
@@ -85,7 +88,7 @@ const UseDetonator = ({
     const grid = getState().game.grid;
     WithCellsWithinRange({grid, x, y, range: DETONATOR_RANGE, fn: (x, y) => {
         UntagIfTagged({dispatch, grid, x, y});
-        Detonate({dispatch, grid, x, y});
+        Detonate({dispatch, getState, grid, x, y});
     }});
 };
 
@@ -105,13 +108,14 @@ const UseProbe = ({
                 dispatch(actions.ReflectGridUpdated({x, y, cell}));
             }
         } else {
-            dispatch(actions.StepIfNotTagged({x, y}));
+            dispatch(actions.Step({x, y}));
         }
     }});
 };
 
 const Detonate = ({
     dispatch,
+    getState,
     grid,
     x,
     y,
@@ -121,8 +125,10 @@ const Detonate = ({
             dispatch(actions.Detonate({x, y}));
         }
     } else {
-        UntagIfTagged({dispatch, grid, x, y});
-        dispatch(actions.StepIfNotTagged({x, y}));
+        if (!getState().game.lost) {
+            UntagIfTagged({dispatch, grid, x, y});
+        }
+        dispatch(actions.Step({x, y}));
     }
 };
 
@@ -148,7 +154,7 @@ const OnDetonate = ({
             (x !== centerX)
             || (y !== centerY)
         ) {
-            Detonate({dispatch, grid, x, y});
+            Detonate({dispatch, getState, grid, x, y});
         }
     }});
 };
@@ -216,15 +222,12 @@ const OnPickUp = ({
     }
 };
 
-const OnStepIfNotTagged = ({
+const OnStep = ({
     action: {x, y},
     dispatch,
     getState,
 }) => {
     const grid = getState().game.grid;
-    if (IsTagged({grid, x, y})) {
-        return;
-    }
     if (getState().game.cellsCleared === 0) {
         let minesRelocated = 0;
         WithCellsWithinRange({grid, x, y, range: 1, fn: (x, y) => {
@@ -236,7 +239,7 @@ const OnStepIfNotTagged = ({
             }
         }});
         if (minesRelocated > 0) {
-            dispatch(actions.StepIfNotTagged({x, y}));
+            dispatch(actions.Step({x, y}));
             return;
         }
     }
@@ -308,7 +311,7 @@ const handlers = {
     [actionTypes.GameLost]: OnGameLost,
     [actionTypes.GameWon]: OnGameWon,
     [actionTypes.PickUp]: OnPickUp,
-    [actionTypes.StepIfNotTagged]: OnStepIfNotTagged,
+    [actionTypes.Step]: OnStep,
     [actionTypes.StepOnUntaggedNeighborsIfEnoughTagged]: OnStepOnUntaggedNeighborsIfEnoughTagged,
     [actionTypes.UsePowerTool]: OnUsePowerTool,
 };

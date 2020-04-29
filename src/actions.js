@@ -45,7 +45,7 @@ const DefineAction = (type) => {
     "ShowReleaseNotes",
     "ShowStage",
     "StartBonusGame",
-    "StepIfNotTagged",
+    "Step",
     "StepOnUntaggedNeighborsIfEnoughTagged",
     "UsePowerTool",
 ].forEach(actionType => DefineAction(actionType));

@@ -100,6 +100,12 @@ export default function (state = initialState, action) {
                 active: false,
                 lost: true,
             };
+        case actionTypes.GameWon:
+            return {
+                ...state,
+                active: false,
+                lost: false,
+            };
         case actionTypes.Play: {
             const numMines = FirstNonNull([action.numMines, state.numMines]);
             const numPower = FirstNonNull([action.numPower, state.numPower]);
@@ -170,10 +176,6 @@ export default function (state = initialState, action) {
             }
             return {
                 ...state,
-                active: (
-                    (cellsToClear > 0)
-                    && !state.lost
-                ),
                 cellsCleared,
                 cellsToClear,
                 grid,
