@@ -9,6 +9,46 @@ import "./ReleaseNotes.css";
 
 const content = [
     {
+        version: "0.17.0 - 2020-04-29",
+        notes: <ul>
+            <li>
+                Added bonus games for power levels!
+                Special "<code>B</code>" tokens are spread throughout the grid.
+                Picking one up begins
+                a "<span className="bonus-text">bonus</span>" game,
+                where the faster you
+                complete it, the more bonus power points are granted to you
+                in the main game.  If you lose the "bonus" game, no worries,
+                the main game continues; you just don't get any bonus
+                power points.
+            </li>
+            <li>
+                Added ability to save the game and restore it later.
+                This is <em>totally not</em> intended to be used to reload
+                the game after making a mistake.
+            </li>
+            <li>
+                Reduced the cost of the detonator from 4 to 3 power points.
+            </li>
+            <li>
+                Added armor!  You start off with one point
+                in power levels, and you can spend 5 power points
+                to add additional armor.
+                What does armor do?  I'm glad you asked!  If you accidentally
+                step on a mine, normally it would be "game over".  However,
+                if you have armor, you stay alive, with one point of armor
+                taken away instead.  The question remains: will you invest
+                all your power points
+                in armor, or will you take a chance and use the other tools?
+                The choice is up to you!
+            </li>
+            <li>
+                Fixed bug in remaining mines not being shown when all clear
+                cells are uncovered.
+            </li>
+        </ul>,
+    },
+    {
         version: "0.16.1 - 2020-04-26",
         notes: <ul>
             <li>Several documentation errors fixed (thanks to nD00rn!)</li>

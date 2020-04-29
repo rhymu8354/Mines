@@ -85,6 +85,10 @@ input {
     animation: power-text 2000ms infinite;
 }
 
+.bonus-text {
+    animation: bonus-text 2000ms infinite;
+}
+
 .power-border {
     border-width: 2px;
     border-style: solid;
@@ -140,5 +144,17 @@ input {
     }
     100% {
         border-color: goldenrod;
+    }
+}
+
+@keyframes bonus-text {
+    0% {
+        color: limegreen;
+    }
+    50% {
+        color: yellow;
+    }
+    100% {
+        color: limegreen;
     }
 }

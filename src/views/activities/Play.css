@@ -40,7 +40,6 @@
 
 .Play-controls-bonus {
     font-size: 200%;
-    animation: bonus-text 2000ms infinite;
     margin-bottom: 0;
 }
 
@@ -113,16 +112,4 @@
 
 .Play-controls-instructions {
     margin-top: 10px;
-}
-
-@keyframes bonus-text {
-    0% {
-        color: limegreen;
-    }
-    50% {
-        color: yellow;
-    }
-    100% {
-        color: limegreen;
-    }
 }

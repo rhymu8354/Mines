@@ -83,7 +83,7 @@ const Play = ({
         <div className="Play-controls">
             {(
                 isBonus
-                ? <p className="Play-controls-bonus">
+                ? <p className="Play-controls-bonus bonus-text">
                     BONUS GAME
                 </p>
                 : null
