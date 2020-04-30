@@ -9,6 +9,15 @@ import "./ReleaseNotes.css";
 
 const content = [
     {
+        version: "0.18.1 - 2020-04-29",
+        notes: <ul>
+            <li>
+                Fixed bug in mini-map where removed tag was not
+                drawn properly.
+            </li>
+        </ul>,
+    },
+    {
         version: "0.18.0 - 2020-04-29",
         notes: <ul>
             <li>

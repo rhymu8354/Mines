@@ -292,18 +292,21 @@ const UpdateMiniMap = ({
         * 1 / Math.ceil(stage.miniMapRatio * height)
     );
     if (stage.miniMapCellSize >= 1) {
-        if (
-            IsUncovered({grid, x, y})
-            || IsTagged({grid, x, y})
-        ) {
-            stage.miniMapRenderTexture.fill(
-                0x000000, 1,
-                x * stage.miniMapCellSize * miniMapWidthRatio,
-                stage.miniMapRenderTexture.gl.drawingBufferHeight - ((y + 1) * stage.miniMapCellSize) * miniMapHeightRatio,
-                stage.miniMapCellSize * miniMapWidthRatio,
-                stage.miniMapCellSize * miniMapHeightRatio
-            );
-        }
+        const color = (
+            (
+                IsUncovered({grid, x, y})
+                || IsTagged({grid, x, y})
+            )
+            ? 0x000000
+            : 0xffffff
+        );
+        stage.miniMapRenderTexture.fill(
+            color, 1,
+            x * stage.miniMapCellSize * miniMapWidthRatio,
+            stage.miniMapRenderTexture.gl.drawingBufferHeight - ((y + 1) * stage.miniMapCellSize) * miniMapHeightRatio,
+            stage.miniMapCellSize * miniMapWidthRatio,
+            stage.miniMapCellSize * miniMapHeightRatio
+        );
     } else {
         const cellsPerPixel = -stage.miniMapCellSize;
         const by = Math.floor(x / cellsPerPixel);
@@ -328,20 +331,22 @@ const UpdateMiniMap = ({
                 }
             }
         }
-        if (cellsUncovered > 0) {
-            const color = (
-                (cellsUncovered == totalCells)
+        const color = (
+            (cellsUncovered > 0)
+            ? (
+                (cellsUncovered === totalCells)
                 ? 0x000000
                 : 0x808080
-            );
-            stage.miniMapRenderTexture.fill(
-                color, 1,
-                bx * miniMapWidthRatio,
-                stage.miniMapRenderTexture.gl.drawingBufferHeight - (by + 1) * miniMapHeightRatio,
-                stage.miniMapCellSize * miniMapWidthRatio,
-                stage.miniMapCellSize * miniMapHeightRatio
-            );
-        }
+            )
+            : 0xffffff
+        );
+        stage.miniMapRenderTexture.fill(
+            color, 1,
+            bx * miniMapWidthRatio,
+            stage.miniMapRenderTexture.gl.drawingBufferHeight - (by + 1) * miniMapHeightRatio,
+            stage.miniMapCellSize * miniMapWidthRatio,
+            stage.miniMapCellSize * miniMapHeightRatio
+        );
     }
 };
 
@@ -949,9 +954,6 @@ const OnShowStage = ({
         stage.scene.load.audioSprite("boom", "boom.json");
     };
     const phaserCreate = function() {
-        const grid = getState().game.grid;
-        const height = grid.length;
-        const width = grid[0].length;
         stage.baseTime = null;
         stage.time = null;
         stage.draggingViewportInMiniMap = false;
@@ -1100,7 +1102,7 @@ const OnShowStage = ({
                         }
                         if (cellsUncovered > 0) {
                             const color = (
-                                (cellsUncovered == totalCells)
+                                (cellsUncovered === totalCells)
                                 ? 0x000000
                                 : 0x808080
                             );
