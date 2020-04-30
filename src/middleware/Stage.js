@@ -150,13 +150,13 @@ const DragViewportInMiniMap = ({
     const offsetX = Math.floor(
         (
             pointer.x - (viewportWidthInPixels - MINI_MAP_SIZE - MINI_MAP_MARGIN)
-        ) / stage.miniMapRatio / tileScaledSize
+        ) / stage.miniMapRatio
         - viewportWidthInTiles / 2
     );
     const offsetY = Math.floor(
         (
             pointer.y - (viewportHeightInPixels - MINI_MAP_SIZE - MINI_MAP_MARGIN)
-        ) / stage.miniMapRatio / tileScaledSize
+        ) / stage.miniMapRatio
         - viewportHeightInTiles / 2
     );
     dispatch(actions.SetViewport({offsetX, offsetY}));
@@ -270,6 +270,78 @@ const ToggleTint = ({
         const grid = getState().game.grid;
         const cell = grid[y][x] ^ GRID_CELL_DARKENED;
         dispatch(actions.ReflectGridUpdated({x, y, cell}));
+    }
+};
+
+const UpdateMiniMap = ({
+    getState,
+    stage,
+    x,
+    y
+}) => {
+    console.log(`Update minimap for x:${x}, y:${y}`);
+    const grid = getState().game.grid;
+    const height = grid.length;
+    const width = grid[0].length;
+    const miniMapWidthRatio = (
+        stage.miniMapRenderTexture.gl.drawingBufferWidth
+        * 1 / Math.ceil(stage.miniMapRatio * width)
+    );
+    const miniMapHeightRatio = (
+        stage.miniMapRenderTexture.gl.drawingBufferHeight
+        * 1 / Math.ceil(stage.miniMapRatio * height)
+    );
+    if (stage.miniMapCellSize >= 1) {
+        if (
+            IsUncovered({grid, x, y})
+            || IsTagged({grid, x, y})
+        ) {
+            stage.miniMapRenderTexture.fill(
+                0x000000, 1,
+                x * stage.miniMapCellSize * miniMapWidthRatio,
+                stage.miniMapRenderTexture.gl.drawingBufferHeight - ((y + 1) * stage.miniMapCellSize) * miniMapHeightRatio,
+                stage.miniMapCellSize * miniMapWidthRatio,
+                stage.miniMapCellSize * miniMapHeightRatio
+            );
+        }
+    } else {
+        const cellsPerPixel = -stage.miniMapCellSize;
+        const by = Math.floor(x / cellsPerPixel);
+        const bx = Math.floor(y / cellsPerPixel);
+        let totalCells = 0;
+        let cellsUncovered = 0;
+        for (let dy = 0; dy < cellsPerPixel; ++dy) {
+            for (let dx = 0; dx < cellsPerPixel; ++dx) {
+                const x = bx * cellsPerPixel + dx;
+                const y = by * cellsPerPixel + dy;
+                if (
+                    (x < width)
+                    && (y < height)
+                ) {
+                    ++totalCells;
+                    if (
+                        IsUncovered({grid, x, y})
+                        || IsTagged({grid, x, y})
+                    ) {
+                        ++cellsUncovered;
+                    }
+                }
+            }
+        }
+        if (cellsUncovered > 0) {
+            const color = (
+                (cellsUncovered == totalCells)
+                ? 0x000000
+                : 0x808080
+            );
+            stage.miniMapRenderTexture.fill(
+                color, 1,
+                bx * miniMapWidthRatio,
+                stage.miniMapRenderTexture.gl.drawingBufferHeight - (by + 1) * miniMapHeightRatio,
+                stage.miniMapCellSize * miniMapWidthRatio,
+                stage.miniMapCellSize * miniMapHeightRatio
+            );
+        }
     }
 };
 
@@ -402,33 +474,27 @@ const UpdateTilePositionsAndScale = ({
         (viewportWidthInPixels < gridWidthInPixels)
         || (viewportHeightInPixels < gridHeightInPixels)
     ) {
-        stage.miniMapRatio = Math.min(
-            MINI_MAP_SIZE / Math.max(viewportOffsetXPixels + viewportWidthInPixels, gridWidthInPixels),
-            MINI_MAP_SIZE / Math.max(viewportOffsetYPixels + viewportHeightInPixels, gridHeightInPixels)
-        );
         stage.miniMap.setPosition(
             viewportWidthInPixels - MINI_MAP_SIZE - MINI_MAP_MARGIN * 2,
             viewportHeightInPixels - MINI_MAP_SIZE - MINI_MAP_MARGIN * 2
         );
         stage.miniMap.width = MINI_MAP_SIZE + MINI_MAP_MARGIN;
         stage.miniMap.height = MINI_MAP_SIZE + MINI_MAP_MARGIN;
-        const miniMapGrid = stage.scene.add.graphics();
-        miniMapGrid.fillStyle(0xffffff);
-        miniMapGrid.fillRect(
+        const miniMapGrid = stage.scene.add.image(
             MINI_MAP_MARGIN,
             MINI_MAP_MARGIN,
-            gridWidthInPixels * stage.miniMapRatio,
-            gridHeightInPixels * stage.miniMapRatio
+            "minimap"
         );
+        miniMapGrid.setOrigin(0, 0);
         miniMapGrid.setDepth(1);
         stage.miniMap.add(miniMapGrid);
         const miniMapViewport = stage.scene.add.graphics();
         miniMapViewport.lineStyle(1, 0xff0000, 1);
         miniMapViewport.strokeRect(
-            Math.floor(MINI_MAP_MARGIN + viewportOffsetXPixels * stage.miniMapRatio),
-            Math.floor(MINI_MAP_MARGIN + viewportOffsetYPixels * stage.miniMapRatio),
-            Math.ceil(viewportWidthInPixels * stage.miniMapRatio),
-            Math.ceil(viewportHeightInPixels * stage.miniMapRatio)
+            Math.floor(MINI_MAP_MARGIN + viewportOffsetXPixels * stage.miniMapRatio / tileScaledSize),
+            Math.floor(MINI_MAP_MARGIN + viewportOffsetYPixels * stage.miniMapRatio / tileScaledSize),
+            Math.ceil(viewportWidthInPixels * stage.miniMapRatio / tileScaledSize),
+            Math.ceil(viewportHeightInPixels * stage.miniMapRatio / tileScaledSize)
         );
         miniMapViewport.setDepth(1);
         stage.miniMap.add(miniMapViewport);
@@ -475,7 +541,7 @@ const OnHideStage = ({
     }
     if (stage.tiles) {
         DropTiles({getState, stage});
-        stage.tiles = [];
+        stage.tiles = null;
     }
     stage.freeSprites.forEach(sprite => sprite.destroy());
     stage.freeSprites = [];
@@ -503,8 +569,21 @@ const OnPlayOrRestoreGame = ({
     stage.baseTime = null;
     stage.offsetX = getState().game.offsetX;
     stage.offsetY = getState().game.offsetY;
+    stage.miniMapInitialized = false;
     ComputeSpriteTint({getState, stage});
-    DropTiles({getState, stage});
+    if (stage.tiles) {
+        DropTiles({getState, stage});
+    }
+    const grid = getState().game.grid;
+    const height = grid.length;
+    const width = grid[0].length;
+    stage.tiles = [];
+    for (let y = 0; y < height; ++y) {
+        stage.tiles[y] = [];
+        for (let x = 0; x < width; ++x) {
+            stage.tiles[y][x] = null;
+        }
+    }
     UpdateTilePositionsAndScale({dispatch, getState, stage});
 };
 
@@ -517,6 +596,7 @@ const OnReflectGridUpdated = ({
     if (sprite != null) {
         SetSpriteTexture({getState, stage, x, y, sprite});
     }
+    UpdateMiniMap({getState, stage, x, y});
 };
 
 const OnReflectGridUpdatedBatch = ({
@@ -529,6 +609,7 @@ const OnReflectGridUpdatedBatch = ({
         if (sprite != null) {
             SetSpriteTexture({getState, stage, x, y, sprite});
         }
+        UpdateMiniMap({getState, stage, x, y});
     });
 };
 
@@ -591,6 +672,8 @@ const OnShowStage = ({
     onPhaserReady,
     stage,
 }) => {
+    stage.firstUpdate = true;
+    stage.miniMapInitialized = false;
     const onKeyDown = (e) => {
         if (e.keyCode === Phaser.Input.Keyboard.KeyCodes.ESC) {
             dispatch(actions.SelectPowerTool({powerTool: null}));
@@ -872,12 +955,6 @@ const OnShowStage = ({
         stage.baseTime = null;
         stage.time = null;
         stage.draggingViewportInMiniMap = false;
-        for (let y = 0; y < height; ++y) {
-            stage.tiles[y] = [];
-            for (let x = 0; x < width; ++x) {
-                stage.tiles[y][x] = null;
-            }
-        }
         stage.miniMap = stage.scene.add.container();
         stage.miniMap.setDepth(DEPTH_MINI_MAP);
         stage.miniMap.setAlpha(MINI_MAP_OPACITY);
@@ -938,6 +1015,109 @@ const OnShowStage = ({
                 stage.spriteContainer.setY(Math.floor(Math.random() * SHAKE_MAX_DISTANCE));
             }
         };
+        if (
+            !stage.miniMapInitialized
+            && !stage.firstUpdate
+        ) {
+            stage.miniMapInitialized = true;
+            const grid = getState().game.grid;
+            const height = grid.length;
+            const width = grid[0].length;
+            const miniMapGridRatio = Math.min(
+                MINI_MAP_SIZE / width,
+                MINI_MAP_SIZE / height
+            );
+            if (miniMapGridRatio >= 1) {
+                stage.miniMapRatio = Math.floor(miniMapGridRatio);
+                stage.miniMapCellSize = stage.miniMapRatio;
+            } else {
+                stage.miniMapCellSize = -Math.ceil(1 / miniMapGridRatio);
+                stage.miniMapRatio = 1 / -stage.miniMapCellSize;
+            }
+            console.log(`ratio: ${stage.miniMapRatio}`)
+            console.log(`cell: ${stage.miniMapCellSize}`)
+            stage.miniMapRenderTexture = stage.scene.add.renderTexture(
+                0, 0,
+                Math.ceil(stage.miniMapRatio * width),
+                Math.ceil(stage.miniMapRatio * height)
+            );
+            stage.miniMapRenderTexture.setVisible(false);
+            stage.miniMapRenderTexture.saveTexture("minimap");
+            const miniMapWidth = Math.ceil(stage.miniMapRatio * width);
+            const miniMapWidthRatio = (
+                stage.miniMapRenderTexture.gl.drawingBufferWidth
+                * 1 / miniMapWidth
+            );
+            const miniMapHeight = Math.ceil(stage.miniMapRatio * height);
+            const miniMapHeightRatio = (
+                stage.miniMapRenderTexture.gl.drawingBufferHeight
+                * 1 / miniMapHeight
+            );
+            stage.miniMapRenderTexture.fill(
+                0xffffff, 1,
+                0, 0,
+                stage.miniMapRenderTexture.gl.drawingBufferWidth,
+                stage.miniMapRenderTexture.gl.drawingBufferHeight,
+            );
+            if (stage.miniMapCellSize >= 1) {
+                WithAllGridCells(grid, (x, y) => {
+                    if (
+                        IsUncovered({grid, x, y})
+                        || IsTagged({grid, x, y})
+                    ) {
+                        stage.miniMapRenderTexture.fill(
+                            0x000000, 1,
+                            x * stage.miniMapCellSize * miniMapWidthRatio,
+                            stage.miniMapRenderTexture.gl.drawingBufferHeight - ((y + 1) * stage.miniMapCellSize) * miniMapHeightRatio,
+                            stage.miniMapCellSize * miniMapWidthRatio,
+                            stage.miniMapCellSize * miniMapHeightRatio
+                        );
+                    }
+                });
+            } else {
+                const cellsPerPixel = -stage.miniMapCellSize;
+                for (let by = 0; by < miniMapHeight; ++by) {
+                    for (let bx = 0; bx < miniMapWidth; ++bx) {
+                        let totalCells = 0;
+                        let cellsUncovered = 0;
+                        for (let dy = 0; dy < cellsPerPixel; ++dy) {
+                            for (let dx = 0; dx < cellsPerPixel; ++dx) {
+                                const x = bx * cellsPerPixel + dx;
+                                const y = by * cellsPerPixel + dy;
+                                if (
+                                    (x < width)
+                                    && (y < height)
+                                ) {
+                                    ++totalCells;
+                                    if (
+                                        IsUncovered({grid, x, y})
+                                        || IsTagged({grid, x, y})
+                                    ) {
+                                        ++cellsUncovered;
+                                    }
+                                }
+                            }
+                        }
+                        if (cellsUncovered > 0) {
+                            const color = (
+                                (cellsUncovered == totalCells)
+                                ? 0x000000
+                                : 0x808080
+                            );
+                            stage.miniMapRenderTexture.fill(
+                                color, 1,
+                                bx * miniMapWidthRatio,
+                                stage.miniMapRenderTexture.gl.drawingBufferHeight - (by + 1) * miniMapHeightRatio,
+                                stage.miniMapCellSize * miniMapWidthRatio,
+                                stage.miniMapCellSize * miniMapHeightRatio
+                            );
+                        }
+                    }
+                }
+            }
+            UpdateTilePositionsAndScale({dispatch, getState, stage});
+        }
+        stage.firstUpdate = false;
     };
     const config = {
         type: Phaser.AUTO,
@@ -986,6 +1166,7 @@ export default function({ getState, dispatch }) {
         detonationSoundStart: null,
         draggingViewportInGrid: false,
         draggingViewportInMiniMap: false,
+        firstUpdate: true,
         freeSprites: [],
         game: null,
         lastButton: null,
@@ -994,7 +1175,10 @@ export default function({ getState, dispatch }) {
         lastTimeRaw: 0,
         lastX: null,
         lastY: null,
+        miniMapCellSize: 1,
+        miniMapInitialized: false,
         miniMapRatio: 1,
+        miniMapRenderTexture: null,
         offsetX: 0,
         offsetY: 0,
         ready: false,
@@ -1004,7 +1188,7 @@ export default function({ getState, dispatch }) {
         shakeCount: 0,
         spriteContainer: null,
         startingScore: 0,
-        tiles: [],
+        tiles: null,
         tileScaling: 1,
         time: null,
         tinting: 0xffffff,

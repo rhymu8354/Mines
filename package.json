@@ -1,10 +1,10 @@
 {
   "name": "mines",
-  "version": "0.17.0",
+  "version": "0.18.0",
   "private": true,
   "dependencies": {
     "pako": "^1.0.11",
-    "phaser": "^3.22.0",
+    "phaser": "^3.23.0",
     "react": "^16.13.1",
     "react-dom": "^16.13.1",
     "react-redux": "^7.2.0",

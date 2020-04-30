@@ -9,6 +9,15 @@ import "./ReleaseNotes.css";
 
 const content = [
     {
+        version: "0.18.0 - 2020-04-29",
+        notes: <ul>
+            <li>
+                Your progress in clearing the grid is now shown
+                in the mini-map!
+            </li>
+        </ul>,
+    },
+    {
         version: "0.17.0 - 2020-04-29",
         notes: <ul>
             <li>
