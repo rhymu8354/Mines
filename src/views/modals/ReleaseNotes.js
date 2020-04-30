@@ -9,6 +9,15 @@ import "./ReleaseNotes.css";
 
 const content = [
     {
+        version: "0.18.2 - 2020-04-29",
+        notes: <ul>
+            <li>
+                Fixed bug in mis-counting cells cleared when the first
+                move is to use a power probe or detonator.
+            </li>
+        </ul>,
+    },
+    {
         version: "0.18.1 - 2020-04-29",
         notes: <ul>
             <li>

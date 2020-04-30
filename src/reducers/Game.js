@@ -64,6 +64,7 @@ const initialState = {
     armor: 0,
     cellsCleared: 0,
     cellsToClear: 0,
+    firstStepTaken: false,
     grid: null,
     height: 1,
     lost: false,
@@ -121,6 +122,7 @@ export default function (state = initialState, action) {
                 active: true,
                 cellsCleared: 0,
                 cellsToClear: width * height - numMines,
+                firstStepTaken: false,
                 grid: MakeGrid(width, height, numMines, numPower, numBonus),
                 lost: false,
                 numBonus,
@@ -137,6 +139,11 @@ export default function (state = initialState, action) {
                 startPower,
             };
         }
+        case actionTypes.ReflectFirstStepTaken:
+            return {
+                ...state,
+                firstStepTaken: true,
+            };
         case actionTypes.ReflectGridUpdated: {
             const originalCell = state.grid[action.y][action.x];
             const grid = [...state.grid];

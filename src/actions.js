@@ -23,6 +23,7 @@ const DefineAction = (type) => {
     "PushGame",
     "PushModal",
     "Quit",
+    "ReflectFirstStepTaken",
     "ReflectGridUpdated",
     "ReflectGridUpdatedBatch",
     "ReflectSavedGame",

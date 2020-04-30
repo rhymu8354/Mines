@@ -228,7 +228,8 @@ const OnStep = ({
     getState,
 }) => {
     const grid = getState().game.grid;
-    if (getState().game.cellsCleared === 0) {
+    if (!getState().game.firstStepTaken) {
+        dispatch(actions.ReflectFirstStepTaken());
         let minesRelocated = 0;
         WithCellsWithinRange({grid, x, y, range: 1, fn: (x, y) => {
             if (IsMinePresent({grid, x, y})) {
@@ -293,6 +294,9 @@ const OnUsePowerTool = ({
     dispatch,
     getState,
 }) => {
+    if (!getState().game.firstStepTaken) {
+        dispatch(actions.ReflectFirstStepTaken());
+    }
     const powerTool = getState().game.powerTool;
     const powerCollected = getState().game.powerCollected;
     const powerCost = POWER_COSTS[powerTool];
