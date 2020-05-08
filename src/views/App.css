@@ -13,6 +13,12 @@
     color: white;
 }
 
+.App-github-banner {
+    position: absolute;
+    rotate: 90;
+    right: 0;
+}
+
 .App-header {
     flex: 0 0 auto;
     display: flex;
@@ -30,7 +36,7 @@
 
 .App-header > *:last-child {
     flex: 0 0 auto;
-    margin-right: 10px;
+    margin-right: 125px;
 }
 
 .App-header > *:last-child > *:not(:first-child) {

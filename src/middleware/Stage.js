@@ -163,10 +163,8 @@ const DragViewportInMiniMap = ({
 };
 
 const DragViewportInGrid = ({dispatch, getState, stage, pointer}) => {
-    const tileScaledSize = TILE_SIZE * stage.tileScaling;
+    const [x, y] = GridCoordinatesFromPointer({getState, pointer, stage});
     const {offsetX, offsetY} = getState().game;
-    const x = offsetX + Math.floor(pointer.x / tileScaledSize);
-    const y = offsetY + Math.floor(pointer.y / tileScaledSize);
     if (
         (x !== stage.lastX)
         || (y !== stage.lastY)
@@ -178,6 +176,17 @@ const DragViewportInGrid = ({dispatch, getState, stage, pointer}) => {
             })
         );
     }
+};
+
+const GridCoordinatesFromPointer = ({
+    getState,
+    pointer,
+    stage,
+}) => {
+    const tileScaledSize = TILE_SIZE * stage.tileScaling;
+    const x = getState().game.offsetX + Math.floor(pointer.x / tileScaledSize - 0.5);
+    const y = getState().game.offsetY + Math.floor(pointer.y / tileScaledSize - 0.5);
+    return [x, y];
 };
 
 const DropTiles = ({
@@ -403,6 +412,7 @@ const UpdateTilePositionsAndScale = ({
     );
     const tileScaledSize = TILE_SIZE * newTileScaling;
     const viewportRightOverflow = Math.ceil((MINI_MAP_SIZE + MINI_MAP_MARGIN * 2) / tileScaledSize);
+    const viewportBottomOverflow = 1;
     offsetX = Clamp(
         offsetX,
         0,
@@ -411,7 +421,7 @@ const UpdateTilePositionsAndScale = ({
     offsetY = Clamp(
         offsetY,
         0,
-        heightInTiles - viewportHeightInTiles
+        heightInTiles + viewportBottomOverflow - viewportHeightInTiles
     );
     if (
         (offsetX !== getState().game.offsetX)
@@ -454,7 +464,7 @@ const UpdateTilePositionsAndScale = ({
                     if (stage.freeSprites.length === 0) {
                         sprite = stage.scene.add.sprite(spriteX, spriteY);
                         stage.spriteContainer.add(sprite);
-                        sprite.setOrigin(0, 0);
+                        sprite.setOrigin(-0.5, -0.5);
                         sprite.setScale(stage.tileScaling);
                     } else {
                         sprite = stage.freeSprites.pop();
@@ -478,6 +488,8 @@ const UpdateTilePositionsAndScale = ({
     if (
         (viewportWidthInPixels < gridWidthInPixels)
         || (viewportHeightInPixels < gridHeightInPixels)
+        || (offsetX > 0)
+        || (offsetY > 0)
     ) {
         stage.miniMap.setPosition(
             viewportWidthInPixels - MINI_MAP_SIZE - MINI_MAP_MARGIN * 2,
@@ -729,9 +741,7 @@ const OnShowStage = ({
             if (stage.draggingViewportInGrid) {
                 DragViewportInGrid({dispatch, getState, stage, pointer});
             }
-            const tileScaledSize = TILE_SIZE * stage.tileScaling;
-            const x = getState().game.offsetX + Math.floor(pointer.x / tileScaledSize);
-            const y = getState().game.offsetY + Math.floor(pointer.y / tileScaledSize);
+            const [x, y] = GridCoordinatesFromPointer({getState, pointer, stage});
             const grid = getState().game.grid;
             if (
                 (x < grid[0].length)
@@ -785,9 +795,7 @@ const OnShowStage = ({
         if (!getState().game.active) {
             return;
         }
-        const tileScaledSize = TILE_SIZE * stage.tileScaling;
-        const x = getState().game.offsetX + Math.floor(pointer.x / tileScaledSize);
-        const y = getState().game.offsetY + Math.floor(pointer.y / tileScaledSize);
+        const [x, y] = GridCoordinatesFromPointer({getState, pointer, stage});
         const grid = getState().game.grid;
         if (x >= grid[0].length) {
             return;
@@ -861,9 +869,7 @@ const OnShowStage = ({
         if (!getState().game.active) {
             return;
         }
-        const tileScaledSize = TILE_SIZE * stage.tileScaling;
-        const x = getState().game.offsetX + Math.floor(pointer.x / tileScaledSize);
-        const y = getState().game.offsetY + Math.floor(pointer.y / tileScaledSize);
+        const [x, y] = GridCoordinatesFromPointer({getState, pointer, stage});
         const grid = getState().game.grid;
         if (x >= grid[0].length) {
             return;

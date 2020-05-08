@@ -38,6 +38,16 @@ const App = ({
     return <div
         className="App"
     >
+        <a href="https://github.com/rhymu8354/Mines">
+            <img
+                width="120"
+                height="120"
+                src="https://github.blog/wp-content/uploads/2008/12/forkme_right_white_ffffff.png?resize=149%2C149"
+                class="App-github-banner"
+                alt="Fork me on GitHub"
+                data-recalc-dims="1"
+            />
+        </a>
         <div className="App-viewport">
             <header
                 className="App-header"

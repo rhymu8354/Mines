@@ -9,6 +9,20 @@ import "./ReleaseNotes.css";
 
 const content = [
     {
+        version: "0.19.0 - 2020-05-08",
+        notes: <ul>
+            <li>
+                Made it more obvious when the viewport is showing an actual
+                grid corner or not, by offsetting the view by half a cell.
+            </li>
+            <li>
+                Fixed bug where mini-map would not appear when grid
+                was scrolled.
+            </li>
+            <li>Added "fork me on GitHub" banner.</li>
+        </ul>,
+    },
+    {
         version: "0.18.2 - 2020-04-29",
         notes: <ul>
             <li>
