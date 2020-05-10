@@ -365,8 +365,8 @@ const UpdateRedBoxPosition = ({
 }) => {
     if (stage.lastX != null) {
         const tileScaledSize = TILE_SIZE * stage.tileScaling;
-        stage.redBox.setX((stage.lastX - getState().game.offsetX) * tileScaledSize);
-        stage.redBox.setY((stage.lastY - getState().game.offsetY) * tileScaledSize);
+        stage.redBox.setX((stage.lastX - getState().game.offsetX + 0.5) * tileScaledSize);
+        stage.redBox.setY((stage.lastY - getState().game.offsetY + 0.5) * tileScaledSize);
         stage.spriteContainer.remove(stage.redBox);
         stage.spriteContainer.add(stage.redBox);
     }
