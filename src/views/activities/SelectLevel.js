@@ -132,6 +132,23 @@ const SelectLevel = ({
                         </button>
                     </div>
                 </React.Fragment>)}
+                <div>Difficult+</div>
+                <div>
+                    <button
+                        type="button"
+                        onClick={
+                            () => onPlay({
+                                title: "Difficult+",
+                                width: 35,
+                                height: 20,
+                                numMines: 125,
+                                sss: true,
+                            })
+                        }
+                    >
+                        Play
+                    </button>
+                </div>
             </div>
             <div className="SelectLevel-grid power-border">
                 {extendedLevelTable.map(level => <React.Fragment key={level.title}>

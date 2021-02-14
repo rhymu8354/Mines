@@ -11,6 +11,9 @@ export const DETONATION_SHAKE_COUNT = 50;
 export const DETONATION_SOUND_DURATION = 1100;
 export const SHAKE_MAX_DISTANCE = 10;
 
+export const SSS_SOUND_DURATION = 3000;
+export const SSS_FLASH_PERIOD = 300;
+
 export const MAX_TILE_SCALING = 10;
 
 export const MINI_MAP_OPACITY = 0.75;
@@ -74,6 +77,8 @@ export const TILE_EXPLODED_MINE = 12;
 export const TILE_TAG = 13;
 export const TILE_POWER = 14;
 export const TILE_BONUS = 15;
+export const TILE_SSS_0 = 16;
+export const TILE_SSS_1 = 17;
 
 export const GRID_CELL_MINE_PRESENT = 1;
 export const GRID_CELL_TAGGED = 2;
@@ -82,3 +87,4 @@ export const GRID_CELL_DARKENED = 8;
 export const GRID_CELL_MINE_EXPLODED = 16;
 export const GRID_CELL_POWER = 32;
 export const GRID_CELL_BONUS = 64;
+export const GRID_CELL_SSS = 128;

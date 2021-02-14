@@ -9,9 +9,11 @@ const DefineAction = (type) => {
 };
 
 [
+    "ActivateSss",
     "AddArmor",
     "AddPower",
     "Detonate",
+    "DiffuseSss",
     "DropSavedGame",
     "GameLost",
     "GameWon",
@@ -45,8 +47,10 @@ const DefineAction = (type) => {
     "ShowAbout",
     "ShowReleaseNotes",
     "ShowStage",
+    "SssDetonated",
     "StartBonusGame",
     "Step",
     "StepOnUntaggedNeighborsIfEnoughTagged",
+    "TakeDamage",
     "UsePowerTool",
 ].forEach(actionType => DefineAction(actionType));

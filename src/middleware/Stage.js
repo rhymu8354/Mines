@@ -21,6 +21,7 @@ import {
     GRID_CELL_BONUS,
     GRID_CELL_DARKENED,
     GRID_CELL_POWER,
+    GRID_CELL_SSS,
     GRID_CELL_TAGGED,
     MAX_TILE_SCALING,
     MINI_MAP_OPACITY,
@@ -29,10 +30,14 @@ import {
     SCROLL_UNITS_PER_PAGE_X,
     SCROLL_UNITS_PER_PAGE_Y,
     SHAKE_MAX_DISTANCE,
+    SSS_FLASH_PERIOD,
+    SSS_SOUND_DURATION,
     TILE_BONUS,
     TILE_COVERED,
     TILE_EXPLODED_MINE,
     TILE_POWER,
+    TILE_SSS_0,
+    TILE_SSS_1,
     TILE_SIZE,
     TILE_UNCOVERED_EIGHT_NEIGHBORS,
     TILE_UNCOVERED_FIVE_NEIGHBORS,
@@ -46,6 +51,7 @@ import {
     TILE_UNEXPLODED_MINE,
     TILE_TAG,
     TILE_TAGGED_BUT_NO_MINE,
+    GRID_CELL_UNCOVERED,
 } from "../constants";
 
 const moveKeys = new Map([
@@ -94,7 +100,7 @@ const ComputeSpriteTint = ({getState, stage}) => {
     );
 };
 
-const ComputeCellFrame = ({gameActive, grid, x, y}) => {
+const ComputeCellFrame = ({stage, gameActive, grid, x, y}) => {
     const cell = grid[y][x];
     if (IsMineExploded({grid, x, y})) {
         return TILE_EXPLODED_MINE;
@@ -113,6 +119,12 @@ const ComputeCellFrame = ({gameActive, grid, x, y}) => {
             return TILE_BONUS;
         } else if ((cell & GRID_CELL_POWER) !== 0) {
             return TILE_POWER;
+        } else if ((cell & GRID_CELL_SSS) !== 0) {
+            if ((Math.floor((stage.lastTimeRaw - stage.sssStart) / SSS_FLASH_PERIOD) % 2) === 0) {
+                return TILE_SSS_0;
+            } else {
+                return TILE_SSS_1;
+            }
         } else {
             return tilesForNeighbors[
                 ComputeNeighborMines({grid, x, y})
@@ -241,7 +253,7 @@ const SetSpriteTexture = ({
     const gameActive = getState().game.active;
     sprite.setTexture(
         "atlas",
-        ComputeCellFrame({gameActive, grid, x, y})
+        ComputeCellFrame({stage, gameActive, grid, x, y})
     );
     const cell = grid[y][x];
     if ((cell & GRID_CELL_DARKENED) === 0) {
@@ -250,6 +262,16 @@ const SetSpriteTexture = ({
         sprite.setTint(stage.tinting);
     }
 };
+
+const StopSssSound = ({
+    stage,
+}) => {
+    if (stage.sssSound != null) {
+        stage.sssSound.destroy();
+        stage.sssSound = null;
+    }
+    stage.sssStart = null;
+}
 
 const ToggleMarker = ({
     dispatch,
@@ -520,6 +542,31 @@ const UpdateTilePositionsAndScale = ({
     UpdateRedBoxPosition({getState, stage});
 };
 
+const OnActivateSss = ({
+    action: {x, y},
+    dispatch,
+    getState,
+    stage,
+}) => {
+    const grid = getState().game.grid;
+    let cell = grid[y][x];
+    if (getState().game.active) {
+        stage.sssStart = stage.lastTimeRaw;
+        stage.sssSound = stage.scene.sound.addAudioSprite(
+            "sss", {
+                volume: getState().app.soundLevel,
+                rate: 1.0
+            }
+        );
+        stage.sssSound.play("0");
+        stage.sssPosition = {x, y};
+        cell |= GRID_CELL_UNCOVERED;
+    } else {
+        cell &= ~GRID_CELL_SSS;
+    }
+    dispatch(actions.ReflectGridUpdated({x, y, cell}));
+};
+
 const OnDetonate = ({
     getState,
     stage,
@@ -541,6 +588,21 @@ const OnDetonate = ({
     if (getState().app.shakeEnabled) {
         stage.shakeCount = DETONATION_SHAKE_COUNT;
     }
+};
+
+const OnDiffuseSss = ({
+    dispatch,
+    getState,
+    stage,
+}) => {
+    if (stage.sssPosition != null) {
+        const {x, y} = stage.sssPosition;
+        const grid = getState().game.grid;
+        const cell = grid[y][x] & ~GRID_CELL_SSS;
+        stage.sssPosition = null;
+        dispatch(actions.ReflectGridUpdated({x, y, cell}));
+    }
+    StopSssSound({stage});
 };
 
 const OnHideStage = ({
@@ -582,6 +644,7 @@ const OnPlayOrRestoreGame = ({
     getState,
     stage,
 }) => {
+    StopSssSound({stage});
     stage.startingScore = getState().game.score;
     stage.baseTime = null;
     stage.offsetX = getState().game.offsetX;
@@ -958,6 +1021,7 @@ const OnShowStage = ({
             }
         );
         stage.scene.load.audioSprite("boom", "boom.json");
+        stage.scene.load.audioSprite("sss", "sss.json");
     };
     const phaserCreate = function() {
         stage.baseTime = null;
@@ -995,7 +1059,6 @@ const OnShowStage = ({
         SetCursor({getState, stage});
     };
     const phaserUpdate = function(time) {
-        stage.lastTimeRaw = time;
         if (getState().game.active) {
             if (stage.baseTime == null) {
                 stage.baseTime = time;
@@ -1014,6 +1077,24 @@ const OnShowStage = ({
                 stage.detonationSoundStart = null;
             }
         }
+        if (stage.sssStart != null) {
+            if (time - stage.sssStart > SSS_SOUND_DURATION) {
+                const sssPosition = stage.sssPosition;
+                stage.sssSound.destroy();
+                stage.sssSound = null;
+                stage.sssStart = null;
+                dispatch(actions.TakeDamage());
+                dispatch(actions.Detonate(sssPosition));
+            } else if (
+                Math.floor((time - stage.sssStart) / SSS_FLASH_PERIOD)
+                !== Math.floor((stage.lastTimeRaw - stage.sssStart) / SSS_FLASH_PERIOD)
+            ) {
+                const {x, y} = stage.sssPosition;
+                const grid = getState().game.grid;
+                const cell = grid[y][x];
+                dispatch(actions.ReflectGridUpdated({x, y, cell}));
+            }
+        }
         if (stage.shakeCount > 0) {
             if (--stage.shakeCount === 0) {
                 stage.spriteContainer.setX(0);
@@ -1022,7 +1103,7 @@ const OnShowStage = ({
                 stage.spriteContainer.setX(Math.floor(Math.random() * SHAKE_MAX_DISTANCE));
                 stage.spriteContainer.setY(Math.floor(Math.random() * SHAKE_MAX_DISTANCE));
             }
-        };
+        }
         if (
             !stage.miniMapInitialized
             && !stage.firstUpdate
@@ -1125,6 +1206,7 @@ const OnShowStage = ({
             }
             UpdateTilePositionsAndScale({dispatch, getState, stage});
         }
+        stage.lastTimeRaw = time;
         stage.firstUpdate = false;
     };
     const config = {
@@ -1150,7 +1232,9 @@ const OnShowStage = ({
 };
 
 const handlers = {
+    [actionTypes.ActivateSss]: OnActivateSss,
     [actionTypes.Detonate]: OnDetonate,
+    [actionTypes.DiffuseSss]: OnDiffuseSss,
     [actionTypes.HideStage]: OnHideStage,
     [actionTypes.Play]: OnPlayOrRestoreGame,
     [actionTypes.ReflectGridUpdated]: OnReflectGridUpdated,
@@ -1195,6 +1279,9 @@ export default function({ getState, dispatch }) {
         scene: null,
         shakeCount: 0,
         spriteContainer: null,
+        sssPosition: null,
+        sssSound: null,
+        sssStart: null,
         startingScore: 0,
         tiles: null,
         tileScaling: 1,
@@ -1228,10 +1315,11 @@ export default function({ getState, dispatch }) {
         const handler = handlers[action.type];
         if (handler) {
             const callHandler = () => handler({
-                // @ts-ignore
                 action,
+                // @ts-ignore
                 dispatch,
                 getState,
+                // @ts-ignore
                 onPhaserNotReady,
                 onPhaserReady,
                 stage

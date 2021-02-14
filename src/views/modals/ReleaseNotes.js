@@ -9,6 +9,12 @@ import "./ReleaseNotes.css";
 
 const content = [
     {
+        version: "0.20.0 - 2021-02-13",
+        notes: <ul>
+            <li>Added special surprise for Fail.</li>
+        </ul>,
+    },
+    {
         version: "0.19.1 - 2020-05-10",
         notes: <ul>
             <li>Fixed offset bug with guide box.</li>

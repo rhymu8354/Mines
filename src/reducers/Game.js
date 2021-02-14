@@ -5,6 +5,7 @@ import {
     GRID_CELL_MINE_PRESENT,
     GRID_CELL_POWER,
     GRID_CELL_UNCOVERED,
+    GRID_CELL_SSS,
     GRID_CELL_TAGGED,
 } from "../constants";
 
@@ -12,7 +13,7 @@ import {
     FirstNonNull,
 } from "../Utilities";
 
-const MakeGrid = (width, height, numMines, numPower, numBonus) => {
+const MakeGrid = (width, height, numMines, numPower, numBonus, sss) => {
     // Set up empty game grid.
     let grid = [];
     for (let y = 0; y < height; ++y) {
@@ -55,6 +56,16 @@ const MakeGrid = (width, height, numMines, numPower, numBonus) => {
         }
     }
 
+    // Place the "surprise".
+    while (sss) {
+        let x = Math.floor(Math.random() * width);
+        let y = Math.floor(Math.random() * height);
+        if (grid[y][x] === 0) {
+            grid[y][x] = GRID_CELL_SSS;
+            break;
+        }
+    }
+
     // Return the finished game grid.
     return grid;
 };
@@ -74,10 +85,12 @@ const initialState = {
     numPower: 0,
     offsetX: 0,
     offsetY: 0,
+    placeSss: false,
     powerCollected: 0,
     powerTool: null,
     score: 0,
     showArmor: false,
+    sssActive: false,
     startArmor: 0,
     startPower: 0,
     width: 1,
@@ -85,6 +98,11 @@ const initialState = {
 
 export default function (state = initialState, action) {
     switch (action.type) {
+        case actionTypes.ActivateSss:
+            return {
+                ...state,
+                sssActive: true,
+            };
         case actionTypes.AddArmor:
             return {
                 ...state,
@@ -94,6 +112,11 @@ export default function (state = initialState, action) {
             return {
                 ...state,
                 powerCollected: state.powerCollected + action.power,
+            };
+        case actionTypes.DiffuseSss:
+            return {
+                ...state,
+                sssActive: false,
             };
         case actionTypes.GameLost:
             return {
@@ -111,6 +134,7 @@ export default function (state = initialState, action) {
             const numMines = FirstNonNull([action.numMines, state.numMines]);
             const numPower = FirstNonNull([action.numPower, state.numPower]);
             const numBonus = FirstNonNull([action.numBonus, state.numBonus]);
+            const placeSss = FirstNonNull([action.sss, state.placeSss]);
             const showArmor = FirstNonNull([action.showArmor, state.showArmor]);
             const startArmor = FirstNonNull([action.startArmor, state.startArmor]);
             const startPower = FirstNonNull([action.startPower, state.startPower]);
@@ -123,7 +147,7 @@ export default function (state = initialState, action) {
                 cellsCleared: 0,
                 cellsToClear: width * height - numMines,
                 firstStepTaken: false,
-                grid: MakeGrid(width, height, numMines, numPower, numBonus),
+                grid: MakeGrid(width, height, numMines, numPower, numBonus, placeSss),
                 lost: false,
                 numBonus,
                 numMines,
@@ -131,10 +155,12 @@ export default function (state = initialState, action) {
                 numPower,
                 offsetX: 0,
                 offsetY: 0,
+                placeSss: placeSss,
                 powerCollected: startPower,
                 powerTool: null,
                 showArmor,
                 score: 0,
+                sssActive: false,
                 startArmor,
                 startPower,
             };
@@ -275,6 +301,11 @@ export default function (state = initialState, action) {
                 ...state,
                 offsetX: action.offsetX,
                 offsetY: action.offsetY,
+            };
+        case actionTypes.SssDetonated:
+            return {
+                ...state,
+                sssActive: false,
             };
         default:
             return state;

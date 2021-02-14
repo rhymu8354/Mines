@@ -1,6 +1,7 @@
 import {
     GRID_CELL_MINE_EXPLODED,
     GRID_CELL_MINE_PRESENT,
+    GRID_CELL_SSS,
     GRID_CELL_TAGGED,
     GRID_CELL_UNCOVERED,
 } from "./constants";
@@ -15,6 +16,10 @@ export function IsMineExploded({grid, x, y}) {
 
 export function IsMinePresent({grid, x, y}) {
     return ((grid[y][x] & GRID_CELL_MINE_PRESENT) !== 0);
+}
+
+export function IsSss({grid, x, y}) {
+    return ((grid[y][x] & GRID_CELL_SSS) !== 0);
 }
 
 export function IsTagged({grid, x, y}) {

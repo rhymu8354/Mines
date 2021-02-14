@@ -5,6 +5,7 @@ import {
     ComputeNeighborTags,
     IsMineExploded,
     IsMinePresent,
+    IsSss,
     IsTagged,
     IsUncovered,
     WithAllGridCells,
@@ -19,6 +20,7 @@ import {
     GRID_CELL_MINE_EXPLODED,
     GRID_CELL_MINE_PRESENT,
     GRID_CELL_POWER,
+    GRID_CELL_SSS,
     GRID_CELL_TAGGED,
     GRID_CELL_UNCOVERED,
     POWER_COSTS,
@@ -106,6 +108,9 @@ const UseProbe = ({
             if ((cell & GRID_CELL_UNCOVERED) === 0) {
                 cell |= GRID_CELL_UNCOVERED;
                 dispatch(actions.ReflectGridUpdated({x, y, cell}));
+                if (IsSss({grid, x, y})) {
+                    dispatch(actions.ActivateSss({x, y}));
+                }
             }
         } else {
             dispatch(actions.Step({x, y}));
@@ -146,6 +151,7 @@ const OnDetonate = ({
     let cell = grid[y][x];
     cell |= GRID_CELL_UNCOVERED;
     cell |= GRID_CELL_MINE_EXPLODED;
+    cell &= ~GRID_CELL_SSS;
     dispatch(actions.ReflectGridUpdated({x, y, cell}));
     const centerX = x;
     const centerY = y;
@@ -166,13 +172,15 @@ const OnGameLost = ({
     const grid = getState().game.grid;
     const updates = [
     ];
+    dispatch(actions.DiffuseSss());
     WithAllGridCells(grid, (x, y) => {
-        let cell = grid[y][x];
+        let cell = grid[y][x] & ~GRID_CELL_SSS;
         if (
             IsMinePresent({grid, x, y})
             && !IsUncovered({grid, x, y})
         ) {
             cell |= GRID_CELL_UNCOVERED;
+            cell &= ~GRID_CELL_SSS;
             updates.push({x, y, cell});
         } else if (IsTagged({grid, x, y})) {
             // Refresh the tile for any mis-tagged cell.
@@ -196,6 +204,7 @@ const OnGameWon = ({
         if (IsMinePresent({grid, x, y})) {
             if (!IsTagged({grid, x, y})) {
                 cell |= GRID_CELL_UNCOVERED;
+                cell &= ~GRID_CELL_SSS;
             }
         }
         if (cell !== grid[y][x]) {
@@ -246,24 +255,27 @@ const OnStep = ({
     }
     if (IsMinePresent({grid, x, y})) {
         if (!IsMineExploded({grid, x, y})) {
-            if (getState().game.active) {
-                if (getState().game.armor > 0) {
-                    dispatch(actions.AddArmor({armor: -1}));
-                } else {
-                    dispatch(actions.GameLost());
-                }
-            }
+            dispatch(actions.TakeDamage());
             dispatch(actions.Detonate({x, y}));
         }
     } else {
-        let cell = grid[y][x] | GRID_CELL_UNCOVERED;
-        dispatch(actions.ReflectGridUpdated({x, y, cell}));
+        if (IsSss({grid, x, y})) {
+            if (IsUncovered({grid, x, y})) {
+                dispatch(actions.DiffuseSss());
+            } else {
+                dispatch(actions.ActivateSss({x, y}));
+            }
+        } else {
+            let cell = grid[y][x] | GRID_CELL_UNCOVERED;
+            dispatch(actions.ReflectGridUpdated({x, y, cell}));
+        }
         if (ComputeNeighborMines({grid, x, y}) === 0) {
             StepOnNeighbors({dispatch, grid, x, y});
         }
         if (
             (getState().game.cellsToClear === 0)
-            && (getState().game.active)
+            && getState().game.active
+            && !getState().game.sssActive
         ) {
             dispatch(actions.GameWon());
         }
@@ -286,6 +298,19 @@ const OnStepOnUntaggedNeighborsIfEnoughTagged = ({
     const neighborTags = ComputeNeighborTags({grid, x, y});
     if (neighborTags >= neighborMines) {
         StepOnNeighbors({dispatch, grid, x, y});
+    }
+};
+
+const OnTakeDamage = ({
+    dispatch,
+    getState,
+}) => {
+    if (getState().game.active) {
+        if (getState().game.armor > 0) {
+            dispatch(actions.AddArmor({armor: -1}));
+        } else {
+            dispatch(actions.GameLost());
+        }
     }
 };
 
@@ -317,6 +342,7 @@ const handlers = {
     [actionTypes.PickUp]: OnPickUp,
     [actionTypes.Step]: OnStep,
     [actionTypes.StepOnUntaggedNeighborsIfEnoughTagged]: OnStepOnUntaggedNeighborsIfEnoughTagged,
+    [actionTypes.TakeDamage]: OnTakeDamage,
     [actionTypes.UsePowerTool]: OnUsePowerTool,
 };
 
