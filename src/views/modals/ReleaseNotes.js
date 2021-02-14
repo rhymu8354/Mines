@@ -9,6 +9,12 @@ import "./ReleaseNotes.css";
 
 const content = [
     {
+        version: "0.20.1 - 2021-02-13",
+        notes: <ul>
+            <li>Make special surprise obey sound enable/disable.</li>
+        </ul>,
+    },
+    {
         version: "0.20.0 - 2021-02-13",
         notes: <ul>
             <li>Added special surprise for Fail.</li>

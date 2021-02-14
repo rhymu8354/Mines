@@ -552,13 +552,15 @@ const OnActivateSss = ({
     let cell = grid[y][x];
     if (getState().game.active) {
         stage.sssStart = stage.lastTimeRaw;
-        stage.sssSound = stage.scene.sound.addAudioSprite(
-            "sss", {
-                volume: getState().app.soundLevel,
-                rate: 1.0
-            }
-        );
-        stage.sssSound.play("0");
+        if (getState().app.soundEnabled) {
+            stage.sssSound = stage.scene.sound.addAudioSprite(
+                "sss", {
+                    volume: getState().app.soundLevel,
+                    rate: 1.0
+                }
+            );
+            stage.sssSound.play("0");
+        }
         stage.sssPosition = {x, y};
         cell |= GRID_CELL_UNCOVERED;
     } else {
@@ -1080,8 +1082,10 @@ const OnShowStage = ({
         if (stage.sssStart != null) {
             if (time - stage.sssStart > SSS_SOUND_DURATION) {
                 const sssPosition = stage.sssPosition;
-                stage.sssSound.destroy();
-                stage.sssSound = null;
+                if (stage.sssSound != null) {
+                    stage.sssSound.destroy();
+                    stage.sssSound = null;
+                }
                 stage.sssStart = null;
                 dispatch(actions.TakeDamage());
                 dispatch(actions.Detonate(sssPosition));
