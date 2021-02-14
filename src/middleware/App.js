@@ -67,8 +67,8 @@ const OnRestoreSavedGame = ({
     dispatch,
     getState,
 }) => {
-    dispatch(actions.RestoreGame({game: DecompressGame(getState().app.savedGame)}));
     dispatch(actions.SetActivity({activity: ACTIVITY_PLAY}));
+    dispatch(actions.RestoreGame({game: DecompressGame(getState().app.savedGame)}));
 };
 
 const OnSave = ({

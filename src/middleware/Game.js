@@ -275,7 +275,7 @@ const OnStep = ({
         if (
             (getState().game.cellsToClear === 0)
             && getState().game.active
-            && !getState().game.sssActive
+            && (getState().game.sssActive == null)
         ) {
             dispatch(actions.GameWon());
         }

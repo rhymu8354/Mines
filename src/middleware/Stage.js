@@ -263,11 +263,21 @@ const SetSpriteTexture = ({
     }
 };
 
+const StopDetonationSound = ({
+    stage,
+}) => {
+    if (stage.detonationSound != null) {
+        stage.scene.sound.remove(stage.detonationSound);
+        stage.detonationSound = null;
+    }
+    stage.detonationSoundStart = null;
+};
+
 const StopSssSound = ({
     stage,
 }) => {
     if (stage.sssSound != null) {
-        stage.sssSound.destroy();
+        stage.scene.sound.remove(stage.sssSound);
         stage.sssSound = null;
     }
     stage.sssStart = null;
@@ -310,7 +320,9 @@ const UpdateMiniMap = ({
     x,
     y
 }) => {
-    console.log(`Update minimap for x:${x}, y:${y}`);
+    if (!stage.miniMapInitialized) {
+        return;
+    }
     const grid = getState().game.grid;
     const height = grid.length;
     const width = grid[0].length;
@@ -613,6 +625,8 @@ const OnHideStage = ({
     stage,
 }) => {
     onPhaserNotReady();
+    StopDetonationSound({stage});
+    StopSssSound({stage});
     if (stage.miniMap) {
         stage.miniMap.removeAll(true);
         stage.miniMap.destroy();
@@ -646,6 +660,7 @@ const OnPlayOrRestoreGame = ({
     getState,
     stage,
 }) => {
+    StopDetonationSound({stage});
     StopSssSound({stage});
     stage.startingScore = getState().game.score;
     stage.baseTime = null;
@@ -1061,6 +1076,9 @@ const OnShowStage = ({
         SetCursor({getState, stage});
     };
     const phaserUpdate = function(time) {
+        if (stage.firstUpdate) {
+            stage.lastTimeRaw = time;
+        }
         if (getState().game.active) {
             if (stage.baseTime == null) {
                 stage.baseTime = time;
@@ -1071,32 +1089,38 @@ const OnShowStage = ({
             if (stage.lastTime !== stage.time) {
                 dispatch(actions.ReflectScore({score: stage.startingScore + stage.time}));
             }
-        }
-        if (stage.detonationSoundStart != null) {
-            if (time - stage.detonationSoundStart > DETONATION_SOUND_DURATION) {
-                stage.detonationSound.destroy();
-                stage.detonationSound = null;
-                stage.detonationSoundStart = null;
-            }
-        }
-        if (stage.sssStart != null) {
-            if (time - stage.sssStart > SSS_SOUND_DURATION) {
-                const sssPosition = stage.sssPosition;
-                if (stage.sssSound != null) {
-                    stage.sssSound.destroy();
-                    stage.sssSound = null;
+            if (stage.detonationSound != null) {
+                if (time > stage.detonationSoundStart + DETONATION_SOUND_DURATION) {
+                    stage.scene.sound.remove(stage.detonationSound);
+                    stage.detonationSound = null;
+                    stage.detonationSoundStart = null;
                 }
-                stage.sssStart = null;
-                dispatch(actions.TakeDamage());
-                dispatch(actions.Detonate(sssPosition));
-            } else if (
-                Math.floor((time - stage.sssStart) / SSS_FLASH_PERIOD)
-                !== Math.floor((stage.lastTimeRaw - stage.sssStart) / SSS_FLASH_PERIOD)
-            ) {
-                const {x, y} = stage.sssPosition;
-                const grid = getState().game.grid;
-                const cell = grid[y][x];
-                dispatch(actions.ReflectGridUpdated({x, y, cell}));
+            }
+            if (stage.firstUpdate) {
+                let sss = getState().game.sssActive;
+                if (sss != null) {
+                    dispatch(actions.ActivateSss(sss));
+                }
+            }
+            if (stage.sssStart != null) {
+                if (time > stage.sssStart + SSS_SOUND_DURATION) {
+                    const sssPosition = stage.sssPosition;
+                    if (stage.sssSound != null) {
+                        stage.scene.sound.remove(stage.sssSound);
+                        stage.sssSound = null;
+                    }
+                    stage.sssStart = null;
+                    dispatch(actions.TakeDamage());
+                    dispatch(actions.Detonate(sssPosition));
+                } else if (
+                    Math.floor((time - stage.sssStart) / SSS_FLASH_PERIOD)
+                    !== Math.floor((stage.lastTimeRaw - stage.sssStart) / SSS_FLASH_PERIOD)
+                ) {
+                    const {x, y} = stage.sssPosition;
+                    const grid = getState().game.grid;
+                    const cell = grid[y][x];
+                    dispatch(actions.ReflectGridUpdated({x, y, cell}));
+                }
             }
         }
         if (stage.shakeCount > 0) {
@@ -1127,8 +1151,6 @@ const OnShowStage = ({
                 stage.miniMapCellSize = -Math.ceil(1 / miniMapGridRatio);
                 stage.miniMapRatio = 1 / -stage.miniMapCellSize;
             }
-            console.log(`ratio: ${stage.miniMapRatio}`)
-            console.log(`cell: ${stage.miniMapCellSize}`)
             stage.miniMapRenderTexture = stage.scene.add.renderTexture(
                 0, 0,
                 Math.ceil(stage.miniMapRatio * width),

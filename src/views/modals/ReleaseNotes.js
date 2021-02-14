@@ -9,6 +9,13 @@ import "./ReleaseNotes.css";
 
 const content = [
     {
+        version: "0.20.2 - 2021-02-13",
+        notes: <ul>
+            <li>Fix issues with sound management.</li>
+            <li>Fix crash if save/restore game with "surprise" active.</li>
+        </ul>,
+    },
+    {
         version: "0.20.1 - 2021-02-13",
         notes: <ul>
             <li>Make special surprise obey sound enable/disable.</li>

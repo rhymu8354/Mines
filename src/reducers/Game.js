@@ -90,7 +90,7 @@ const initialState = {
     powerTool: null,
     score: 0,
     showArmor: false,
-    sssActive: false,
+    sssActive: null,
     startArmor: 0,
     startPower: 0,
     width: 1,
@@ -101,7 +101,10 @@ export default function (state = initialState, action) {
         case actionTypes.ActivateSss:
             return {
                 ...state,
-                sssActive: true,
+                sssActive: {
+                    x: action.x,
+                    y: action.y,
+                },
             };
         case actionTypes.AddArmor:
             return {
@@ -116,7 +119,7 @@ export default function (state = initialState, action) {
         case actionTypes.DiffuseSss:
             return {
                 ...state,
-                sssActive: false,
+                sssActive: null,
             };
         case actionTypes.GameLost:
             return {
@@ -160,7 +163,7 @@ export default function (state = initialState, action) {
                 powerTool: null,
                 showArmor,
                 score: 0,
-                sssActive: false,
+                sssActive: null,
                 startArmor,
                 startPower,
             };
@@ -305,7 +308,7 @@ export default function (state = initialState, action) {
         case actionTypes.SssDetonated:
             return {
                 ...state,
-                sssActive: false,
+                sssActive: null,
             };
         default:
             return state;
